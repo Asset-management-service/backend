@@ -22,9 +22,9 @@ spring:
         format_sql: true
         use_sql_comments: false
 
-#  mvc:
-#    pathmatch:
-#      matching-strategy: ant_path_matcher
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
 
 #  redis:
 #    host: localhost
