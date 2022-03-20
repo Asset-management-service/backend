@@ -15,12 +15,13 @@ import java.util.Map;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
+@RequestMapping("/stock")
 public class StockApiController {
 
     private final StockCrawling stockCrawling;
 
 
-    @GetMapping("/stock/code")
+    @GetMapping("/code")
     public ResponseEntity getStockCode(@RequestBody Map<String,Object> map) {
 
         String stockCode = stockCrawling.getStockCode(String.valueOf(map.get("name")));
@@ -28,7 +29,7 @@ public class StockApiController {
         return ResponseEntity.status(HttpStatus.OK).body(stockCode);
     }
 
-    @GetMapping("/stock/value")
+    @GetMapping("/value")
     public ResponseEntity getStockValue(@RequestBody Map<String,Object> map) throws IOException {
 
         String stockCode = stockCrawling.getStockCode(String.valueOf(map.get("name")));
