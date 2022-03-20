@@ -1,8 +1,7 @@
-package com.backend.moamoa.domain;
+package com.backend.moamoa.domain.user.entity;
 
-import com.backend.moamoa.domain.enums.Address;
-import com.backend.moamoa.domain.enums.Gender;
-import lombok.AccessLevel;
+import com.backend.moamoa.domain.user.enums.Address;
+import com.backend.moamoa.domain.user.enums.Gender;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
