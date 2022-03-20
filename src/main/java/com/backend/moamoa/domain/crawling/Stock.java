@@ -17,6 +17,7 @@ public class Stock {
 
     //증가,감소값
     private String point;
+
     //종가
 //  private String open_Price;
 
