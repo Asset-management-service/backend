@@ -17,6 +17,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @RequestMapping("/stock")
 @Slf4j
+@RequestMapping("/stock")
 public class StockApiController {
 
     private final StockCrawling stockCrawling;
