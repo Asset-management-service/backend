@@ -65,10 +65,10 @@ public class StockCrawling {
                 result.add(subSpecialWord(element.text()));
             }
 
-            stock = Stock.builder().close_Price(result.get(0))
-                    .high_Price(result.get(1))
-                    .low_Price(result.get(2))
-                    .net_Change(result.get(3))
+            stock = Stock.builder().closePrice(result.get(0))
+                    .highPrice(result.get(1))
+                    .lowPrice(result.get(2))
+                    .netChange(result.get(3))
                     .volume(result.get(4))
                     .name(board.get("name"))
                     .rate(board.get("rate"))

@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 
 @Getter
@@ -12,7 +13,7 @@ import java.time.OffsetDateTime;
 @RequiredArgsConstructor
 public class ErrorResponse {
 
-    private final OffsetDateTime time = OffsetDateTime.now();
+    private final LocalDateTime time = LocalDateTime.now();
     private final int status;
     private final String error;
     private final String code;
