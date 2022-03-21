@@ -83,7 +83,7 @@ public class StockCrawling {
         return stock;
     }
 
-    public Map<String, String> board(Element title) {
+    private Map<String, String> board(Element title) {
         Map<String,String> result = new HashMap<>();
         result.put("name",subSpecialWord(title.selectFirst("a").text()));
         result.put("price",subSpecialWord(title.selectFirst("span.price").text()));
@@ -92,11 +92,11 @@ public class StockCrawling {
         return result;
     }
 
-    public String subSpecialWord(String str) {
+    private String subSpecialWord(String str) {
         return str.replaceAll("[(),]","");
     }
 
-    public void isTrueStockName(String findName, String webName) {
+    private void isTrueStockName(String findName, String webName) {
         if (!webName.equals(findName)) {
             throw new CustomException(ErrorCode.NOT_FOUND_STOCK,String.format("[%s] 종목을 찾을 수 없습니다.",findName));
         }
