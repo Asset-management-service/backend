@@ -28,6 +28,7 @@ public class UserProfile {
 
     private Gender gender;
 
+    @Enumerated(EnumType.STRING)
     private Address address;
 
     private String phoneNumber;
@@ -36,5 +37,7 @@ public class UserProfile {
 
     private String providerId;
 
+    @OneToOne(mappedBy ="userProfile")
+    private User user;
 
 }
