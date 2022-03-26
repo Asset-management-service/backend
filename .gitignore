@@ -39,3 +39,6 @@ out/
 
 ### local ###
 application-local.yml
+
+### oauth ###
+application-oauth.yml
