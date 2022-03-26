@@ -16,12 +16,13 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/post")
+@RequestMapping("/api/posts")
 @Slf4j
 public class PostApiController {
 
     private final PostService postService;
 
+    // post 객체 id 한건 조회
     @GetMapping("/{postId}")
     public ResponseEntity retrievePostDetail(@PathVariable("postId")Long postId) {
 
@@ -30,10 +31,6 @@ public class PostApiController {
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
     }
 
-    @GetMapping("/posts")
-    public ResponseEntity retrieveAllPost() {
-        Post post = postService.findById(1L);
-        return ResponseEntity.status(HttpStatus.OK).body(post);
-    }
+
 }
 

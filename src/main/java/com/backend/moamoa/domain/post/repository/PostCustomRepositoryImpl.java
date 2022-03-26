@@ -7,6 +7,8 @@ import com.backend.moamoa.domain.user.entity.QUser;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Optional;
+
 import static com.backend.moamoa.domain.post.entity.QPost.post;
 import static com.backend.moamoa.domain.user.entity.QUser.user;
 
@@ -16,9 +18,9 @@ public class PostCustomRepositoryImpl implements PostCustomRepository{
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public PostDetailResponseDto findPostDetailDto(Long postId) {
+    public Optional<PostDetailResponseDto> findPostDetailDto(Long postId) {
 
-        return queryFactory.select(new QPostDetailResponseDto(
+        return Optional.ofNullable(queryFactory.select(new QPostDetailResponseDto(
                 user.id,
                 post.id,
                 user.userProfile.nickname,
@@ -28,7 +30,7 @@ public class PostCustomRepositoryImpl implements PostCustomRepository{
         )).from(post)
                 .leftJoin(post.user,user)
                 .where(post.id.eq(postId))
-                .fetchOne();
+                .fetchOne());
 
     }
 }

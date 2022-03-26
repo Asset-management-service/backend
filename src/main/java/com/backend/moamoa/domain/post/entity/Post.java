@@ -49,11 +49,11 @@ public class Post implements Auditable {
         this.timeEntity = timeEntity;
     }
 
-    @Builder
-    public Post(Long id, String title, String context) {
-        this.id = id;
-        this.title = title;
-        this.context = context;
-
+    public static Post createPost(String title,String context){
+        Post post = new Post ();
+        post.title=title;
+        post.context=context;
+        return  post;
     }
+
 }
