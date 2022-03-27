@@ -17,8 +17,6 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-
 @Service
 @RequiredArgsConstructor
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
@@ -61,29 +59,22 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     }
 
     private User createUser(OAuth2UserInfo userInfo, ProviderType providerType) {
-        LocalDateTime now = LocalDateTime.now();
-        User user = new User(
-                userInfo.getId(),
-                userInfo.getName(),
-                userInfo.getEmail(),
-                "Y",
-                userInfo.getImageUrl(),
-                providerType,
-                RoleType.USER,
-                now,
-                now
+        return userRepository.saveAndFlush(
+                User.builder()
+                        .userId(userInfo.getId())
+                        .nickname(userInfo.getName())
+                        .email(userInfo.getEmail())
+                        .birthday(userInfo.getBirthday())
+                        .birthYear(userInfo.getBirthYear())
+                        .gender(userInfo.getGender())
+                        .providerType(providerType)
+                        .build()
         );
-
-        return userRepository.saveAndFlush(user);
     }
 
     private User updateUser(User user, OAuth2UserInfo userInfo) {
-        if (userInfo.getName() != null && !user.getUsername().equals(userInfo.getName())) {
-            user.setUsername(userInfo.getName());
-        }
-
-        if (userInfo.getImageUrl() != null && !user.getProfileImageUrl().equals(userInfo.getImageUrl())) {
-            user.setProfileImageUrl(userInfo.getImageUrl());
+        if (userInfo.getName() != null && !user.getNickname().equals(userInfo.getName())) {
+            user.setNickname(userInfo.getName());
         }
 
         return user;
