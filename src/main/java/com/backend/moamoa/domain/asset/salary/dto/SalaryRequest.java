@@ -1,31 +1,21 @@
 package com.backend.moamoa.domain.asset.salary.dto;
 
-import com.backend.moamoa.domain.asset.salary.entity.FixedCost;
-import com.backend.moamoa.domain.asset.salary.entity.VariableCost;
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
-@Setter
 @NoArgsConstructor
-@AllArgsConstructor
-@ToString
 public class SalaryRequest {
 
-    //고정비
-    @NotNull
-    private FixedCostDto fixedCosts;
+    private List<FixedCostDto> fixed;
 
-    //변동비
-    @NotNull
-    private VariableCostDto variableCosts;
+    private List<VariableCostDto> variable;
 
-    //총 지출
-    @NotNull
-    private int totalExpenditure;
+    private int expenditure;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDateTime date;

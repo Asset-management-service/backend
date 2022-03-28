@@ -8,10 +8,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
-import java.time.LocalDateTime;
-
-import static javax.persistence.FetchType.LAZY;
 import static javax.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
 
@@ -26,32 +25,21 @@ public class Salary implements Auditable {
     @Column(name = "salary_id")
     private Long id;
 
+    @OneToMany(mappedBy = "salary")
+    private List<Category> categories = new ArrayList<>();
+
+
     private int totalExpenditure;
 
-    private LocalDateTime setDate;
-
-    //고정비
-    @OneToOne(fetch = LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "fixed_cost_id")
-    private FixedCost fixedCost;
-
-    //변동비
-    @OneToOne(fetch = LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "variable_cost_id")
-    private VariableCost variableCost;
-
+    @Builder
+    public Salary(List<Category> category, int totalExpenditure) {
+        category.stream()
+                .forEach(assetCategory -> this.categories.add(assetCategory));
+        this.totalExpenditure = totalExpenditure;
+    }
 
     @Embedded
     private TimeEntity timeEntity;
-
-
-    @Builder
-    public Salary(int totalExpenditure, LocalDateTime setDate, FixedCost fixedCost, VariableCost variableCost) {
-        this.totalExpenditure = totalExpenditure;
-        this.setDate = setDate;
-        this.fixedCost = fixedCost;
-        this.variableCost = variableCost;
-    }
 
     @Override
     public void setTimeEntity(TimeEntity timeEntity) {

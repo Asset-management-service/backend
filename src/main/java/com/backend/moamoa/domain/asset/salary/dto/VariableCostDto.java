@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.Map;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -13,8 +14,8 @@ import java.util.List;
 @Setter
 public class VariableCostDto {
 
-    private List<String> variableCostCategories;
+    private List<Map<String, Integer>> category;
 
-    private int cost;
+    private int totalCost;
 
 }
