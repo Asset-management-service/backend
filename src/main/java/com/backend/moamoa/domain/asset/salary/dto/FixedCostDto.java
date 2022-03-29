@@ -2,7 +2,6 @@ package com.backend.moamoa.domain.asset.salary.dto;
 
 import lombok.*;
 
-import java.util.List;
 import java.util.Map;
 
 @Getter
@@ -12,7 +11,7 @@ import java.util.Map;
 @ToString
 public class FixedCostDto {
 
-    private List<Map<String, Integer>> category;
+    private Map<String, Integer> category;
 
     private int totalCost;
 

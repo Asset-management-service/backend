@@ -9,8 +9,11 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import static javax.persistence.CascadeType.ALL;
 import static javax.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
 
@@ -25,18 +28,13 @@ public class Salary implements Auditable {
     @Column(name = "salary_id")
     private Long id;
 
-    @OneToMany(mappedBy = "salary")
+//    private CostType costType;
+
+    @OneToMany(mappedBy = "salary", cascade = ALL)
     private List<Category> categories = new ArrayList<>();
 
 
     private int totalExpenditure;
-
-    @Builder
-    public Salary(List<Category> category, int totalExpenditure) {
-        category.stream()
-                .forEach(assetCategory -> this.categories.add(assetCategory));
-        this.totalExpenditure = totalExpenditure;
-    }
 
     @Embedded
     private TimeEntity timeEntity;
@@ -44,5 +42,20 @@ public class Salary implements Auditable {
     @Override
     public void setTimeEntity(TimeEntity timeEntity) {
         this.timeEntity = timeEntity;
+    }
+
+
+    @Builder
+    public Salary(List<Category> category, int totalExpenditure) {
+        this.categories = category;
+        this.totalExpenditure = totalExpenditure;
+    }
+
+
+    public static Salary createSalary(List<Category> category, int totalExpenditure){
+        return Salary.builder()
+                .category(category)
+                .totalExpenditure(totalExpenditure)
+                .build();
     }
 }

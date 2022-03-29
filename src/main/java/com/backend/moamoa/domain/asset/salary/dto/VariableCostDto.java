@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
 import java.util.Map;
 
 @AllArgsConstructor
@@ -14,7 +13,7 @@ import java.util.Map;
 @Setter
 public class VariableCostDto {
 
-    private List<Map<String, Integer>> category;
+    private Map<String, Integer> category;
 
     private int totalCost;
 

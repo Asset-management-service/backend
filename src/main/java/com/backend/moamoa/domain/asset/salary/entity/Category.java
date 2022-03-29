@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.Set;
 
 import static javax.persistence.FetchType.LAZY;
 import static javax.persistence.GenerationType.IDENTITY;
@@ -21,16 +22,28 @@ public class Category {
     private Long id;
 
     private String category;
-    private int cost;
+    private Integer cost;
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "salary_id")
     private Salary salary;
 
+    public void addSalary(Salary salary) {
+        this.salary = salary;
+        salary.getCategories().add(this);
+    }
 
     @Builder
-    public Category(String category, int cost) {
+    public Category(String category, Integer cost) {
         this.category = category;
         this.cost = cost;
     }
+
+    public static Category createCategory(String category, Integer cost){
+        return Category.builder()
+                .category(category)
+                .cost(cost)
+                .build();
+    }
+
 }
