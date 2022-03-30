@@ -13,6 +13,7 @@ public class FixedCostDto {
 
     private Map<String, Integer> category;
 
+
     private int totalCost;
 
 }
