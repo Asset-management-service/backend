@@ -4,6 +4,7 @@ import com.backend.moamoa.domain.user.entity.User;
 import com.backend.moamoa.global.audit.AuditListener;
 import com.backend.moamoa.global.audit.Auditable;
 import com.backend.moamoa.global.audit.TimeEntity;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
@@ -13,6 +14,7 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static javax.persistence.CascadeType.*;
 import static javax.persistence.FetchType.*;
 import static javax.persistence.GenerationType.*;
 import static lombok.AccessLevel.PROTECTED;
@@ -44,11 +46,36 @@ public class Post implements Auditable {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToMany(mappedBy = "post")
+    @OneToMany(mappedBy = "post", orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 
     @Override
     public void setTimeEntity(TimeEntity timeEntity) {
         this.timeEntity = timeEntity;
+    }
+
+    @Builder
+    public Post(String title, String content, Integer viewCount, User user, List<Comment> comments) {
+        this.title = title;
+        this.content = content;
+        this.viewCount = viewCount;
+        this.user = user;
+        this.comments = comments;
+    }
+
+    /**
+     * 생성 메서드
+     */
+    public static Post createPost(String title, String content, User user){
+        return Post.builder()
+                .title(title)
+                .content(content)
+                .user(user)
+                .build();
+    }
+
+    public void updatePost(String title, String content) {
+        this.title = title;
+        this.content = content;
     }
 }

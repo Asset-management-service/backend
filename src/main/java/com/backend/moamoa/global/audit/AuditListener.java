@@ -17,7 +17,6 @@ public class AuditListener {
             auditable.setTimeEntity(timeEntity);
         }
         timeEntity.setCreatedDate(LocalDateTime.now());
-        timeEntity.setUpdatedDate(LocalDateTime.now());
     }
 
     @PreUpdate
