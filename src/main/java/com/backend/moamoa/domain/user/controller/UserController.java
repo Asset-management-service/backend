@@ -3,9 +3,8 @@ package com.backend.moamoa.domain.user.controller;
 import com.backend.moamoa.global.common.ApiResponse;
 import com.backend.moamoa.domain.user.entity.User;
 import com.backend.moamoa.domain.user.service.UserService;
+import com.backend.moamoa.global.utils.SecurityUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,11 +22,7 @@ public class UserController {
      */
     @GetMapping
     public ApiResponse getUser() {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        UserDetails userDetails = (UserDetails)principal;
-
-        User user = userService.getUser(userDetails.getUsername());
-
+        User user = userService.getUser(SecurityUtil.getCurrentMemberId());
         return ApiResponse.success("user", user);
     }
 
