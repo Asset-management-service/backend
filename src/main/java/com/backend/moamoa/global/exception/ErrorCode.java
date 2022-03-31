@@ -8,8 +8,10 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum ErrorCode {
 
-    BAD_REQUEST_PARAM(HttpStatus.BAD_REQUEST, "잘못된 요청입니다."),
-    NOT_FOUND_STOCK(HttpStatus.NOT_FOUND,"해당 주식이름이 존재하지않습니다.");
+
+    NOT_FOUND_POST(HttpStatus.NOT_FOUND, "해당 글을 찾을 수 없습니다."),
+
+    NOT_FOUND_MEMBER(HttpStatus.NOT_FOUND, "해당 유저를 찾을 수 없습니다.");
 
 
     private final HttpStatus httpStatus;
