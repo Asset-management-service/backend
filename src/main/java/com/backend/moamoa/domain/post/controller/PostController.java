@@ -35,10 +35,10 @@ public class PostController {
         return postService.deletePost(postId);
     }
 
-    @GetMapping("/my")
-    public void myPosts() {
-        postService.findMyPosts();
-    }
+//    @GetMapping("/my")
+//    public void myPosts() {
+//        postService.findMyPosts();
+//    }
 
 
 }

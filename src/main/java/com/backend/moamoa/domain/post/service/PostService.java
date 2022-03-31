@@ -10,7 +10,6 @@ import com.backend.moamoa.domain.user.entity.User;
 import com.backend.moamoa.domain.user.repository.UserRepository;
 import com.backend.moamoa.global.exception.CustomException;
 import com.backend.moamoa.global.exception.ErrorCode;
-import com.backend.moamoa.global.util.Util;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +21,6 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final UserRepository userRepository;
-    private final Util util;
 
 
     @Transactional
@@ -71,11 +69,11 @@ public class PostService {
     }
 
 
-    public void findMyPosts() {
-        User user = util.findCurrentUser();
-
-        postRepository.findMyPostsById(user.getId());
-    }
+//    public void findMyPosts() {
+//        User user = util.findCurrentUser();
+//
+//        postRepository.findMyPostsById(user.getId());
+//    }
 
 
 

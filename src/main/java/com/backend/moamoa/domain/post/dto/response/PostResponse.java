@@ -10,4 +10,5 @@ import lombok.NoArgsConstructor;
 public class PostResponse {
     private Long postId;
     private String message;
+
 }

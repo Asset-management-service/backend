@@ -10,13 +10,11 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 
 import javax.persistence.*;
-
 import java.util.ArrayList;
 import java.util.List;
 
-import static javax.persistence.CascadeType.*;
-import static javax.persistence.FetchType.*;
-import static javax.persistence.GenerationType.*;
+import static javax.persistence.FetchType.LAZY;
+import static javax.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
 
 @Getter
@@ -40,6 +38,7 @@ public class Post implements Auditable {
     private TimeEntity timeEntity;
 
     @ColumnDefault("0")
+    @Column(nullable = false)
     private Integer viewCount;
 
     @ManyToOne(fetch = LAZY)
@@ -48,6 +47,10 @@ public class Post implements Auditable {
 
     @OneToMany(mappedBy = "post", orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
+
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "post_category_id")
+    private PostCategory postCategory;
 
     @Override
     public void setTimeEntity(TimeEntity timeEntity) {
