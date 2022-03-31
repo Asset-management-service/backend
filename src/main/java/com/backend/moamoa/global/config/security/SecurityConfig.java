@@ -1,10 +1,10 @@
 package com.backend.moamoa.global.config.security;
 
+import com.backend.moamoa.domain.user.oauth.filter.JwtFilter;
 import com.backend.moamoa.global.config.properties.AppProperties;
 import com.backend.moamoa.global.config.properties.CorsProperties;
 import com.backend.moamoa.domain.user.enums.RoleType;
 import com.backend.moamoa.domain.user.oauth.exception.RestAuthenticationEntryPoint;
-import com.backend.moamoa.domain.user.oauth.filter.TokenAuthenticationFilter;
 import com.backend.moamoa.domain.user.oauth.handler.OAuth2AuthenticationFailureHandler;
 import com.backend.moamoa.domain.user.oauth.handler.OAuth2AuthenticationSuccessHandler;
 import com.backend.moamoa.domain.user.oauth.handler.TokenAccessDeniedHandler;
@@ -117,8 +117,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
      * 토큰 필터 설정
      * */
     @Bean
-    public TokenAuthenticationFilter tokenAuthenticationFilter() {
-        return new TokenAuthenticationFilter(tokenProvider);
+    public JwtFilter tokenAuthenticationFilter() {
+        return new JwtFilter(tokenProvider);
     }
 
     /*
