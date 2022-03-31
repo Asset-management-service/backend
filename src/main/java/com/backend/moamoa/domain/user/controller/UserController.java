@@ -5,6 +5,7 @@ import com.backend.moamoa.domain.user.entity.User;
 import com.backend.moamoa.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,15 +17,16 @@ public class UserController {
 
     private final UserService userService;
 
-    /**
+    /** [GET] /users
      * accessToken을 통해 유저 정보 가져오는 API
-     * @return
+     * @return ApiResponse 응답 내용
      */
     @GetMapping
     public ApiResponse getUser() {
-        org.springframework.security.core.userdetails.User principal = (org.springframework.security.core.userdetails.User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UserDetails userDetails = (UserDetails)principal;
 
-        User user = userService.getUser(principal.getUsername());
+        User user = userService.getUser(userDetails.getUsername());
 
         return ApiResponse.success("user", user);
     }
