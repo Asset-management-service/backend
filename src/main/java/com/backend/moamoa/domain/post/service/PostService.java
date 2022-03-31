@@ -2,6 +2,7 @@ package com.backend.moamoa.domain.post.service;
 
 import com.backend.moamoa.domain.post.dto.request.PostRequest;
 import com.backend.moamoa.domain.post.dto.request.PostUpdateRequest;
+import com.backend.moamoa.domain.post.dto.response.PostOneResponse;
 import com.backend.moamoa.domain.post.dto.response.PostResponse;
 import com.backend.moamoa.domain.post.entity.Post;
 import com.backend.moamoa.domain.post.repository.PostRepository;
@@ -50,6 +51,15 @@ public class PostService {
         return new PostResponse(postId, "게시글 삭제가 완료되었습니다.");
     }
 
+    /**
+     * 게시글 조회
+     */
+    @Transactional
+    public PostOneResponse findById(Long postId) {
+        return postRepository.findOnePostById(postId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_POST));
+    }
+
 
     /**
      * 중복 로직 findById Optional 처리
@@ -66,4 +76,7 @@ public class PostService {
 
         postRepository.findMyPostsById(user.getId());
     }
+
+
+
 }

@@ -1,4 +1,4 @@
-package com.backend.moamoa.domain.post.dto.querydsl;
+package com.backend.moamoa.domain.post.dto.response;
 
 public class MyPostResponse {
     private Long id;
