@@ -4,7 +4,6 @@ import com.backend.moamoa.domain.user.oauth.entity.ProviderType;
 import com.backend.moamoa.global.audit.AuditListener;
 import com.backend.moamoa.global.audit.Auditable;
 import com.backend.moamoa.global.audit.TimeEntity;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
@@ -17,7 +16,6 @@ import javax.validation.constraints.NotNull;
 @Entity
 @Builder
 public class User implements Auditable {
-    @JsonIgnore
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -31,10 +29,7 @@ public class User implements Auditable {
 
     private String email;
 
-    @JsonIgnore
-    @NotNull
-    @Builder.Default
-    private String password = "";
+    private String password;
 
     @NotNull
     private String nickname;
