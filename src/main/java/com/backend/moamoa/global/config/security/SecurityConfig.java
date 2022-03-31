@@ -2,7 +2,7 @@ package com.backend.moamoa.global.config.security;
 
 import com.backend.moamoa.global.config.properties.AppProperties;
 import com.backend.moamoa.global.config.properties.CorsProperties;
-import com.backend.moamoa.domain.user.oauth.entity.RoleType;
+import com.backend.moamoa.domain.user.enums.RoleType;
 import com.backend.moamoa.domain.user.oauth.exception.RestAuthenticationEntryPoint;
 import com.backend.moamoa.domain.user.oauth.filter.TokenAuthenticationFilter;
 import com.backend.moamoa.domain.user.oauth.handler.OAuth2AuthenticationFailureHandler;
