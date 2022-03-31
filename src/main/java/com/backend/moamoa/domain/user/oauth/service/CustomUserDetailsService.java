@@ -1,7 +1,7 @@
 package com.backend.moamoa.domain.user.oauth.service;
 
 import com.backend.moamoa.domain.user.entity.User;
-import com.backend.moamoa.domain.user.oauth.entity.UserPrincipal;
+import com.backend.moamoa.domain.user.oauth.entity.CustomUserDetails;
 import com.backend.moamoa.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,6 +21,6 @@ public class CustomUserDetailsService implements UserDetailsService {
         if (user == null) {
             throw new UsernameNotFoundException("Can not find username.");
         }
-        return UserPrincipal.create(user);
+        return CustomUserDetails.create(user);
     }
 }
