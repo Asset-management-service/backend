@@ -1,6 +1,7 @@
 package com.backend.moamoa.domain.user.oauth.entity;
 
 import com.backend.moamoa.domain.user.entity.User;
+import com.backend.moamoa.domain.user.enums.RoleType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +22,8 @@ import java.util.Map;
 @Setter
 @AllArgsConstructor
 @RequiredArgsConstructor
-public class UserPrincipal implements OAuth2User, UserDetails, OidcUser {
+public class CustomUserDetails implements OAuth2User, UserDetails, OidcUser {
+
     private final String userId;
     private final String password;
     private final ProviderType providerType;
@@ -84,8 +86,8 @@ public class UserPrincipal implements OAuth2User, UserDetails, OidcUser {
         return null;
     }
 
-    public static UserPrincipal create(User user) {
-        return new UserPrincipal(
+    public static CustomUserDetails create(User user) {
+        return new CustomUserDetails(
                 user.getUserId(),
                 user.getPassword(),
                 user.getProviderType(),
@@ -94,10 +96,11 @@ public class UserPrincipal implements OAuth2User, UserDetails, OidcUser {
         );
     }
 
-    public static UserPrincipal create(User user, Map<String, Object> attributes) {
-        UserPrincipal userPrincipal = create(user);
+    public static CustomUserDetails create(User user, Map<String, Object> attributes) {
+        CustomUserDetails userPrincipal = create(user);
         userPrincipal.setAttributes(attributes);
 
         return userPrincipal;
     }
+
 }
