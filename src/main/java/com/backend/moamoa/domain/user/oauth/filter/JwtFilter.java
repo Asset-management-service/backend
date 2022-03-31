@@ -2,9 +2,9 @@ package com.backend.moamoa.domain.user.oauth.filter;
 
 import com.backend.moamoa.domain.user.oauth.token.AuthToken;
 import com.backend.moamoa.domain.user.oauth.token.AuthTokenProvider;
-import com.backend.moamoa.global.utils.HeaderUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.http.HeaderUtil;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -17,7 +17,10 @@ import java.io.IOException;
 
 @Slf4j
 @RequiredArgsConstructor
-public class TokenAuthenticationFilter extends OncePerRequestFilter {
+public class JwtFilter extends OncePerRequestFilter {
+    private final static String HEADER_AUTHORIZATION = "Authorization";
+    private final static String TOKEN_PREFIX = "Bearer ";
+
     private final AuthTokenProvider tokenProvider;
 
     @Override
@@ -26,7 +29,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain)  throws ServletException, IOException {
 
-        String tokenStr = HeaderUtil.getAccessToken(request);
+        String tokenStr = getAccessToken(request);
         AuthToken token = tokenProvider.convertAuthToken(tokenStr);
 
         if (token.validate()) {
@@ -35,6 +38,20 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    public static String getAccessToken(HttpServletRequest request) {
+        String headerValue = request.getHeader(HEADER_AUTHORIZATION);
+
+        if (headerValue == null) {
+            return null;
+        }
+
+        if (headerValue.startsWith(TOKEN_PREFIX)) {
+            return headerValue.substring(TOKEN_PREFIX.length());
+        }
+
+        return null;
     }
 
 }
