@@ -2,16 +2,15 @@ package com.backend.moamoa.domain.user.oauth.controller;
 
 import com.backend.moamoa.domain.user.entity.UserRefreshToken;
 import com.backend.moamoa.domain.user.enums.RoleType;
+import com.backend.moamoa.domain.user.oauth.filter.JwtFilter;
 import com.backend.moamoa.domain.user.oauth.token.AuthToken;
 import com.backend.moamoa.domain.user.oauth.token.AuthTokenProvider;
 import com.backend.moamoa.domain.user.repository.UserRefreshTokenRepository;
 import com.backend.moamoa.global.common.ApiResponse;
 import com.backend.moamoa.global.config.properties.AppProperties;
 import com.backend.moamoa.global.utils.CookieUtil;
-import com.backend.moamoa.global.utils.HeaderUtil;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,7 +27,7 @@ public class AuthController {
 
     private final AppProperties appProperties;
     private final AuthTokenProvider tokenProvider;
-    private final AuthenticationManager authenticationManager;
+    private final JwtFilter jwtFilter;
     private final UserRefreshTokenRepository userRefreshTokenRepository;
 
     private final static long THREE_DAYS_MSEC = 259200000;
@@ -37,7 +36,7 @@ public class AuthController {
     @GetMapping("/refresh")
     public ApiResponse refreshToken (HttpServletRequest request, HttpServletResponse response) {
         // access token 확인
-        String accessToken = HeaderUtil.getAccessToken(request);
+        String accessToken = jwtFilter.getAccessToken(request);
         AuthToken authToken = tokenProvider.convertAuthToken(accessToken);
         if (!authToken.validate()) {
             return ApiResponse.invalidAccessToken();
