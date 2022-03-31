@@ -1,7 +1,7 @@
 package com.backend.moamoa.domain.user.oauth.handler;
 
 import com.backend.moamoa.domain.user.oauth.entity.ProviderType;
-import com.backend.moamoa.domain.user.oauth.entity.RoleType;
+import com.backend.moamoa.domain.user.enums.RoleType;
 import com.backend.moamoa.domain.user.oauth.info.OAuth2UserInfo;
 import com.backend.moamoa.domain.user.oauth.info.OAuth2UserInfoFactory;
 import com.backend.moamoa.domain.user.oauth.repository.OAuth2AuthorizationRequestBasedOnCookieRepository;
