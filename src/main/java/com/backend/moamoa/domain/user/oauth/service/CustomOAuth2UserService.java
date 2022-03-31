@@ -1,9 +1,8 @@
 package com.backend.moamoa.domain.user.oauth.service;
 
 import com.backend.moamoa.domain.user.oauth.entity.ProviderType;
-import com.backend.moamoa.domain.user.oauth.entity.RoleType;
 import com.backend.moamoa.domain.user.entity.User;
-import com.backend.moamoa.domain.user.oauth.entity.UserPrincipal;
+import com.backend.moamoa.domain.user.oauth.entity.CustomUserDetails;
 import com.backend.moamoa.domain.user.oauth.exception.OAuthProviderMissMatchException;
 import com.backend.moamoa.domain.user.oauth.info.OAuth2UserInfo;
 import com.backend.moamoa.domain.user.oauth.info.OAuth2UserInfoFactory;
@@ -55,7 +54,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             savedUser = createUser(userInfo, providerType);
         }
 
-        return UserPrincipal.create(savedUser, user.getAttributes());
+        return CustomUserDetails.create(savedUser, user.getAttributes());
     }
 
     private User createUser(OAuth2UserInfo userInfo, ProviderType providerType) {
