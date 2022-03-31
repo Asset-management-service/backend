@@ -29,8 +29,6 @@ public class User implements Auditable {
 
     private String email;
 
-    private String password;
-
     @NotNull
     private String nickname;
 
