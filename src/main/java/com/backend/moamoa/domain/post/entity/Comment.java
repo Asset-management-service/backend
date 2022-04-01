@@ -44,7 +44,6 @@ public class Comment implements Auditable {
     @JoinColumn(name = "user_id")
     private User user;
 
-
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "post_id")
     private Post post;
