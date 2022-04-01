@@ -1,5 +1,6 @@
 package com.backend.moamoa.domain.post.entity;
 
+import com.backend.moamoa.domain.user.entity.User;
 import com.backend.moamoa.global.audit.AuditListener;
 import com.backend.moamoa.global.audit.Auditable;
 import com.backend.moamoa.global.audit.TimeEntity;
@@ -42,7 +43,6 @@ public class Comment implements Auditable {
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "user_id")
     private User user;
-
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "post_id")

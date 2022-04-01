@@ -6,6 +6,8 @@ import com.backend.moamoa.domain.post.dto.response.PostOneResponse;
 import com.backend.moamoa.domain.post.dto.response.PostResponse;
 import com.backend.moamoa.domain.post.entity.Post;
 import com.backend.moamoa.domain.post.repository.PostRepository;
+import com.backend.moamoa.domain.user.entity.User;
+import com.backend.moamoa.domain.user.repository.UserRepository;
 import com.backend.moamoa.global.exception.CustomException;
 import com.backend.moamoa.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -72,7 +74,5 @@ public class PostService {
 //
 //        postRepository.findMyPostsById(user.getId());
 //    }
-
-
 
 }
