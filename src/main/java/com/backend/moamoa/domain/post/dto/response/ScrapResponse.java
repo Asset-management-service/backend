@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class LikeResponse {
-    private boolean likeStatus;
-
+public class ScrapResponse {
+    private boolean scrapStatus;
 }

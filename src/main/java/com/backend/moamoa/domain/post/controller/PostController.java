@@ -5,6 +5,7 @@ import com.backend.moamoa.domain.post.dto.request.PostUpdateRequest;
 import com.backend.moamoa.domain.post.dto.response.LikeResponse;
 import com.backend.moamoa.domain.post.dto.response.PostOneResponse;
 import com.backend.moamoa.domain.post.dto.response.PostResponse;
+import com.backend.moamoa.domain.post.dto.response.ScrapResponse;
 import com.backend.moamoa.domain.post.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -39,6 +40,11 @@ public class PostController {
     @PostMapping("/{postId}/likes")
     public LikeResponse likePost(@PathVariable Long postId){
         return postService.likePost(postId);
+    }
+
+    @PostMapping("/{postId}/scrap")
+    public ScrapResponse scrapPost(@PathVariable Long postId) {
+        return postService.scrapPost(postId);
     }
 
 //    @GetMapping("/my")

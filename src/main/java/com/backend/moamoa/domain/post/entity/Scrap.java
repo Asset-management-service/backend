@@ -34,4 +34,11 @@ public class Scrap {
         this.post = post;
         this.user = user;
     }
+
+    public static Scrap createScrap(User user, Post post) {
+        return Scrap.builder()
+                .user(user)
+                .post(post)
+                .build();
+    }
 }

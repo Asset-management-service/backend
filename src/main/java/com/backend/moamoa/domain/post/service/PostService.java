@@ -5,12 +5,15 @@ import com.backend.moamoa.domain.post.dto.request.PostUpdateRequest;
 import com.backend.moamoa.domain.post.dto.response.LikeResponse;
 import com.backend.moamoa.domain.post.dto.response.PostOneResponse;
 import com.backend.moamoa.domain.post.dto.response.PostResponse;
+import com.backend.moamoa.domain.post.dto.response.ScrapResponse;
 import com.backend.moamoa.domain.post.entity.Post;
 import com.backend.moamoa.domain.post.entity.PostCategory;
 import com.backend.moamoa.domain.post.entity.PostLike;
+import com.backend.moamoa.domain.post.entity.Scrap;
 import com.backend.moamoa.domain.post.repository.PostCategoryRepository;
 import com.backend.moamoa.domain.post.repository.PostLikeRepository;
 import com.backend.moamoa.domain.post.repository.PostRepository;
+import com.backend.moamoa.domain.post.repository.ScrapRepository;
 import com.backend.moamoa.domain.user.entity.User;
 import com.backend.moamoa.domain.user.repository.UserRepository;
 import com.backend.moamoa.global.exception.CustomException;
@@ -30,6 +33,7 @@ public class PostService {
     private final UserRepository userRepository;
     private final PostCategoryRepository postCategoryRepository;
     private final PostLikeRepository postLikeRepository;
+    private final ScrapRepository scrapRepository;
 
 
     @Transactional
@@ -87,10 +91,24 @@ public class PostService {
 
         if (postLike.isEmpty()) {
             postLikeRepository.save(PostLike.createPostLike(user, post));
-            return new LikeResponse(true, "likePost");
+            return new LikeResponse(true);
         }
         postLikeRepository.delete(postLike.get());
-        return new LikeResponse(false, "UnLikePost");
+        return new LikeResponse(false);
+    }
+
+    @Transactional
+    public ScrapResponse scrapPost(Long postId) {
+        User user = userRepository.findById(1L).get();
+        Post post = getPost(postId);
+
+        Optional<Scrap> scrap = scrapRepository.findByUserAndPost(user, post);
+        if (scrap.isEmpty()) {
+            scrapRepository.save(Scrap.createScrap(user, post));
+            return new ScrapResponse(true);
+        }
+        scrapRepository.delete(scrap.get());
+        return new ScrapResponse(false);
     }
 
 
