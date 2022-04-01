@@ -1,10 +1,8 @@
-package com.backend.moamoa.global.config.security;
+package com.backend.moamoa.global.config;
 
-import com.backend.moamoa.domain.user.oauth.filter.JwtFilter;
-import com.backend.moamoa.domain.user.oauth.properties.AppProperties;
-import com.backend.moamoa.domain.user.oauth.properties.CorsProperties;
-import com.backend.moamoa.domain.user.oauth.provider.AuthTokenProvider;
 import com.backend.moamoa.domain.user.enums.RoleType;
+import com.backend.moamoa.domain.user.oauth.filter.JwtFilter;
+import com.backend.moamoa.domain.user.oauth.provider.AuthTokenProvider;
 import com.backend.moamoa.domain.user.oauth.exception.RestAuthenticationEntryPoint;
 import com.backend.moamoa.domain.user.oauth.handler.OAuth2AuthenticationFailureHandler;
 import com.backend.moamoa.domain.user.oauth.handler.OAuth2AuthenticationSuccessHandler;
@@ -35,7 +33,7 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-    private final CorsProperties corsProperties;
+    private final com.backend.moamoa.domain.user.oauth.properties.CorsProperties corsProperties;
     private final AppProperties appProperties;
     private final AuthTokenProvider tokenProvider;
     private final CustomUserDetailsService userDetailsService;

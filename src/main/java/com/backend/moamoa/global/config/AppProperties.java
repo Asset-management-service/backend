@@ -1,4 +1,4 @@
-package com.backend.moamoa.domain.user.oauth.properties;
+package com.backend.moamoa.global.config;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
