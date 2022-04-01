@@ -17,7 +17,7 @@ public class PostController {
 
     @GetMapping("/{postId}")
     public PostOneResponse getPost(@PathVariable Long postId) {
-         return postService.findById(postId);
+        return postService.findById(postId);
     }
 
     @PostMapping
@@ -33,6 +33,11 @@ public class PostController {
     @DeleteMapping("/{postId}")
     public PostResponse deletePost(@PathVariable Long postId) {
         return postService.deletePost(postId);
+    }
+
+    @PostMapping("/{postId}/likes")
+    public PostResponse likePost(@PathVariable Long postId){
+        return postService.likePost(postId);
     }
 
 //    @GetMapping("/my")

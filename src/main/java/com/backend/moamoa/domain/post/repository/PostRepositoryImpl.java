@@ -46,4 +46,6 @@ public class PostRepositoryImpl implements PostCustomRepository{
                 .where(post.id.eq(postId))
                 .fetchOne());
     }
+
+
 }

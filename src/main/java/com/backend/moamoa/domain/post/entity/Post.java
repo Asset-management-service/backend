@@ -38,19 +38,26 @@ public class Post implements Auditable {
     private TimeEntity timeEntity;
 
     @ColumnDefault("0")
-    @Column(nullable = false)
+    @Column(name = "view_count",nullable = false)
     private Integer viewCount;
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
+    @ManyToOne(fetch = LAZY,cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "post_category_id")
+    private PostCategory postCategory;
+
     @OneToMany(mappedBy = "post", orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 
-    @ManyToOne(fetch = LAZY)
-    @JoinColumn(name = "post_category_id")
-    private PostCategory postCategory;
+    @OneToMany(mappedBy = "post", orphanRemoval = true)
+    private List<PostLike> postLikes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "post", orphanRemoval = true)
+    private List<Scrap> scraps = new ArrayList<>();
+
 
     @Override
     public void setTimeEntity(TimeEntity timeEntity) {
@@ -58,27 +65,38 @@ public class Post implements Auditable {
     }
 
     @Builder
-    public Post(String title, String content, Integer viewCount, User user, List<Comment> comments) {
+    public Post(String title, String content, Integer viewCount, User user, List<Comment> comments, PostCategory postCategory) {
         this.title = title;
         this.content = content;
         this.viewCount = viewCount;
         this.user = user;
         this.comments = comments;
+        this.postCategory = postCategory;
     }
 
     /**
      * 생성 메서드
      */
-    public static Post createPost(String title, String content, User user){
+    public static Post createPost(String title, String content, User user, PostCategory postCategory){
         return Post.builder()
                 .title(title)
                 .content(content)
                 .user(user)
+                .postCategory(postCategory)
                 .build();
     }
 
     public void updatePost(String title, String content) {
         this.title = title;
         this.content = content;
+    }
+
+    /**
+     * 초기화 값이 DB 에 추가되지 않는 오류가 있어서
+     * persist 하기 전에 초기화
+     */
+    @PrePersist
+    public void prePersistCount(){
+        this.viewCount = this.viewCount == null ? 0 : this.viewCount;
     }
 }

@@ -5,6 +5,9 @@ import com.backend.moamoa.domain.post.dto.request.PostUpdateRequest;
 import com.backend.moamoa.domain.post.dto.response.PostOneResponse;
 import com.backend.moamoa.domain.post.dto.response.PostResponse;
 import com.backend.moamoa.domain.post.entity.Post;
+import com.backend.moamoa.domain.post.entity.PostCategory;
+import com.backend.moamoa.domain.post.entity.PostLike;
+import com.backend.moamoa.domain.post.repository.PostCategoryRepository;
 import com.backend.moamoa.domain.post.repository.PostRepository;
 import com.backend.moamoa.domain.user.entity.User;
 import com.backend.moamoa.domain.user.repository.UserRepository;
@@ -21,13 +24,16 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final PostCategoryRepository postCategoryRepository;
 
 
     @Transactional
     public PostResponse createPost(PostRequest postRequest) {
+
+        PostCategory postCategory = postCategoryRepository.findByCategoryName(postRequest.getCategoryName())
+                .orElseGet(() -> PostCategory.createCategory(postRequest.getCategoryName()));
         User user = userRepository.findById(1L).get();
-//        User user = util.findCurrentUser();
-        Post post = Post.createPost(postRequest.getTitle(), postRequest.getContent(), user);
+        Post post = Post.createPost(postRequest.getTitle(), postRequest.getContent(), user, postCategory);
         postRepository.save(post);
         return new PostResponse(post.getId(), "게시글 작성이 완료되었습니다.");
     }
@@ -66,6 +72,14 @@ public class PostService {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_POST));
         return post;
+    }
+
+    public PostResponse likePost(Long postId) {
+        Post post = getPost(postId);
+        User user = userRepository.findById(1L).get();
+        PostLike postLike = PostLike.createPostLike(user, post);
+
+        return null;
     }
 
 

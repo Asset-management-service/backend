@@ -41,7 +41,7 @@ public class User implements Auditable {
     @Embedded
     private TimeEntity timeEntity;
 
-    @OneToMany(mappedBy = "user", cascade = ALL)
+    @OneToMany(mappedBy = "user", orphanRemoval = true)
     private List<Post> posts = new ArrayList<>();
 
     @Override
