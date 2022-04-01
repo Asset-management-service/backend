@@ -2,12 +2,14 @@ package com.backend.moamoa.domain.post.service;
 
 import com.backend.moamoa.domain.post.dto.request.PostRequest;
 import com.backend.moamoa.domain.post.dto.request.PostUpdateRequest;
+import com.backend.moamoa.domain.post.dto.response.LikeResponse;
 import com.backend.moamoa.domain.post.dto.response.PostOneResponse;
 import com.backend.moamoa.domain.post.dto.response.PostResponse;
 import com.backend.moamoa.domain.post.entity.Post;
 import com.backend.moamoa.domain.post.entity.PostCategory;
 import com.backend.moamoa.domain.post.entity.PostLike;
 import com.backend.moamoa.domain.post.repository.PostCategoryRepository;
+import com.backend.moamoa.domain.post.repository.PostLikeRepository;
 import com.backend.moamoa.domain.post.repository.PostRepository;
 import com.backend.moamoa.domain.user.entity.User;
 import com.backend.moamoa.domain.user.repository.UserRepository;
@@ -17,6 +19,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -25,6 +29,7 @@ public class PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final PostCategoryRepository postCategoryRepository;
+    private final PostLikeRepository postLikeRepository;
 
 
     @Transactional
@@ -74,12 +79,18 @@ public class PostService {
         return post;
     }
 
-    public PostResponse likePost(Long postId) {
-        Post post = getPost(postId);
+    @Transactional
+    public LikeResponse likePost(Long postId) {
         User user = userRepository.findById(1L).get();
-        PostLike postLike = PostLike.createPostLike(user, post);
+        Post post = getPost(postId);
+        Optional<PostLike> postLike = postLikeRepository.findByUserAndPost(user, post);
 
-        return null;
+        if (postLike.isEmpty()) {
+            postLikeRepository.save(PostLike.createPostLike(user, post));
+            return new LikeResponse(true, "likePost");
+        }
+        postLikeRepository.delete(postLike.get());
+        return new LikeResponse(false, "UnLikePost");
     }
 
 

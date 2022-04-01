@@ -2,6 +2,7 @@ package com.backend.moamoa.domain.post.controller;
 
 import com.backend.moamoa.domain.post.dto.request.PostRequest;
 import com.backend.moamoa.domain.post.dto.request.PostUpdateRequest;
+import com.backend.moamoa.domain.post.dto.response.LikeResponse;
 import com.backend.moamoa.domain.post.dto.response.PostOneResponse;
 import com.backend.moamoa.domain.post.dto.response.PostResponse;
 import com.backend.moamoa.domain.post.service.PostService;
@@ -36,7 +37,7 @@ public class PostController {
     }
 
     @PostMapping("/{postId}/likes")
-    public PostResponse likePost(@PathVariable Long postId){
+    public LikeResponse likePost(@PathVariable Long postId){
         return postService.likePost(postId);
     }
 
