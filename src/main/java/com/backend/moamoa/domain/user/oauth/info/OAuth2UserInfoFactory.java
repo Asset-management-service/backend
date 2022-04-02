@@ -17,4 +17,5 @@ public class OAuth2UserInfoFactory {
             default: throw new IllegalArgumentException("Invalid Provider Type.");
         }
     }
+
 }
