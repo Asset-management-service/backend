@@ -1,5 +1,6 @@
 package com.backend.moamoa.domain.user.oauth.info.impl;
 
+import com.backend.moamoa.domain.user.enums.Gender;
 import com.backend.moamoa.domain.user.oauth.info.OAuth2UserInfo;
 
 import java.util.Map;
@@ -55,14 +56,19 @@ public class NaverOAuth2UserInfo extends OAuth2UserInfo {
     }
 
     @Override
-    public String getGender() {
+    public Gender getGender() {
         Map<String, Object> response = (Map<String, Object>) attributes.get("response");
 
         if (response == null) {
             return null;
         }
 
-        return (String) response.get("gender");
+        String gender = (String) response.get("gender");
+
+        if (gender.equals("M")) {
+            return Gender.MAN;
+        }
+        return Gender.WOMAN;
     }
 
     @Override
@@ -75,4 +81,5 @@ public class NaverOAuth2UserInfo extends OAuth2UserInfo {
 
         return (String) response.get("birthyear");
     }
+
 }

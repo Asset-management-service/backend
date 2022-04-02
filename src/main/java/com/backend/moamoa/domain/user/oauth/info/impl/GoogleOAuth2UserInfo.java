@@ -1,5 +1,6 @@
 package com.backend.moamoa.domain.user.oauth.info.impl;
 
+import com.backend.moamoa.domain.user.enums.Gender;
 import com.backend.moamoa.domain.user.oauth.info.OAuth2UserInfo;
 
 import java.util.Map;
@@ -27,17 +28,25 @@ public class GoogleOAuth2UserInfo extends OAuth2UserInfo {
 
     @Override
     public String getBirthday() {
-        return null;
+        return (String) attributes.get("birthday");
     }
 
     @Override
-    public String getGender() {
+    public Gender getGender() {
+        String gender = (String) attributes.get("gender");
+
+        if (gender != null) {
+            if (gender.equals("male")) {
+                return Gender.MAN;
+            }
+            return Gender.WOMAN;
+        }
         return null;
     }
 
     @Override
     public String getBirthYear() {
-        return null;
+        return (String) attributes.get("birthyear");
     }
 
 }
