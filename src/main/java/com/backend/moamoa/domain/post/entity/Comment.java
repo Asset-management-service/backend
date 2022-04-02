@@ -4,11 +4,11 @@ import com.backend.moamoa.domain.user.entity.User;
 import com.backend.moamoa.global.audit.AuditListener;
 import com.backend.moamoa.global.audit.Auditable;
 import com.backend.moamoa.global.audit.TimeEntity;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,5 +52,22 @@ public class Comment implements Auditable {
     @Override
     public void setTimeEntity(TimeEntity timeEntity) {
         this.timeEntity = timeEntity;
+    }
+
+    @Builder
+    public Comment(String content, Comment parent, User user, Post post) {
+        this.content = content;
+        this.parent = parent;
+        this.user = user;
+        this.post = post;
+    }
+
+    public static Comment createComment(Comment parent, User user, Post post, String content){
+        return Comment.builder()
+                .user(user)
+                .post(post)
+                .parent(parent)
+                .content(content)
+                .build();
     }
 }

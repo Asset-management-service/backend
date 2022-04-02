@@ -1,19 +1,11 @@
 package com.backend.moamoa.domain.post.service;
 
+import com.backend.moamoa.domain.post.dto.request.CommentRequest;
 import com.backend.moamoa.domain.post.dto.request.PostRequest;
 import com.backend.moamoa.domain.post.dto.request.PostUpdateRequest;
-import com.backend.moamoa.domain.post.dto.response.LikeResponse;
-import com.backend.moamoa.domain.post.dto.response.PostOneResponse;
-import com.backend.moamoa.domain.post.dto.response.PostResponse;
-import com.backend.moamoa.domain.post.dto.response.ScrapResponse;
-import com.backend.moamoa.domain.post.entity.Post;
-import com.backend.moamoa.domain.post.entity.PostCategory;
-import com.backend.moamoa.domain.post.entity.PostLike;
-import com.backend.moamoa.domain.post.entity.Scrap;
-import com.backend.moamoa.domain.post.repository.PostCategoryRepository;
-import com.backend.moamoa.domain.post.repository.PostLikeRepository;
-import com.backend.moamoa.domain.post.repository.PostRepository;
-import com.backend.moamoa.domain.post.repository.ScrapRepository;
+import com.backend.moamoa.domain.post.dto.response.*;
+import com.backend.moamoa.domain.post.entity.*;
+import com.backend.moamoa.domain.post.repository.*;
 import com.backend.moamoa.domain.user.entity.User;
 import com.backend.moamoa.domain.user.repository.UserRepository;
 import com.backend.moamoa.global.exception.CustomException;
@@ -22,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -34,6 +27,7 @@ public class PostService {
     private final PostCategoryRepository postCategoryRepository;
     private final PostLikeRepository postLikeRepository;
     private final ScrapRepository scrapRepository;
+    private final CommentRepository commentRepository;
 
 
     @Transactional
@@ -111,6 +105,29 @@ public class PostService {
         return new ScrapResponse(false);
     }
 
+    @Transactional
+    public CommentResponse createComment(CommentRequest commentRequest) {
+        User user = userRepository.findById(1L).get();
+        Post post = getPost(commentRequest.getPostId());
+        Long parentId = commentRequest.getParentId();
+
+        if (Objects.isNull(parentId)) {
+            Comment comment = commentRepository.save(Comment.builder()
+                    .user(user)
+                    .post(post)
+                    .content(commentRequest.getContent())
+                    .build());
+            return new CommentResponse(comment.getId());
+        }
+            Comment parent = commentRepository.findById(parentId)
+                    .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COMMENT));
+        Comment comment = commentRepository.save(Comment.createComment(parent, user, post, commentRequest.getContent()));
+        commentRepository.save(comment);
+            return new CommentResponse(comment.getId());
+        }
+
+    }
+
 
 //    public void findMyPosts() {
 //        User user = util.findCurrentUser();
@@ -118,4 +135,3 @@ public class PostService {
 //        postRepository.findMyPostsById(user.getId());
 //    }
 
-}

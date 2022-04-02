@@ -20,23 +20,23 @@ import java.util.List;
 @Entity
 @Builder
 public class User implements Auditable {
-    @JsonIgnore
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
     private Long id;
 
-    @NotNull
+//    @NotNull
+    @Column(name = "user_provider_id")
     private String userId;
 
-    @Enumerated(EnumType.STRING)
-    @NotNull
+//    @Enumerated(EnumType.STRING)
+//    @NotNull
     private ProviderType providerType;
 
     private String email;
 
-    @JsonIgnore
-    @NotNull
-    @Builder.Default
+
     private String password = "";
 
     @NotNull
