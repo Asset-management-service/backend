@@ -25,7 +25,6 @@ import java.util.Map;
 public class CustomUserDetails implements OAuth2User, UserDetails, OidcUser {
 
     private final String userId;
-    private final String password;
     private final ProviderType providerType;
     private final RoleType roleType;
     private final Collection<GrantedAuthority> authorities;
@@ -42,12 +41,17 @@ public class CustomUserDetails implements OAuth2User, UserDetails, OidcUser {
     }
 
     @Override
-    public String getName() {
-        return userId;
+    public String getPassword() {
+        return null;
     }
 
     @Override
     public String getUsername() {
+        return userId;
+    }
+
+    @Override
+    public String getName() {
         return userId;
     }
 
@@ -89,7 +93,6 @@ public class CustomUserDetails implements OAuth2User, UserDetails, OidcUser {
     public static CustomUserDetails create(User user) {
         return new CustomUserDetails(
                 user.getUserId(),
-                user.getPassword(),
                 user.getProviderType(),
                 RoleType.USER,
                 Collections.singletonList(new SimpleGrantedAuthority(RoleType.USER.getCode()))
