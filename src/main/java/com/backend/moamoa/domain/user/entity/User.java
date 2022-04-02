@@ -1,5 +1,8 @@
 package com.backend.moamoa.domain.user.entity;
 
+import com.backend.moamoa.domain.user.dto.request.UserUpdateRequest;
+import com.backend.moamoa.domain.user.dto.response.UserResponse;
+import com.backend.moamoa.domain.user.enums.Gender;
 import com.backend.moamoa.domain.user.oauth.entity.ProviderType;
 import com.backend.moamoa.global.audit.AuditListener;
 import com.backend.moamoa.global.audit.Auditable;
@@ -10,6 +13,8 @@ import lombok.*;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
+import static javax.persistence.EnumType.STRING;
+
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditListener.class)
@@ -17,34 +22,34 @@ import javax.validation.constraints.NotNull;
 @Entity
 @Builder
 public class User implements Auditable {
-    @JsonIgnore
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
     private Long id;
 
     @NotNull
+    @Column(name = "user_userId")
     private String userId;
 
-    @Enumerated(EnumType.STRING)
+    @Enumerated(STRING)
     @NotNull
     private ProviderType providerType;
 
     private String email;
 
-    @JsonIgnore
-    @NotNull
-    @Builder.Default
-    private String password = "";
-
     @NotNull
     private String nickname;
+
+    @Builder.Default
+    private String phoneNum = "";
 
     private String birthday;
 
     private String birthYear;
 
-    @Builder.Default
-    private String gender = "";
+    @Enumerated(STRING)
+    private Gender gender;
 
     @Embedded
     private TimeEntity timeEntity;
@@ -56,6 +61,26 @@ public class User implements Auditable {
 
     public void setNickname(String nickname) {
         this.nickname = nickname;
+    }
+
+    public void update(UserUpdateRequest userUpdateRequest) {
+        this.nickname = userUpdateRequest.getNickname();
+        this.phoneNum = userUpdateRequest.getPhoneNum();
+        this.gender = userUpdateRequest.getGender();
+    }
+
+    public UserResponse toUserResponse() {
+        return UserResponse.builder()
+                .id(id)
+                .nickname(nickname)
+                .email(email)
+                .phoneNum(phoneNum)
+                .gender(gender)
+                .birthday(birthday)
+                .birthYear(birthYear)
+                .createdDate(timeEntity.getCreatedDate())
+                .updatedDate(timeEntity.getUpdatedDate())
+                .build();
     }
 
 }
