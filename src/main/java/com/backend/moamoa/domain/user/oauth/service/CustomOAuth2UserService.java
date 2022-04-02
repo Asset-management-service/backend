@@ -7,6 +7,8 @@ import com.backend.moamoa.domain.user.oauth.exception.OAuthProviderMissMatchExce
 import com.backend.moamoa.domain.user.oauth.info.OAuth2UserInfo;
 import com.backend.moamoa.domain.user.oauth.info.OAuth2UserInfoFactory;
 import com.backend.moamoa.domain.user.repository.UserRepository;
+import com.backend.moamoa.global.exception.CustomException;
+import com.backend.moamoa.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.AuthenticationException;
@@ -16,7 +18,6 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
-import java.nio.file.attribute.UserPrincipal;
 
 @Service
 @RequiredArgsConstructor
@@ -80,4 +81,5 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         return user;
     }
+
 }
