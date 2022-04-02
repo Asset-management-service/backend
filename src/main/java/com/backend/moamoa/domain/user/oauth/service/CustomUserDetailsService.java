@@ -3,6 +3,8 @@ package com.backend.moamoa.domain.user.oauth.service;
 import com.backend.moamoa.domain.user.entity.User;
 import com.backend.moamoa.domain.user.oauth.entity.CustomUserDetails;
 import com.backend.moamoa.domain.user.repository.UserRepository;
+import com.backend.moamoa.global.exception.CustomException;
+import com.backend.moamoa.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -23,4 +25,5 @@ public class CustomUserDetailsService implements UserDetailsService {
         }
         return CustomUserDetails.create(user);
     }
+
 }
