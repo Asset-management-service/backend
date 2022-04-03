@@ -1,16 +1,16 @@
 package com.backend.moamoa.global.config;
 
 import com.backend.moamoa.domain.user.enums.RoleType;
-import com.backend.moamoa.domain.user.oauth.filter.JwtFilter;
-import com.backend.moamoa.domain.user.oauth.provider.AuthTokenProvider;
 import com.backend.moamoa.domain.user.oauth.exception.RestAuthenticationEntryPoint;
+import com.backend.moamoa.domain.user.oauth.filter.JwtFilter;
 import com.backend.moamoa.domain.user.oauth.handler.OAuth2AuthenticationFailureHandler;
 import com.backend.moamoa.domain.user.oauth.handler.OAuth2AuthenticationSuccessHandler;
 import com.backend.moamoa.domain.user.oauth.handler.TokenAccessDeniedHandler;
+import com.backend.moamoa.domain.user.oauth.provider.AuthTokenProvider;
 import com.backend.moamoa.domain.user.oauth.repository.OAuth2AuthorizationRequestBasedOnCookieRepository;
-import com.backend.moamoa.domain.user.repository.UserRefreshTokenRepository;
 import com.backend.moamoa.domain.user.oauth.service.CustomOAuth2UserService;
 import com.backend.moamoa.domain.user.oauth.service.CustomUserDetailsService;
+import com.backend.moamoa.domain.user.repository.UserRefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -50,10 +50,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .passwordEncoder(passwordEncoder());
     }
 
-    /*
-     * h2 database를 위한 설정
-     * */
-    public void configure(WebSecurity web) throws Exception {
+    // Security 무시하기
+    public void configure(WebSecurity web)throws Exception{
         web.ignoring().antMatchers("/h2-console/**");
     }
 
@@ -66,8 +64,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .csrf().disable()
-                .headers().frameOptions().disable()
-                .and()
                 .formLogin().disable()
                 .httpBasic().disable()
                 .exceptionHandling()
@@ -76,15 +72,19 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .authorizeRequests()
                 .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
-                .antMatchers("/").permitAll()
                 .antMatchers("/h2-console/**").permitAll()
-                .antMatchers("/api/**").permitAll()
+                .antMatchers("/api/**").hasAnyAuthority(RoleType.USER.getCode())
                 .antMatchers("/api/**/admin/**").hasAnyAuthority(RoleType.ADMIN.getCode())
                 .anyRequest().authenticated()
                 .and()
-                .httpBasic()
-                .and()
                 .oauth2Login()
+                .authorizationEndpoint()
+                .baseUri("/oauth2/authorization")
+                .authorizationRequestRepository(oAuth2AuthorizationRequestBasedOnCookieRepository())
+                .and()
+                .redirectionEndpoint()
+                .baseUri("/*/oauth2/code/*")
+                .and()
                 .userInfoEndpoint()
                 .userService(oAuth2UserService)
                 .and()
@@ -166,5 +166,4 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         corsConfigSource.registerCorsConfiguration("/**", corsConfig);
         return corsConfigSource;
     }
-
 }
