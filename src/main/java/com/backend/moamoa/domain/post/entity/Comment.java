@@ -4,6 +4,7 @@ import com.backend.moamoa.domain.user.entity.User;
 import com.backend.moamoa.global.audit.AuditListener;
 import com.backend.moamoa.global.audit.Auditable;
 import com.backend.moamoa.global.audit.TimeEntity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -30,9 +31,11 @@ public class Comment implements Auditable {
     @Column(nullable = false, length = 1000)
     private String content;
 
+    @JsonIgnore
     @Embedded
     private TimeEntity timeEntity;
 
+    @JsonIgnore
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "parent_id")
     private Comment parent;
@@ -40,10 +43,12 @@ public class Comment implements Auditable {
     @OneToMany(mappedBy = "parent", orphanRemoval = true)
     private List<Comment> children = new ArrayList<>();
 
+    @JsonIgnore
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
+    @JsonIgnore
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "post_id")
     private Post post;

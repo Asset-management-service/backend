@@ -63,8 +63,8 @@ public class PostService {
      */
     @Transactional
     public PostOneResponse findById(Long postId) {
-        return postRepository.findOnePostById(postId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_POST));
+        return postRepository.findOnePostById(postId);
+
     }
 
 
@@ -105,29 +105,7 @@ public class PostService {
         return new ScrapResponse(false);
     }
 
-    @Transactional
-    public CommentResponse createComment(CommentRequest commentRequest) {
-        User user = userRepository.findById(1L).get();
-        Post post = getPost(commentRequest.getPostId());
-        Long parentId = commentRequest.getParentId();
-
-        if (Objects.isNull(parentId)) {
-            Comment comment = commentRepository.save(Comment.builder()
-                    .user(user)
-                    .post(post)
-                    .content(commentRequest.getContent())
-                    .build());
-            return new CommentResponse(comment.getId());
-        }
-            Comment parent = commentRepository.findById(parentId)
-                    .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COMMENT));
-        Comment comment = commentRepository.save(Comment.createComment(parent, user, post, commentRequest.getContent()));
-        commentRepository.save(comment);
-            return new CommentResponse(comment.getId());
-        }
-
-    }
-
+}
 
 //    public void findMyPosts() {
 //        User user = util.findCurrentUser();

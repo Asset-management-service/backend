@@ -1,9 +1,11 @@
 package com.backend.moamoa.domain.post.controller;
 
-import com.backend.moamoa.domain.post.dto.request.CommentRequest;
 import com.backend.moamoa.domain.post.dto.request.PostRequest;
 import com.backend.moamoa.domain.post.dto.request.PostUpdateRequest;
-import com.backend.moamoa.domain.post.dto.response.*;
+import com.backend.moamoa.domain.post.dto.response.LikeResponse;
+import com.backend.moamoa.domain.post.dto.response.PostOneResponse;
+import com.backend.moamoa.domain.post.dto.response.PostResponse;
+import com.backend.moamoa.domain.post.dto.response.ScrapResponse;
 import com.backend.moamoa.domain.post.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +23,7 @@ public class PostController {
     }
 
     @PostMapping
+
     public PostResponse createPost(@RequestBody PostRequest request) {
         return postService.createPost(request);
     }
@@ -44,18 +47,6 @@ public class PostController {
     public ScrapResponse scrapPost(@PathVariable Long postId) {
         return postService.scrapPost(postId);
     }
-
-    @PostMapping("/comments")
-    public CommentResponse createComment(@RequestBody CommentRequest commentRequest) {
-        return postService.createComment(commentRequest);
-    }
-
-
-
-//    @GetMapping("/my")
-//    public void myPosts() {
-//        postService.findMyPosts();
-//    }
 
 
 }
