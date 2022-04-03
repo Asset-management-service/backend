@@ -29,7 +29,7 @@ public class User implements Auditable {
     private Long id;
 
     @NotNull
-    @Column(name = "user_userId")
+    @Column(name = "user_provider_id")
     private String userId;
 
     @Enumerated(STRING)
