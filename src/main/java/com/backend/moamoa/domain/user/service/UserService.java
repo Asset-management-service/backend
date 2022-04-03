@@ -18,7 +18,7 @@ public class UserService {
     @Transactional
     public UserResponse update(User user, UserUpdateRequest userUpdateRequest) {
         user.update(userUpdateRequest);
-        return user.toUserResponse();
+        return UserResponse.toUserResponse(user);
     }
 
 }
