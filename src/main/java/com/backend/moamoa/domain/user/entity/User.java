@@ -41,8 +41,7 @@ public class User implements Auditable {
     @NotNull
     private String nickname;
 
-    @Builder.Default
-    private String phoneNum = "";
+    private String phoneNum;
 
     private String birthday;
 
@@ -67,20 +66,6 @@ public class User implements Auditable {
         this.nickname = userUpdateRequest.getNickname();
         this.phoneNum = userUpdateRequest.getPhoneNum();
         this.gender = userUpdateRequest.getGender();
-    }
-
-    public UserResponse toUserResponse() {
-        return UserResponse.builder()
-                .id(id)
-                .nickname(nickname)
-                .email(email)
-                .phoneNum(phoneNum)
-                .gender(gender)
-                .birthday(birthday)
-                .birthYear(birthYear)
-                .createdDate(timeEntity.getCreatedDate())
-                .updatedDate(timeEntity.getUpdatedDate())
-                .build();
     }
 
 }
