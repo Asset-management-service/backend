@@ -14,14 +14,18 @@ import java.time.LocalDateTime;
 public class PostOneCommentResponse {
 
     private Long postId;
+
     private Long parentId;
 
     private Long commentId;
 
     private String content;
+
     private String username;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime createDate;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime updateDate;
 
@@ -35,4 +39,5 @@ public class PostOneCommentResponse {
         this.createDate = createDate;
         this.updateDate = updateDate;
     }
+
 }

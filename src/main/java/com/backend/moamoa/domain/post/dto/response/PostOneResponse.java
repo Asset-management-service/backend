@@ -14,20 +14,30 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 public class PostOneResponse {
+
     private Long postId;
+
     private String title;
+
     private String content;
+
     private int scrapCount;
+
     private int commentCount;
+
     private int likeCount;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime createDate;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime updateDate;
-    private Integer viewCount;
-    private String username;
-    private List<PostOneCommentResponse> comments = new ArrayList<>();
 
+    private Integer viewCount;
+
+    private String username;
+
+    private List<PostOneCommentResponse> comments = new ArrayList<>();
 
     @QueryProjection
     public PostOneResponse(Long postId, String title, String content, int scrapCount, int commentCount, int likeCount, LocalDateTime createDate, LocalDateTime updateDate, Integer viewCount, String username) {
@@ -42,4 +52,5 @@ public class PostOneResponse {
         this.viewCount = viewCount;
         this.username = username;
     }
+
 }

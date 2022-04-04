@@ -31,11 +31,9 @@ public class Comment implements Auditable {
     @Column(nullable = false, length = 1000)
     private String content;
 
-    @JsonIgnore
     @Embedded
     private TimeEntity timeEntity;
 
-    @JsonIgnore
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "parent_id")
     private Comment parent;
@@ -43,12 +41,10 @@ public class Comment implements Auditable {
     @OneToMany(mappedBy = "parent", orphanRemoval = true)
     private List<Comment> children = new ArrayList<>();
 
-    @JsonIgnore
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
-    @JsonIgnore
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "post_id")
     private Post post;
@@ -75,4 +71,5 @@ public class Comment implements Auditable {
                 .content(content)
                 .build();
     }
+
 }

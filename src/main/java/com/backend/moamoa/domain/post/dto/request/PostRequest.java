@@ -8,8 +8,11 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class PostRequest {
+
     private String title;
+
     private String content;
+
     private String categoryName;
 
 }

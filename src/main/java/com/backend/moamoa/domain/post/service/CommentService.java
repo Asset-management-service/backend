@@ -33,17 +33,20 @@ public class CommentService {
         Long parentId = commentRequest.getParentId();
 
         if (Objects.isNull(parentId)) {
-            Comment comment = commentRepository.save(Comment.builder()
-                    .user(user)
-                    .post(post)
-                    .content(commentRequest.getContent())
-                    .build());
-            return new CommentResponse(comment.getId());
+            return createParentComment(commentRequest, user, post);
         }
         Comment parent = commentRepository.findById(parentId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COMMENT));
         Comment comment = commentRepository.save(Comment.createComment(parent, user, post, commentRequest.getContent()));
-        commentRepository.save(comment);
+        return new CommentResponse(comment.getId());
+    }
+
+    private CommentResponse createParentComment(CommentRequest commentRequest, User user, Post post) {
+        Comment comment = commentRepository.save(Comment.builder()
+                .user(user)
+                .post(post)
+                .content(commentRequest.getContent())
+                .build());
         return new CommentResponse(comment.getId());
     }
 }

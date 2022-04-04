@@ -27,19 +27,16 @@ public class PostCategory{
     @OneToMany(mappedBy = "postCategory", orphanRemoval = true)
     private List<Post> posts = new ArrayList<>();
 
-
     @Builder
     public PostCategory(String categoryName, List<Post> posts) {
         this.categoryName = categoryName;
         this.posts = posts;
     }
 
-
     public static PostCategory createCategory(String categoryName) {
         return PostCategory.builder()
                 .categoryName(categoryName)
                 .build();
     }
-
 
 }
