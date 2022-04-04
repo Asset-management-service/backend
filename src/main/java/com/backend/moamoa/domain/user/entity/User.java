@@ -1,17 +1,17 @@
 package com.backend.moamoa.domain.user.entity;
 
-import com.backend.moamoa.domain.post.entity.Post;
+import com.backend.moamoa.domain.user.dto.request.UserUpdateRequest;
+import com.backend.moamoa.domain.user.enums.Gender;
 import com.backend.moamoa.domain.user.oauth.entity.ProviderType;
 import com.backend.moamoa.global.audit.AuditListener;
 import com.backend.moamoa.global.audit.Auditable;
 import com.backend.moamoa.global.audit.TimeEntity;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.List;
+
+import static javax.persistence.EnumType.STRING;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -26,34 +26,30 @@ public class User implements Auditable {
     @Column(name = "user_id")
     private Long id;
 
-//    @NotNull
+    @NotNull
     @Column(name = "user_provider_id")
     private String userId;
 
-//    @Enumerated(EnumType.STRING)
-//    @NotNull
+    @Enumerated(STRING)
+    @NotNull
     private ProviderType providerType;
 
     private String email;
 
-
-    private String password = "";
-
     @NotNull
     private String nickname;
+
+    private String phoneNum;
 
     private String birthday;
 
     private String birthYear;
 
-    @Builder.Default
-    private String gender = "";
+    @Enumerated(STRING)
+    private Gender gender;
 
     @Embedded
     private TimeEntity timeEntity;
-
-    @OneToMany(mappedBy = "user", orphanRemoval = true)
-    private List<Post> posts = new ArrayList<>();
 
     @Override
     public void setTimeEntity(TimeEntity timeEntity) {
@@ -62,6 +58,12 @@ public class User implements Auditable {
 
     public void setNickname(String nickname) {
         this.nickname = nickname;
+    }
+
+    public void update(UserUpdateRequest userUpdateRequest) {
+        this.nickname = userUpdateRequest.getNickname();
+        this.phoneNum = userUpdateRequest.getPhoneNum();
+        this.gender = userUpdateRequest.getGender();
     }
 
 }

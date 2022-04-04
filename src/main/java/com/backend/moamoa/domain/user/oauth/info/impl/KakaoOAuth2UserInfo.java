@@ -1,5 +1,6 @@
 package com.backend.moamoa.domain.user.oauth.info.impl;
 
+import com.backend.moamoa.domain.user.enums.Gender;
 import com.backend.moamoa.domain.user.oauth.info.OAuth2UserInfo;
 
 import java.util.Map;
@@ -17,32 +18,43 @@ public class KakaoOAuth2UserInfo extends OAuth2UserInfo {
 
     @Override
     public String getName() {
-        Map<String, Object> properties = (Map<String, Object>) attributes.get("properties");
-
-        if (properties == null) {
-            return null;
-        }
-
-        return (String) properties.get("nickname");
+        return (String) getProfile().get("nickname");
     }
 
     @Override
     public String getEmail() {
-        return (String) attributes.get("account_email");
+        return (String) getKakaoAccount().get("email");
     }
 
     @Override
     public String getBirthday() {
-        return (String) attributes.get("birthday");
+        return (String) getKakaoAccount().get("birthday");
     }
 
     @Override
-    public String getGender() {
-        return (String) attributes.get("gender");
+    public Gender getGender() {
+        String gender = (String) getKakaoAccount().get("gender");
+
+        if (gender != null) {
+            if (gender.equals("male")) {
+                return Gender.MAN;
+            }
+            return Gender.WOMAN;
+        }
+        return null;
     }
 
     @Override
     public String getBirthYear() {
-        return null;
+        return (String) getKakaoAccount().get("birthyear");
     }
+
+    public Map<String, Object> getKakaoAccount() {
+        return (Map<String, Object>) attributes.get("kakao_account");
+    }
+
+    public Map<String, Object> getProfile() {
+        return (Map<String, Object>) getKakaoAccount().get("profile");
+    }
+
 }

@@ -53,4 +53,5 @@ public class OAuth2AuthorizationRequestBasedOnCookieRepository implements Author
         CookieUtil.deleteCookie(request, response, REDIRECT_URI_PARAM_COOKIE_NAME);
         CookieUtil.deleteCookie(request, response, REFRESH_TOKEN);
     }
+
 }
