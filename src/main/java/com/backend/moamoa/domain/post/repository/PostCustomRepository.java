@@ -9,5 +9,5 @@ import java.util.Optional;
 public interface PostCustomRepository {
     List<Post> findMyPostsById(Long id);
 
-    Optional<PostOneResponse> findOnePostById(Long postId);
+    PostOneResponse findOnePostById(Long postId);
 }

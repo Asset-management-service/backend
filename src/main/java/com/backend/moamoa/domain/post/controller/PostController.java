@@ -2,8 +2,10 @@ package com.backend.moamoa.domain.post.controller;
 
 import com.backend.moamoa.domain.post.dto.request.PostRequest;
 import com.backend.moamoa.domain.post.dto.request.PostUpdateRequest;
+import com.backend.moamoa.domain.post.dto.response.LikeResponse;
 import com.backend.moamoa.domain.post.dto.response.PostOneResponse;
 import com.backend.moamoa.domain.post.dto.response.PostResponse;
+import com.backend.moamoa.domain.post.dto.response.ScrapResponse;
 import com.backend.moamoa.domain.post.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -17,10 +19,11 @@ public class PostController {
 
     @GetMapping("/{postId}")
     public PostOneResponse getPost(@PathVariable Long postId) {
-         return postService.findById(postId);
+        return postService.findById(postId);
     }
 
     @PostMapping
+
     public PostResponse createPost(@RequestBody PostRequest request) {
         return postService.createPost(request);
     }
@@ -35,10 +38,15 @@ public class PostController {
         return postService.deletePost(postId);
     }
 
-//    @GetMapping("/my")
-//    public void myPosts() {
-//        postService.findMyPosts();
-//    }
+    @PostMapping("/{postId}/likes")
+    public LikeResponse likePost(@PathVariable Long postId){
+        return postService.likePost(postId);
+    }
+
+    @PostMapping("/{postId}/scrap")
+    public ScrapResponse scrapPost(@PathVariable Long postId) {
+        return postService.scrapPost(postId);
+    }
 
 
 }

@@ -1,25 +1,19 @@
 spring:
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
   profiles:
     active: local
     include: oauth
   datasource:
-    url: jdbc:h2:mem:testdb;
-    username: sa
+    url: jdbc:mysql://localhost:3306/moamoa?useSSL=false&useUnicode=true&serverTimezone=Asia/Seoul
+    username:
     password:
-    driver-class-name: org.h2.Driver
+    driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
       ddl-auto: create
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.H2Dialect
-        show_sql: true
+        #show_sql: true
         format_sql: true
-        #database: mysql
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
@@ -30,4 +24,3 @@ spring:
 
 logging.level:
   org.hibernate.SQL: debug
-

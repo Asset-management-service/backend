@@ -1,13 +1,11 @@
 package com.backend.moamoa.domain.user.entity;
 
 import com.backend.moamoa.domain.user.dto.request.UserUpdateRequest;
-import com.backend.moamoa.domain.user.dto.response.UserResponse;
 import com.backend.moamoa.domain.user.enums.Gender;
 import com.backend.moamoa.domain.user.oauth.entity.ProviderType;
 import com.backend.moamoa.global.audit.AuditListener;
 import com.backend.moamoa.global.audit.Auditable;
 import com.backend.moamoa.global.audit.TimeEntity;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;

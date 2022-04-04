@@ -1,19 +1,16 @@
 package com.backend.moamoa.domain.post.repository;
 
 
-import com.backend.moamoa.domain.post.dto.response.PostOneResponse;
-import com.backend.moamoa.domain.post.dto.response.QPostOneResponse;
+import com.backend.moamoa.domain.post.dto.response.*;
 import com.backend.moamoa.domain.post.entity.Post;
-import com.backend.moamoa.domain.post.entity.QPost;
-import com.backend.moamoa.domain.user.entity.QUser;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
-import java.util.Optional;
 
-import static com.backend.moamoa.domain.post.entity.QPost.*;
-import static com.backend.moamoa.domain.user.entity.QUser.*;
+import static com.backend.moamoa.domain.post.entity.QComment.comment;
+import static com.backend.moamoa.domain.post.entity.QPost.post;
+import static com.backend.moamoa.domain.user.entity.QUser.user;
 
 @RequiredArgsConstructor
 public class PostRepositoryImpl implements PostCustomRepository{
@@ -26,17 +23,20 @@ public class PostRepositoryImpl implements PostCustomRepository{
     }
 
     @Override
-    public Optional<PostOneResponse> findOnePostById(Long postId) {
+    public PostOneResponse findOnePostById(Long postId) {
         queryFactory.update(post)
                 .set(post.viewCount, post.viewCount.add(1))
                 .where(post.id.eq(postId))
                 .execute();
 
-        return Optional.ofNullable(queryFactory
+        PostOneResponse response = queryFactory
                 .select(new QPostOneResponse(
                         post.id,
                         post.title,
                         post.content,
+                        post.scraps.size(),
+                        post.comments.size(),
+                        post.postLikes.size(),
                         post.timeEntity.createdDate,
                         post.timeEntity.updatedDate,
                         post.viewCount,
@@ -44,6 +44,29 @@ public class PostRepositoryImpl implements PostCustomRepository{
                 .from(post)
                 .innerJoin(post.user, user)
                 .where(post.id.eq(postId))
-                .fetchOne());
+                .fetchOne();
+
+        List<PostOneCommentResponse> comments = queryFactory
+                .select(new QPostOneCommentResponse(
+                        comment.post.id,
+                        comment.parent.id,
+                        comment.id,
+                        comment.content,
+                        user.nickname,
+                        comment.timeEntity.createdDate,
+                        comment.timeEntity.updatedDate))
+                .from(comment)
+                .innerJoin(comment.post, post)
+                .innerJoin(post.user, user)
+                .where(post.id.eq(postId))
+                .orderBy(comment.parent.id.desc())
+                .fetch();
+
+
+         response.setComments(comments);
+
+         return response;
     }
+
+
 }

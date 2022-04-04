@@ -1,11 +1,11 @@
 package com.backend.moamoa.domain.post.service;
 
+import com.backend.moamoa.domain.post.dto.request.CommentRequest;
 import com.backend.moamoa.domain.post.dto.request.PostRequest;
 import com.backend.moamoa.domain.post.dto.request.PostUpdateRequest;
-import com.backend.moamoa.domain.post.dto.response.PostOneResponse;
-import com.backend.moamoa.domain.post.dto.response.PostResponse;
-import com.backend.moamoa.domain.post.entity.Post;
-import com.backend.moamoa.domain.post.repository.PostRepository;
+import com.backend.moamoa.domain.post.dto.response.*;
+import com.backend.moamoa.domain.post.entity.*;
+import com.backend.moamoa.domain.post.repository.*;
 import com.backend.moamoa.domain.user.entity.User;
 import com.backend.moamoa.domain.user.repository.UserRepository;
 import com.backend.moamoa.global.exception.CustomException;
@@ -14,6 +14,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -21,13 +24,19 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final PostCategoryRepository postCategoryRepository;
+    private final PostLikeRepository postLikeRepository;
+    private final ScrapRepository scrapRepository;
+    private final CommentRepository commentRepository;
 
 
     @Transactional
     public PostResponse createPost(PostRequest postRequest) {
+
+        PostCategory postCategory = postCategoryRepository.findByCategoryName(postRequest.getCategoryName())
+                .orElseGet(() -> PostCategory.createCategory(postRequest.getCategoryName()));
         User user = userRepository.findById(1L).get();
-//        User user = util.findCurrentUser();
-        Post post = Post.createPost(postRequest.getTitle(), postRequest.getContent(), user);
+        Post post = Post.createPost(postRequest.getTitle(), postRequest.getContent(), user, postCategory);
         postRepository.save(post);
         return new PostResponse(post.getId(), "게시글 작성이 완료되었습니다.");
     }
@@ -54,8 +63,8 @@ public class PostService {
      */
     @Transactional
     public PostOneResponse findById(Long postId) {
-        return postRepository.findOnePostById(postId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_POST));
+        return postRepository.findOnePostById(postId);
+
     }
 
 
@@ -68,6 +77,35 @@ public class PostService {
         return post;
     }
 
+    @Transactional
+    public LikeResponse likePost(Long postId) {
+        User user = userRepository.findById(1L).get();
+        Post post = getPost(postId);
+        Optional<PostLike> postLike = postLikeRepository.findByUserAndPost(user, post);
+
+        if (postLike.isEmpty()) {
+            postLikeRepository.save(PostLike.createPostLike(user, post));
+            return new LikeResponse(true);
+        }
+        postLikeRepository.delete(postLike.get());
+        return new LikeResponse(false);
+    }
+
+    @Transactional
+    public ScrapResponse scrapPost(Long postId) {
+        User user = userRepository.findById(1L).get();
+        Post post = getPost(postId);
+
+        Optional<Scrap> scrap = scrapRepository.findByUserAndPost(user, post);
+        if (scrap.isEmpty()) {
+            scrapRepository.save(Scrap.createScrap(user, post));
+            return new ScrapResponse(true);
+        }
+        scrapRepository.delete(scrap.get());
+        return new ScrapResponse(false);
+    }
+
+}
 
 //    public void findMyPosts() {
 //        User user = util.findCurrentUser();
@@ -75,4 +113,3 @@ public class PostService {
 //        postRepository.findMyPostsById(user.getId());
 //    }
 
-}
