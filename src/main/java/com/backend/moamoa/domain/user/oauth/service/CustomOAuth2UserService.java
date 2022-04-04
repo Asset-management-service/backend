@@ -18,6 +18,8 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 
 @Service
 @RequiredArgsConstructor
@@ -43,21 +45,21 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         ProviderType providerType = ProviderType.valueOf(userRequest.getClientRegistration().getRegistrationId().toUpperCase());
 
         OAuth2UserInfo userInfo = OAuth2UserInfoFactory.getOAuth2UserInfo(providerType, user.getAttributes());
-        User savedUser = userRepository.findByUserId(userInfo.getId());
+        Optional<User> savedUser = userRepository.findByUserId(userInfo.getId());
 
-        if (savedUser != null) {
-            if (providerType != savedUser.getProviderType()) {
+        if (savedUser.isPresent()) {
+            if (providerType != savedUser.get().getProviderType()) {
                 throw new OAuthProviderMissMatchException(
                         "Looks like you're signed up with " + providerType +
-                                " account. Please use your " + savedUser.getProviderType() + " account to login."
+                                " account. Please use your " + savedUser.get().getProviderType() + " account to login."
                 );
             }
-            updateUser(savedUser, userInfo);
+            updateUser(savedUser.get(), userInfo);
         } else {
-            savedUser = createUser(userInfo, providerType);
+            savedUser = Optional.of(createUser(userInfo, providerType));
         }
 
-        return CustomUserDetails.create(savedUser, user.getAttributes());
+        return CustomUserDetails.create(savedUser.get(), user.getAttributes());
     }
 
     private User createUser(OAuth2UserInfo userInfo, ProviderType providerType) {

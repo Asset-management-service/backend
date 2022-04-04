@@ -14,12 +14,9 @@ public class UserUtil {
     private final UserRepository userRepository;
 
     public User findCurrentUser() {
+        User user = userRepository.findByUserId(SecurityUtil.getCurrentMemberId())
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_MEMBER));
 
-        User user = userRepository.findByUserId(SecurityUtil.getCurrentMemberId());
-
-        if (user == null) {
-            throw new CustomException(ErrorCode.NOT_FOUND_MEMBER);
-        }
         return user;
     }
 
