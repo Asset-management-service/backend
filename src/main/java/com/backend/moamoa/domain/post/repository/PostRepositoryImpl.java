@@ -3,10 +3,14 @@ package com.backend.moamoa.domain.post.repository;
 
 import com.backend.moamoa.domain.post.dto.response.*;
 import com.backend.moamoa.domain.post.entity.Post;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.backend.moamoa.domain.post.entity.QComment.comment;
 import static com.backend.moamoa.domain.post.entity.QPost.post;
@@ -48,7 +52,6 @@ public class PostRepositoryImpl implements PostCustomRepository{
 
         List<PostOneCommentResponse> comments = queryFactory
                 .select(new QPostOneCommentResponse(
-                        comment.post.id,
                         comment.parent.id,
                         comment.id,
                         comment.content,
@@ -58,15 +61,38 @@ public class PostRepositoryImpl implements PostCustomRepository{
                 .from(comment)
                 .innerJoin(comment.post, post)
                 .innerJoin(post.user, user)
-                .where(post.id.eq(postId))
-                .orderBy(comment.parent.id.desc())
+                .where(post.id.eq(postId).and(comment.parent.id.isNull()))
+                .orderBy(comment.id.asc())
+                .fetch();
+
+        List<Long> commentsId = comments.stream()
+                .map(c -> c.getCommentId())
+                .collect(Collectors.toList());
+
+        List<CommentsChildrenResponse> children = queryFactory.select(new QCommentsChildrenResponse(
+                        comment.parent.id,
+                        comment.id,
+                        comment.content,
+                        user.nickname,
+                        comment.timeEntity.createdDate,
+                        comment.timeEntity.updatedDate))
+                .from(comment)
+                .innerJoin(comment.parent)
+                .innerJoin(comment.post, post)
+                .innerJoin(post.user, user)
+                .where(post.id.eq(postId).and(comment.parent.id.in(commentsId))
+                        .and(comment.parent.id.eq(commentsId.stream().findFirst().get())))
+                .orderBy(comment.parent.id.asc())
                 .fetch();
 
 
-         response.setComments(comments);
+        comments.stream()
+                .forEach(comment -> comment.setChildren(children));
+
+
+        response.setComments(comments);
 
          return response;
     }
-
 
 }

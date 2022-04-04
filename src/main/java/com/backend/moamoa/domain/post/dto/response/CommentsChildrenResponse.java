@@ -7,13 +7,11 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 @Setter
 @NoArgsConstructor
-public class PostOneCommentResponse {
+public class CommentsChildrenResponse {
 
     private Long parentId;
 
@@ -23,8 +21,6 @@ public class PostOneCommentResponse {
 
     private String username;
 
-    private List<CommentsChildrenResponse> children = new ArrayList<>();
-
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime createDate;
 
@@ -32,7 +28,7 @@ public class PostOneCommentResponse {
     private LocalDateTime updateDate;
 
     @QueryProjection
-    public PostOneCommentResponse(Long parentId, Long commentId, String content, String username, LocalDateTime createDate, LocalDateTime updateDate) {
+    public CommentsChildrenResponse(Long parentId, Long commentId, String content, String username, LocalDateTime createDate, LocalDateTime updateDate) {
         this.parentId = parentId;
         this.commentId = commentId;
         this.content = content;
