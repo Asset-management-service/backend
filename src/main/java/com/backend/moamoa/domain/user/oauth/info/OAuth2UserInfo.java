@@ -1,5 +1,7 @@
 package com.backend.moamoa.domain.user.oauth.info;
 
+import com.backend.moamoa.domain.user.enums.Gender;
+
 import java.util.Map;
 
 public abstract class OAuth2UserInfo {
@@ -21,7 +23,8 @@ public abstract class OAuth2UserInfo {
 
     public abstract String getBirthday();
 
-    public abstract String getGender();
+    public abstract Gender getGender();
 
     public abstract String getBirthYear();
+
 }
