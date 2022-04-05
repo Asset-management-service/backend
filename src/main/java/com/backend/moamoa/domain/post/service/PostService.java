@@ -1,24 +1,34 @@
 package com.backend.moamoa.domain.post.service;
 
-import com.backend.moamoa.domain.post.dto.request.CommentRequest;
 import com.backend.moamoa.domain.post.dto.request.PostRequest;
 import com.backend.moamoa.domain.post.dto.request.PostUpdateRequest;
+import com.backend.moamoa.domain.post.dto.request.RecentPostRequest;
 import com.backend.moamoa.domain.post.dto.response.*;
-import com.backend.moamoa.domain.post.entity.*;
-import com.backend.moamoa.domain.post.repository.*;
+import com.backend.moamoa.domain.post.entity.Post;
+import com.backend.moamoa.domain.post.entity.PostCategory;
+import com.backend.moamoa.domain.post.entity.PostLike;
+import com.backend.moamoa.domain.post.entity.Scrap;
+import com.backend.moamoa.domain.post.repository.comment.CommentRepository;
+import com.backend.moamoa.domain.post.repository.post.PostCategoryRepository;
+import com.backend.moamoa.domain.post.repository.post.PostLikeRepository;
+import com.backend.moamoa.domain.post.repository.post.PostRepository;
+import com.backend.moamoa.domain.post.repository.post.ScrapRepository;
 import com.backend.moamoa.domain.user.entity.User;
 import com.backend.moamoa.domain.user.repository.UserRepository;
 import com.backend.moamoa.global.exception.CustomException;
 import com.backend.moamoa.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Objects;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 @Transactional(readOnly = true)
 public class PostService {
 
@@ -64,7 +74,6 @@ public class PostService {
     @Transactional
     public PostOneResponse findById(Long postId) {
         return postRepository.findOnePostById(postId);
-
     }
 
 
@@ -105,6 +114,9 @@ public class PostService {
         return new ScrapResponse(false);
     }
 
+    public Page<RecentPostResponse> getRecentPost(Pageable pageable, RecentPostRequest request) {
+        return postRepository.findRecentPosts(pageable, request);
+    }
 }
 
 //    public void findMyPosts() {
