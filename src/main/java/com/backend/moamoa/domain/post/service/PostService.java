@@ -80,7 +80,7 @@ public class PostService {
     private void commentsExtractor(Long postId, PostOneResponse postOneResponse) {
         postOneResponse.getComments()
                 .forEach(comment -> {
-                            List<CommentsChildrenResponse> comments = commentRepository.findPostComments(postId, comment);
+                            List<CommentsChildrenResponse> comments = commentRepository.findPostComments(postId, comment.getCommentId());
                             comment.setChildren(comments);
                 });
     }

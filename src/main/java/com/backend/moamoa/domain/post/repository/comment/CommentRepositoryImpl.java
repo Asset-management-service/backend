@@ -30,7 +30,7 @@ public class CommentRepositoryImpl implements CommentCustomRepository {
     }
 
     @Override
-    public List<CommentsChildrenResponse> findPostComments(Long postId, PostOneCommentResponse response) {
+    public List<CommentsChildrenResponse> findPostComments(Long postId, Long commentId) {
 
         return queryFactory.select(new QCommentsChildrenResponse(
                         comment.parent.id,
@@ -43,7 +43,7 @@ public class CommentRepositoryImpl implements CommentCustomRepository {
                 .innerJoin(comment.parent)
                 .innerJoin(comment.post, post)
                 .innerJoin(post.user, user)
-                .where(post.id.eq(postId).and(comment.parent.id.eq(response.getCommentId())))
+                .where(post.id.eq(postId).and(comment.parent.id.eq(commentId)))
                 .orderBy(comment.id.asc())
                 .fetch();
     }

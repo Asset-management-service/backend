@@ -11,6 +11,6 @@ public interface CommentCustomRepository {
 
     Optional<Comment> findWithPostAndMemberById(Long userId, Long commentId);
 
-    List<CommentsChildrenResponse> findPostComments(Long postId, PostOneCommentResponse comment);
+    List<CommentsChildrenResponse> findPostComments(Long postId, Long commentId);
 
 }
