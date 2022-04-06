@@ -36,6 +36,9 @@ public class User implements Auditable {
 
     private String email;
 
+    @Builder.Default
+    private boolean emailCheck = false;
+
     @NotNull
     private String nickname;
 
@@ -47,6 +50,9 @@ public class User implements Auditable {
 
     @Enumerated(STRING)
     private Gender gender;
+
+    @Builder.Default
+    private boolean deleted = false;
 
     @Embedded
     private TimeEntity timeEntity;
@@ -64,6 +70,11 @@ public class User implements Auditable {
         this.nickname = userUpdateRequest.getNickname();
         this.phoneNum = userUpdateRequest.getPhoneNum();
         this.gender = userUpdateRequest.getGender();
+    }
+
+    public void updateEmail(String email) {
+        this.email = email;
+        emailCheck = true;
     }
 
 }
