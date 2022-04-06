@@ -72,8 +72,9 @@ public class PostService {
      * 게시글 조회
      */
     @Transactional
-    public PostOneResponse findById(Long postId) {
-        return postRepository.findOnePostById(postId);
+    public PostOneResponse getOnePost(Long postId) {
+        return postRepository.findOnePostById(postId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_POST));
     }
 
 

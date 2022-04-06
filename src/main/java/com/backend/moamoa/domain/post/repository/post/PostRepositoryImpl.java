@@ -3,7 +3,6 @@ package com.backend.moamoa.domain.post.repository.post;
 
 import com.backend.moamoa.domain.post.dto.request.RecentPostRequest;
 import com.backend.moamoa.domain.post.dto.response.*;
-import com.backend.moamoa.domain.post.repository.post.PostCustomRepository;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -11,7 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 import static com.backend.moamoa.domain.post.entity.QComment.comment;
 import static com.backend.moamoa.domain.post.entity.QPost.post;
@@ -25,13 +24,13 @@ public class PostRepositoryImpl implements PostCustomRepository {
 
 
     @Override
-    public PostOneResponse findOnePostById(Long postId) {
+    public Optional<PostOneResponse> findOnePostById(Long postId) {
         queryFactory.update(post)
                 .set(post.viewCount, post.viewCount.add(1))
                 .where(post.id.eq(postId))
                 .execute();
 
-        PostOneResponse response = queryFactory
+        Optional<PostOneResponse> response = Optional.ofNullable(queryFactory
                 .select(new QPostOneResponse(
                         post.id,
                         post.title,
@@ -46,7 +45,12 @@ public class PostRepositoryImpl implements PostCustomRepository {
                 .from(post)
                 .innerJoin(post.user, user)
                 .where(post.id.eq(postId))
-                .fetchOne();
+                .fetchOne());
+
+        if (response.isEmpty()) {
+            return Optional.empty();
+        }
+
 
         List<PostOneCommentResponse> comments = queryFactory
                 .select(new QPostOneCommentResponse(
@@ -78,19 +82,10 @@ public class PostRepositoryImpl implements PostCustomRepository {
                 .orderBy(comment.parent.id.asc())
                 .fetch();
 
-        List<Long> ids = comments
-                .stream()
-                .map(comment -> comment.getCommentId())
-                .collect(Collectors.toList());
-
-        List<CommentsChildrenResponse> collect = children.stream()
-                .filter(child -> !child.getParentId().equals(ids))
-                .collect(Collectors.toList());
-
         comments.stream()
                 .forEach(comment -> comment.setChildren(children));
 
-        response.setComments(comments);
+        response.get().setComments(comments);
 
          return response;
     }

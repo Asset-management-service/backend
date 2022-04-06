@@ -18,8 +18,8 @@ public class PostController {
     private final PostService postService;
 
     @GetMapping("/{postId}")
-    public PostOneResponse getPost(@PathVariable Long postId) {
-        return postService.findById(postId);
+    public PostOneResponse getOnePost(@PathVariable Long postId) {
+        return postService.getOnePost(postId);
     }
 
     @GetMapping("/recent")
