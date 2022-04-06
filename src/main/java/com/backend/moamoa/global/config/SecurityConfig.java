@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.BeanIds;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -31,6 +32,7 @@ import java.util.Arrays;
 
 @Configuration
 @RequiredArgsConstructor
+@EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final CorsProperties corsProperties;
@@ -45,15 +47,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
      * Swagger UI 설정
      * */
     private static final String[] PERMIT_URL_ARRAY = {
-            /* swagger v2 */
-            "/v2/api-docs",
-            "/swagger-resources",
-            "/swagger-resources/**",
-            "/configuration/ui",
-            "/configuration/security",
-            "/swagger-ui.html",
-            "/webjars/**",
-            /* swagger v3 */
             "/v3/api-docs/**",
             "/swagger-ui/**"
     };
@@ -89,11 +82,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .authorizeRequests()
                 .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
-                .antMatchers("/h2-console/**").permitAll()
                 .antMatchers(PERMIT_URL_ARRAY).permitAll()
-                .antMatchers("/api/**").hasAnyAuthority(RoleType.USER.getCode())
-                .antMatchers("/api/**/admin/**").hasAnyAuthority(RoleType.ADMIN.getCode())
-                .anyRequest().authenticated()
                 .and()
                 .oauth2Login()
                 .authorizationEndpoint()
