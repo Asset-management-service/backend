@@ -44,7 +44,7 @@ public class CommentRepositoryImpl implements CommentCustomRepository {
                 .innerJoin(comment.post, post)
                 .innerJoin(post.user, user)
                 .where(post.id.eq(postId).and(comment.parent.id.eq(response.getCommentId())))
-                .orderBy(comment.parent.id.asc())
+                .orderBy(comment.id.asc())
                 .fetch();
     }
 }
