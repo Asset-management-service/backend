@@ -51,7 +51,6 @@ public class PostRepositoryImpl implements PostCustomRepository {
             return Optional.empty();
         }
 
-
         List<PostOneCommentResponse> comments = queryFactory
                 .select(new QPostOneCommentResponse(
                         comment.parent.id,
@@ -63,32 +62,16 @@ public class PostRepositoryImpl implements PostCustomRepository {
                 .from(comment)
                 .innerJoin(comment.post, post)
                 .innerJoin(post.user, user)
-                .where(post.id.eq(postId).and(comment.parent.id.isNull()))
+                .where(post.id.eq(postId).and(comment.parent.isNull()))
                 .orderBy(comment.id.asc())
                 .fetch();
-
-        List<CommentsChildrenResponse> children = queryFactory.select(new QCommentsChildrenResponse(
-                        comment.parent.id,
-                        comment.id,
-                        comment.content,
-                        user.nickname,
-                        comment.timeEntity.createdDate,
-                        comment.timeEntity.updatedDate))
-                .from(comment)
-                .innerJoin(comment.parent)
-                .innerJoin(comment.post, post)
-                .innerJoin(post.user, user)
-                .where(post.id.eq(postId).and(comment.parent.id.isNotNull()))
-                .orderBy(comment.parent.id.asc())
-                .fetch();
-
-        comments.stream()
-                .forEach(comment -> comment.setChildren(children));
 
         response.get().setComments(comments);
 
          return response;
     }
+
+
 
     @Override
     public Page<RecentPostResponse> findRecentPosts(Pageable pageable, RecentPostRequest request) {

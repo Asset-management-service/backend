@@ -4,10 +4,7 @@ import com.backend.moamoa.domain.post.dto.request.PostRequest;
 import com.backend.moamoa.domain.post.dto.request.PostUpdateRequest;
 import com.backend.moamoa.domain.post.dto.request.RecentPostRequest;
 import com.backend.moamoa.domain.post.dto.response.*;
-import com.backend.moamoa.domain.post.entity.Post;
-import com.backend.moamoa.domain.post.entity.PostCategory;
-import com.backend.moamoa.domain.post.entity.PostLike;
-import com.backend.moamoa.domain.post.entity.Scrap;
+import com.backend.moamoa.domain.post.entity.*;
 import com.backend.moamoa.domain.post.repository.comment.CommentRepository;
 import com.backend.moamoa.domain.post.repository.post.PostCategoryRepository;
 import com.backend.moamoa.domain.post.repository.post.PostLikeRepository;
@@ -24,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -73,8 +71,18 @@ public class PostService {
      */
     @Transactional
     public PostOneResponse getOnePost(Long postId) {
-        return postRepository.findOnePostById(postId)
+        PostOneResponse postOneResponse = postRepository.findOnePostById(postId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_POST));
+        commentsExtractor(postId, postOneResponse);
+        return postOneResponse;
+    }
+
+    private void commentsExtractor(Long postId, PostOneResponse postOneResponse) {
+        postOneResponse.getComments()
+                .forEach(comment -> {
+                            List<CommentsChildrenResponse> comments = commentRepository.findPostComments(postId, comment);
+                            comment.setChildren(comments);
+                });
     }
 
 

@@ -1,9 +1,13 @@
 package com.backend.moamoa.domain.post.repository.comment;
 
+import com.backend.moamoa.domain.post.dto.response.CommentsChildrenResponse;
+import com.backend.moamoa.domain.post.dto.response.PostOneCommentResponse;
+import com.backend.moamoa.domain.post.dto.response.QCommentsChildrenResponse;
 import com.backend.moamoa.domain.post.entity.Comment;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
 import java.util.Optional;
 
 import static com.backend.moamoa.domain.post.entity.QComment.comment;
@@ -25,4 +29,22 @@ public class CommentRepositoryImpl implements CommentCustomRepository {
                 .fetchOne());
     }
 
+    @Override
+    public List<CommentsChildrenResponse> findPostComments(Long postId, PostOneCommentResponse response) {
+
+        return queryFactory.select(new QCommentsChildrenResponse(
+                        comment.parent.id,
+                        comment.id,
+                        comment.content,
+                        user.nickname,
+                        comment.timeEntity.createdDate,
+                        comment.timeEntity.updatedDate))
+                .from(comment)
+                .innerJoin(comment.parent)
+                .innerJoin(comment.post, post)
+                .innerJoin(post.user, user)
+                .where(post.id.eq(postId).and(comment.parent.id.eq(response.getCommentId())))
+                .orderBy(comment.parent.id.asc())
+                .fetch();
+    }
 }
