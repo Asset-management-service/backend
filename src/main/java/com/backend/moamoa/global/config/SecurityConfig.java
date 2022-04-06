@@ -42,6 +42,23 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final UserRefreshTokenRepository userRefreshTokenRepository;
 
     /*
+     * Swagger UI 설정
+     * */
+    private static final String[] PERMIT_URL_ARRAY = {
+            /* swagger v2 */
+            "/v2/api-docs",
+            "/swagger-resources",
+            "/swagger-resources/**",
+            "/configuration/ui",
+            "/configuration/security",
+            "/swagger-ui.html",
+            "/webjars/**",
+            /* swagger v3 */
+            "/v3/api-docs/**",
+            "/swagger-ui/**"
+    };
+
+    /*
      * UserDetailsService 설정
      * */
     @Override
@@ -74,6 +91,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
                 .antMatchers("/h2-console/**").permitAll()
+                .antMatchers(PERMIT_URL_ARRAY).permitAll()
                 .antMatchers("/api/**").hasAnyAuthority(RoleType.USER.getCode())
                 .antMatchers("/api/**/admin/**").hasAnyAuthority(RoleType.ADMIN.getCode())
                 .anyRequest().authenticated()
