@@ -38,11 +38,9 @@ public class PostOneResponse {
     private int likeCount;
 
     @ApiModelProperty(value = "해당 게시글의 생성 시간")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime createDate;
 
     @ApiModelProperty(value = "해당 게시글의 수정 시간")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime updateDate;
 
     @ApiModelProperty(value = "해당 게시글의 조회수")

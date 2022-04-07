@@ -35,7 +35,6 @@ public class RecentPostResponse {
     private String username;
 
     @ApiModelProperty(value = "게시글 생성 시간")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime localDateTime;
 
     @ApiModelProperty(value = "해당 게시글의 조회수")
