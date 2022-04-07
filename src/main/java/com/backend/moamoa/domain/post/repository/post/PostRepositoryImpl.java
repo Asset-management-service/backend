@@ -3,6 +3,8 @@ package com.backend.moamoa.domain.post.repository.post;
 
 import com.backend.moamoa.domain.post.dto.request.RecentPostRequest;
 import com.backend.moamoa.domain.post.dto.response.*;
+import com.backend.moamoa.domain.post.entity.Post;
+import com.backend.moamoa.domain.user.entity.QUser;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,7 +23,6 @@ import static com.backend.moamoa.domain.user.entity.QUser.user;
 public class PostRepositoryImpl implements PostCustomRepository {
 
     private final JPAQueryFactory queryFactory;
-
 
     @Override
     public Optional<PostOneResponse> findOnePostById(Long postId) {
@@ -101,5 +102,14 @@ public class PostRepositoryImpl implements PostCustomRepository {
 
         return PageableExecutionUtils.getPage(content, pageable, () -> countQuery);
 
+    }
+
+    @Override
+    public Optional<Post> findByIdAndUser(Long postId, Long id) {
+        return Optional.ofNullable(queryFactory
+                .selectFrom(post)
+                .innerJoin(post.user, user)
+                .where(post.id.eq(postId).and(user.id.eq(id)))
+                .fetchOne());
     }
 }

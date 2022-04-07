@@ -4,7 +4,10 @@ import com.backend.moamoa.domain.post.dto.request.PostRequest;
 import com.backend.moamoa.domain.post.dto.request.PostUpdateRequest;
 import com.backend.moamoa.domain.post.dto.request.RecentPostRequest;
 import com.backend.moamoa.domain.post.dto.response.*;
-import com.backend.moamoa.domain.post.entity.*;
+import com.backend.moamoa.domain.post.entity.Post;
+import com.backend.moamoa.domain.post.entity.PostCategory;
+import com.backend.moamoa.domain.post.entity.PostLike;
+import com.backend.moamoa.domain.post.entity.Scrap;
 import com.backend.moamoa.domain.post.repository.comment.CommentRepository;
 import com.backend.moamoa.domain.post.repository.post.PostCategoryRepository;
 import com.backend.moamoa.domain.post.repository.post.PostLikeRepository;
@@ -40,7 +43,6 @@ public class PostService {
 
     @Transactional
     public PostResponse createPost(PostRequest postRequest) {
-
         PostCategory postCategory = postCategoryRepository.findByCategoryName(postRequest.getCategoryName())
                 .orElseGet(() -> PostCategory.createCategory(postRequest.getCategoryName()));
         User user = userRepository.findById(1L).get();
@@ -52,7 +54,9 @@ public class PostService {
     @Transactional
     public PostResponse updatePost(PostUpdateRequest request) {
 
-        Post post = getPost(request.getPostId());
+        User user = userRepository.findById(1L).get();
+        Post post = postRepository.findByIdAndUser(request.getPostId(), user.getId())
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_POST));
 
         post.updatePost(request.getTitle(), request.getContent());
 
@@ -61,7 +65,11 @@ public class PostService {
 
     @Transactional
     public PostResponse deletePost(Long postId) {
-        postRepository.deleteById(postId);
+        User user = userRepository.findById(1L).get();
+        Post post = postRepository.findByIdAndUser(postId, user.getId())
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_POST));
+
+        postRepository.delete(post);
 
         return new PostResponse(postId, "게시글 삭제가 완료되었습니다.");
     }
@@ -127,10 +135,3 @@ public class PostService {
         return postRepository.findRecentPosts(pageable, request);
     }
 }
-
-//    public void findMyPosts() {
-//        User user = util.findCurrentUser();
-//
-//        postRepository.findMyPostsById(user.getId());
-//    }
-
