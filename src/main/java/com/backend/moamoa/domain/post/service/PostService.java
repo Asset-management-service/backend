@@ -1,24 +1,35 @@
 package com.backend.moamoa.domain.post.service;
 
-import com.backend.moamoa.domain.post.dto.request.CommentRequest;
 import com.backend.moamoa.domain.post.dto.request.PostRequest;
 import com.backend.moamoa.domain.post.dto.request.PostUpdateRequest;
+import com.backend.moamoa.domain.post.dto.request.RecentPostRequest;
 import com.backend.moamoa.domain.post.dto.response.*;
-import com.backend.moamoa.domain.post.entity.*;
-import com.backend.moamoa.domain.post.repository.*;
+import com.backend.moamoa.domain.post.entity.Post;
+import com.backend.moamoa.domain.post.entity.PostCategory;
+import com.backend.moamoa.domain.post.entity.PostLike;
+import com.backend.moamoa.domain.post.entity.Scrap;
+import com.backend.moamoa.domain.post.repository.comment.CommentRepository;
+import com.backend.moamoa.domain.post.repository.post.PostCategoryRepository;
+import com.backend.moamoa.domain.post.repository.post.PostLikeRepository;
+import com.backend.moamoa.domain.post.repository.post.PostRepository;
+import com.backend.moamoa.domain.post.repository.post.ScrapRepository;
 import com.backend.moamoa.domain.user.entity.User;
 import com.backend.moamoa.domain.user.repository.UserRepository;
 import com.backend.moamoa.global.exception.CustomException;
 import com.backend.moamoa.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Objects;
+import java.util.List;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 @Transactional(readOnly = true)
 public class PostService {
 
@@ -32,7 +43,6 @@ public class PostService {
 
     @Transactional
     public PostResponse createPost(PostRequest postRequest) {
-
         PostCategory postCategory = postCategoryRepository.findByCategoryName(postRequest.getCategoryName())
                 .orElseGet(() -> PostCategory.createCategory(postRequest.getCategoryName()));
         User user = userRepository.findById(1L).get();
@@ -44,7 +54,9 @@ public class PostService {
     @Transactional
     public PostResponse updatePost(PostUpdateRequest request) {
 
-        Post post = getPost(request.getPostId());
+        User user = userRepository.findById(1L).get();
+        Post post = postRepository.findByIdAndUser(request.getPostId(), user.getId())
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_POST));
 
         post.updatePost(request.getTitle(), request.getContent());
 
@@ -53,7 +65,11 @@ public class PostService {
 
     @Transactional
     public PostResponse deletePost(Long postId) {
-        postRepository.deleteById(postId);
+        User user = userRepository.findById(1L).get();
+        Post post = postRepository.findByIdAndUser(postId, user.getId())
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_POST));
+
+        postRepository.delete(post);
 
         return new PostResponse(postId, "게시글 삭제가 완료되었습니다.");
     }
@@ -62,9 +78,19 @@ public class PostService {
      * 게시글 조회
      */
     @Transactional
-    public PostOneResponse findById(Long postId) {
-        return postRepository.findOnePostById(postId);
+    public PostOneResponse getOnePost(Long postId) {
+        PostOneResponse postOneResponse = postRepository.findOnePostById(postId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_POST));
+        commentsExtractor(postId, postOneResponse);
+        return postOneResponse;
+    }
 
+    private void commentsExtractor(Long postId, PostOneResponse postOneResponse) {
+        postOneResponse.getComments()
+                .forEach(comment -> {
+                            List<CommentsChildrenResponse> comments = commentRepository.findPostComments(postId, comment.getCommentId());
+                            comment.setChildren(comments);
+                });
     }
 
 
@@ -105,11 +131,7 @@ public class PostService {
         return new ScrapResponse(false);
     }
 
+    public Page<RecentPostResponse> getRecentPost(Pageable pageable, RecentPostRequest request) {
+        return postRepository.findRecentPosts(pageable, request);
+    }
 }
-
-//    public void findMyPosts() {
-//        User user = util.findCurrentUser();
-//
-//        postRepository.findMyPostsById(user.getId());
-//    }
-

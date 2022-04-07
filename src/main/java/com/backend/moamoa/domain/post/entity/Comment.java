@@ -4,7 +4,6 @@ import com.backend.moamoa.domain.user.entity.User;
 import com.backend.moamoa.global.audit.AuditListener;
 import com.backend.moamoa.global.audit.Auditable;
 import com.backend.moamoa.global.audit.TimeEntity;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -72,4 +71,7 @@ public class Comment implements Auditable {
                 .build();
     }
 
+    public void updateContent(String content) {
+        this.content = content;
+    }
 }
