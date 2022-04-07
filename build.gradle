@@ -27,6 +27,9 @@ repositories {
 
 dependencies {
 
+	// AWS S3
+	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+
 	// Mail Library
 	implementation group: 'com.sun.mail', name: 'javax.mail', version: '1.6.2'
 	implementation group: 'org.springframework', name: 'spring-context-support', version: '5.3.18'
