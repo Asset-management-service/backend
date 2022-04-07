@@ -1,4 +1,4 @@
-package com.backend.moamoa.domain.post.repository;
+package com.backend.moamoa.domain.post.repository.post;
 
 import com.backend.moamoa.domain.post.entity.Post;
 import com.backend.moamoa.domain.post.entity.PostLike;
