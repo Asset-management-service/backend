@@ -9,6 +9,7 @@ import com.backend.moamoa.domain.user.service.UserService;
 import com.backend.moamoa.global.common.ApiResponse;
 import com.backend.moamoa.domain.user.entity.User;
 import com.backend.moamoa.global.utils.UserUtil;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.Map;
 
+@Api(tags = "유저 API")
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
