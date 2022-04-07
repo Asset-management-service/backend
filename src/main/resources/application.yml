@@ -1,7 +1,9 @@
 spring:
   profiles:
     active: local
-    include: oauth
+    include:
+      - oauth
+      - aws
   datasource:
     url: jdbc:mysql://moamoa1.cuax43rzes2d.ap-northeast-2.rds.amazonaws.com:3306/moamoaDB
     username: admin
@@ -25,3 +27,4 @@ spring:
 
 logging.level:
   org.hibernate.SQL: debug
+  com.amazonaws.util.EC2MetadataUtils: error
