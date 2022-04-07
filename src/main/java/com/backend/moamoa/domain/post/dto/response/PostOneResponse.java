@@ -1,6 +1,5 @@
 package com.backend.moamoa.domain.post.dto.response;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.querydsl.core.annotations.QueryProjection;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
