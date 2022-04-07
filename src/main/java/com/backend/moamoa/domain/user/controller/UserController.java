@@ -37,9 +37,8 @@ public class UserController {
     @GetMapping
     @ApiOperation(value = "현재 사용자 조회",
             notes = "현재 사용자의 정보를 가져옵니다. 헤더에 사용자 토큰 주입을 필요로 합니다.")
-    @PreAuthorize("isAuthenticated()")
     public ApiResponse getUser() {
-        User user = userUtil.findCurrentUser();
+        User user = userService.getUser();
         return ApiResponse.success("user", user);
     }
 
@@ -51,22 +50,20 @@ public class UserController {
     @PatchMapping
     @ApiOperation(value = "개인정보 수정",
             notes = "현재 사용자의 개인정보를 업데이트 합니다. 헤더에 사용자 토큰 주입을 필요로 합니다.")
-    @PreAuthorize("isAuthenticated()")
     public UserResponse update(@RequestBody @Valid UserUpdateRequest userUpdateRequest) {
-        User user = userUtil.findCurrentUser();
+        User user = userService.getUser();
         return userService.update(user, userUpdateRequest);
     }
 
     /**
-     * [GET] api/users/registerEmail/{email}
+     * [GET] api/users/registerEmail
      * 변경할 이메일을 받아 이메일 인증 메일을 보냅니다.
      */
     @GetMapping("/registerEmail")
     @ApiOperation(value = "이메일 전송",
             notes = "변경할 이메일을 받아 인증 메일을 보냅니다. 헤더에 사용자 토큰 주입을 필요로 합니다.")
-    @PreAuthorize("isAuthenticated()")
     public void registerEmail(@RequestBody UserEmailRequest userEmailRequest) {
-        User user = userUtil.findCurrentUser();
+        User user = userService.getUser();
         String authKey = mailSendService.sendAuthMail(userEmailRequest.getEmail());
         mailSendService.save(userEmailRequest.getEmail(), authKey, user.getId());
     }

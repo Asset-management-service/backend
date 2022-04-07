@@ -17,7 +17,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @ApiModel("유저 조회 정보")
-@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
 public class UserResponse {
 
     @ApiModelProperty(value = "유저 식별자", example = "1")
@@ -42,9 +41,11 @@ public class UserResponse {
     private String birthYear;
 
     @ApiModelProperty(value = "생성 시각", example = "")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime createdDate;
 
     @ApiModelProperty(value = "수정 시각", example = "")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime updatedDate;
 
     public static UserResponse toUserResponse(User user) {

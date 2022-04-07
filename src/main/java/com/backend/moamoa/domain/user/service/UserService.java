@@ -7,6 +7,7 @@ import com.backend.moamoa.domain.user.entity.UserMailAuth;
 import com.backend.moamoa.domain.user.repository.UserRepository;
 import com.backend.moamoa.global.exception.CustomException;
 import com.backend.moamoa.global.exception.ErrorCode;
+import com.backend.moamoa.global.utils.UserUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +20,15 @@ import java.nio.charset.StandardCharsets;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final UserUtil userUtil;
+
+    /**
+     * 전달받은 accessToken을 통해 현재 유저를 반환합니다.
+     * @return User 현재 유저
+     */
+    public User getUser() {
+        return userUtil.findCurrentUser();
+    }
 
     /**
      * 전달받은 유저와 유저의 개인정보를 통해 업데이트합니다.
