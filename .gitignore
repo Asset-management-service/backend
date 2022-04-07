@@ -35,3 +35,15 @@ out/
 
 ### VS Code ###
 .vscode/
+
+application.yml
+
+### local ###
+application-local.yml
+
+### oauth ###
+application-oauth.yml
+application-oauth-local.yml
+
+### aws ###
+application-aws.yml

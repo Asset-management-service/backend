@@ -26,9 +26,30 @@ repositories {
 }
 
 dependencies {
+
+	// AWS S3
+	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+
+	// Mail Library
+	implementation group: 'com.sun.mail', name: 'javax.mail', version: '1.6.2'
+	implementation group: 'org.springframework', name: 'spring-context-support', version: '5.3.18'
+
+	implementation group: 'io.springfox', name: 'springfox-boot-starter', version: '3.0.0'
+	implementation 'io.springfox:springfox-swagger-ui:3.0.0'
+
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+	// Spring Security
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+
+	// Jwt
+	implementation 'jakarta.xml.bind:jakarta.xml.bind-api:2.3.2'
+	implementation 'io.jsonwebtoken:jjwt-api:0.11.2'
+	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.2'
+	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.2'
+
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
-//	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
@@ -37,12 +58,14 @@ dependencies {
 	implementation "com.querydsl:querydsl-apt:${queryDslVersion}"
 
 	compileOnly 'org.projectlombok:lombok'
-	runtimeOnly 'com.h2database:h2'
+	compile('org.springframework.boot:spring-boot-starter-mustache')
 	runtimeOnly 'mysql:mysql-connector-java'
+	runtimeOnly 'com.h2database:h2'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'io.projectreactor:reactor-test'
 	testImplementation 'org.springframework.security:spring-security-test'
+	annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
 
 
 }
@@ -53,24 +76,28 @@ tasks.named('test') {
 
 //querydsl 추가 시작
 def querydslDir = "$buildDir/generated/querydsl"
+
 querydsl {
 	jpa = true
 	querydslSourcesDir = querydslDir
 }
+
 sourceSets {
 	main.java.srcDir querydslDir
 }
+
 compileQuerydsl {
 	options.annotationProcessorPath = configurations.querydsl
 }
+
 configurations {
-	compileOnly {
+	/*compileOnly {
 		extendsFrom annotationProcessor
-	}
+	}*/
 	querydsl.extendsFrom compileClasspath
 }
 
 
-bootJar {
+/*bootJar {
 	destinationDirectory = file("./target")
-}
+}*/

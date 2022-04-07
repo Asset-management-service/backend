@@ -1,28 +1,25 @@
 spring:
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
-  output:
-    ansi:
-      enabled: always
+  profiles:
+    active: local
+    include:
+      - oauth
+      - aws
   datasource:
-    url: jdbc:h2:mem:mydb
-    username: root
-    password:
-    driverClassName: org.h2.Driver
+    url: jdbc:mysql://moamoa1.cuax43rzes2d.ap-northeast-2.rds.amazonaws.com:3306/moamoaDB
+    username: admin
+    password: moamoathink33
+    driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
       ddl-auto: update
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.H2Dialect
+        show_sql: true
         format_sql: true
-        use_sql_comments: false
-
-#  mvc:
-#    pathmatch:
-#      matching-strategy: ant_path_matcher
+    database-platform: org.hibernate.dialect.MySQL57Dialect
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
 
 #  redis:
 #    host: localhost
@@ -30,4 +27,4 @@ spring:
 
 logging.level:
   org.hibernate.SQL: debug
-
+  com.amazonaws.util.EC2MetadataUtils: error
