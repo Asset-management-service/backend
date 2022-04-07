@@ -1,5 +1,6 @@
 package com.backend.moamoa.global.common;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 

@@ -44,3 +44,6 @@ application-local.yml
 ### oauth ###
 application-oauth.yml
 application-oauth-local.yml
+
+### aws ###
+application-aws.yml
