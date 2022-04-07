@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.Random;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class MailSendService {
 
@@ -78,6 +78,7 @@ public class MailSendService {
     }
 
     // UserMaliAuth 저장
+    @Transactional
     public void save(String email, String authKey, Long userId) {
         mailAuthRepository.save(
                 UserMailAuth.builder()
