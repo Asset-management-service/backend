@@ -5,6 +5,7 @@ import com.backend.moamoa.domain.user.dto.response.UserResponse;
 import com.backend.moamoa.domain.user.entity.User;
 import com.backend.moamoa.domain.user.entity.UserMailAuth;
 import com.backend.moamoa.domain.user.repository.UserRepository;
+import com.backend.moamoa.global.common.ApiResponse;
 import com.backend.moamoa.global.exception.CustomException;
 import com.backend.moamoa.global.exception.ErrorCode;
 import com.backend.moamoa.global.utils.UserUtil;
@@ -26,18 +27,20 @@ public class UserService {
      * 전달받은 accessToken을 통해 현재 유저를 반환합니다.
      * @return User 현재 유저
      */
-    public User getUser() {
-        return userUtil.findCurrentUser();
+    public ApiResponse getUser() {
+        User user = userUtil.findCurrentUser();
+        return ApiResponse.success("user", user);
+
     }
 
     /**
      * 전달받은 유저와 유저의 개인정보를 통해 업데이트합니다.
-     * @param user 유저 정보
      * @param userUpdateRequest 유저 업데이트
      * @return UserResponse
      */
     @Transactional
-    public UserResponse update(User user, UserUpdateRequest userUpdateRequest) {
+    public UserResponse update(UserUpdateRequest userUpdateRequest) {
+        User user = userUtil.findCurrentUser();
         user.update(userUpdateRequest);
         return UserResponse.toUserResponse(user);
     }

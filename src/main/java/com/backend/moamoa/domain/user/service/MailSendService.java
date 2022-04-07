@@ -1,10 +1,12 @@
 package com.backend.moamoa.domain.user.service;
 
+import com.backend.moamoa.domain.user.entity.User;
 import com.backend.moamoa.domain.user.entity.UserMailAuth;
 import com.backend.moamoa.domain.user.repository.MailAuthRepository;
 import com.backend.moamoa.domain.user.utils.MailUtils;
 import com.backend.moamoa.global.exception.CustomException;
 import com.backend.moamoa.global.exception.ErrorCode;
+import com.backend.moamoa.global.utils.UserUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,7 @@ import java.util.Random;
 @RequiredArgsConstructor
 public class MailSendService {
 
+    private final UserUtil userUtil;
     private final JavaMailSender mailSender;
     private final MailAuthRepository mailAuthRepository;
 
@@ -79,10 +82,11 @@ public class MailSendService {
 
     // UserMaliAuth 저장
     @Transactional
-    public void save(String email, String authKey, Long userId) {
+    public void save(String email, String authKey) {
+        User user = userUtil.findCurrentUser();
         mailAuthRepository.save(
                 UserMailAuth.builder()
-                        .userId(userId)
+                        .userId(user.getId())
                         .mail(email)
                         .authKey(authKey)
                         .expirationDate(LocalDateTime.now().plusMinutes(EMAIL_TOKEN_EXPIRATION))

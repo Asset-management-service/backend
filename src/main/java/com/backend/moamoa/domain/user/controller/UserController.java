@@ -9,12 +9,9 @@ import com.backend.moamoa.domain.user.service.UserService;
 import com.backend.moamoa.global.common.ApiResponse;
 import com.backend.moamoa.domain.user.entity.User;
 import com.backend.moamoa.global.utils.UserUtil;
-import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -25,7 +22,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class UserController {
 
-    private final UserUtil userUtil;
     private final UserService userService;
     private final MailSendService mailSendService;
 
@@ -38,8 +34,7 @@ public class UserController {
     @ApiOperation(value = "현재 사용자 조회",
             notes = "현재 사용자의 정보를 가져옵니다. 헤더에 사용자 토큰 주입을 필요로 합니다.")
     public ApiResponse getUser() {
-        User user = userService.getUser();
-        return ApiResponse.success("user", user);
+        return userService.getUser();
     }
 
     /**
@@ -51,8 +46,7 @@ public class UserController {
     @ApiOperation(value = "개인정보 수정",
             notes = "현재 사용자의 개인정보를 업데이트 합니다. 헤더에 사용자 토큰 주입을 필요로 합니다.")
     public UserResponse update(@RequestBody @Valid UserUpdateRequest userUpdateRequest) {
-        User user = userService.getUser();
-        return userService.update(user, userUpdateRequest);
+        return userService.update(userUpdateRequest);
     }
 
     /**
@@ -63,9 +57,8 @@ public class UserController {
     @ApiOperation(value = "이메일 전송",
             notes = "변경할 이메일을 받아 인증 메일을 보냅니다. 헤더에 사용자 토큰 주입을 필요로 합니다.")
     public void registerEmail(@RequestBody UserEmailRequest userEmailRequest) {
-        User user = userService.getUser();
         String authKey = mailSendService.sendAuthMail(userEmailRequest.getEmail());
-        mailSendService.save(userEmailRequest.getEmail(), authKey, user.getId());
+        mailSendService.save(userEmailRequest.getEmail(), authKey);
     }
 
     @GetMapping("/confirm")
