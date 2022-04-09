@@ -58,6 +58,9 @@ public class Post implements Auditable {
     @OneToMany(mappedBy = "post", orphanRemoval = true)
     private List<Scrap> scraps = new ArrayList<>();
 
+    @OneToMany(mappedBy = "post", orphanRemoval = true)
+    private List<PostImage> postImages = new ArrayList<>();
+
 
     @Override
     public void setTimeEntity(TimeEntity timeEntity) {

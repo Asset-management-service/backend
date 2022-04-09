@@ -5,6 +5,10 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @ApiModel(description = "게시글 생성 요청 데이터 모델")
 @Getter
@@ -20,6 +24,9 @@ public class PostRequest {
 
     @ApiModelProperty(value = "커뮤니티 게시글의 카테고리 이름", example = "모아모아", required = true)
     private String categoryName;
+
+    @ApiModelProperty(value = "이미지 파일", required = false)
+    private List<MultipartFile> imageUrl = new ArrayList<>();
 
 }
 

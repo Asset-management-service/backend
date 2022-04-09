@@ -13,7 +13,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Objects;
 
 @Api(tags = "커뮤니티 게시글 API")
 @RestController
@@ -41,13 +44,14 @@ public class PostController {
         return postService.getRecentPost(pageable, request);
     }
 
-    @ApiOperation(value = "게시글 생성", notes = "Request Body 값을 받아와서 글을 생성하는 API")
+    @ApiOperation(value = "게시글 생성", notes = "Request Body 값을 받아와서 글을 생성하는 API",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "해당 게시글이 정상적으로 생성된 경우"),
             @ApiResponse(responseCode = "404", description = "회원의 Id를 찾지 못한 경우")
     })
     @PostMapping
-    public PostResponse createPost(@RequestBody PostRequest request) {
+    public PostCreateResponse createPost(@ModelAttribute PostRequest request){
         return postService.createPost(request);
     }
 
@@ -57,7 +61,7 @@ public class PostController {
             @ApiResponse(responseCode = "404", description = "회원 OR 게시글의 Id를 찾지 못한 경우")
     })
     @PatchMapping
-    public PostResponse updatePost(@RequestBody PostUpdateRequest request) {
+    public PostResponse updatePost(@ModelAttribute PostUpdateRequest request) {
         return postService.updatePost(request);
     }
 

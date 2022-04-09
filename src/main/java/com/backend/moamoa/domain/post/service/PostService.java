@@ -4,28 +4,27 @@ import com.backend.moamoa.domain.post.dto.request.PostRequest;
 import com.backend.moamoa.domain.post.dto.request.PostUpdateRequest;
 import com.backend.moamoa.domain.post.dto.request.RecentPostRequest;
 import com.backend.moamoa.domain.post.dto.response.*;
-import com.backend.moamoa.domain.post.entity.Post;
-import com.backend.moamoa.domain.post.entity.PostCategory;
-import com.backend.moamoa.domain.post.entity.PostLike;
-import com.backend.moamoa.domain.post.entity.Scrap;
+import com.backend.moamoa.domain.post.entity.*;
 import com.backend.moamoa.domain.post.repository.comment.CommentRepository;
-import com.backend.moamoa.domain.post.repository.post.PostCategoryRepository;
-import com.backend.moamoa.domain.post.repository.post.PostLikeRepository;
-import com.backend.moamoa.domain.post.repository.post.PostRepository;
-import com.backend.moamoa.domain.post.repository.post.ScrapRepository;
+import com.backend.moamoa.domain.post.repository.post.*;
 import com.backend.moamoa.domain.user.entity.User;
 import com.backend.moamoa.domain.user.repository.UserRepository;
 import com.backend.moamoa.global.exception.CustomException;
 import com.backend.moamoa.global.exception.ErrorCode;
+import com.backend.moamoa.global.s3.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -39,16 +38,29 @@ public class PostService {
     private final PostLikeRepository postLikeRepository;
     private final ScrapRepository scrapRepository;
     private final CommentRepository commentRepository;
+    private final S3Uploader s3Uploader;
+    private final PostImageRepository postImageRepository;
 
 
     @Transactional
-    public PostResponse createPost(PostRequest postRequest) {
+    public PostCreateResponse createPost(PostRequest postRequest) {
+
         PostCategory postCategory = postCategoryRepository.findByCategoryName(postRequest.getCategoryName())
                 .orElseGet(() -> PostCategory.createCategory(postRequest.getCategoryName()));
         User user = userRepository.findById(1L).get();
-        Post post = Post.createPost(postRequest.getTitle(), postRequest.getContent(), user, postCategory);
-        postRepository.save(post);
-        return new PostResponse(post.getId(), "게시글 작성이 완료되었습니다.");
+        Post post = postRepository.save(Post.createPost(postRequest.getTitle(), postRequest.getContent(), user, postCategory));
+        List<PostImage> postImages = postRequest.getImageUrl().stream()
+                    .map(image -> s3Uploader.upload(image, "post"))
+                    .map(url -> postImageRepository.save(PostImage.builder()
+                            .imageUrl(url)
+                            .storeFilename(StringUtils.getFilename(url))
+                            .post(post)
+                            .build()))
+                    .collect(Collectors.toList());
+        return new PostCreateResponse(post.getId(), "게시글 작성이 완료되었습니다.", postImages
+                .stream().map(url -> url.getImageUrl())
+                .collect(Collectors.toList()));
+
     }
 
     @Transactional
@@ -57,7 +69,20 @@ public class PostService {
         User user = userRepository.findById(1L).get();
         Post post = postRepository.findByIdAndUser(request.getPostId(), user.getId())
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_POST));
-
+        if (!Objects.isNull(request.getSavedImageUrl())) {
+            List<PostImage> postImages = postImageRepository.findBySavedImageUrl(request.getPostId());
+            postImages.stream()
+                    .forEach(postImage -> {
+                        if (!request.getSavedImageUrl().equals(postImage.getImageUrl())) {
+                            s3Uploader.deleteImage(postImage.getImageUrl());
+                           postImageRepository.delete(postImage);
+                        }
+                    });
+        }
+//            request.getImageUrl()
+//                            .stream()
+//                                    .map(image -> s3Uploader.)
+//
         post.updatePost(request.getTitle(), request.getContent());
 
         return new PostResponse(post.getId(), "게시글 변경이 완료되었습니다.");
@@ -134,4 +159,5 @@ public class PostService {
     public Page<RecentPostResponse> getRecentPost(Pageable pageable, RecentPostRequest request) {
         return postRepository.findRecentPosts(pageable, request);
     }
+
 }
