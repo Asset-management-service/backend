@@ -19,11 +19,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
@@ -49,7 +49,7 @@ public class PostService {
                 .orElseGet(() -> PostCategory.createCategory(postRequest.getCategoryName()));
         User user = userRepository.findById(1L).get();
         Post post = postRepository.save(Post.createPost(postRequest.getTitle(), postRequest.getContent(), user, postCategory));
-        List<PostImage> postImages = postRequest.getImageUrl().stream()
+        List<PostImage> postImages = postRequest.getImageFiles().stream()
                     .map(image -> s3Uploader.upload(image, "post"))
                     .map(url -> postImageRepository.save(PostImage.builder()
                             .imageUrl(url)
@@ -64,28 +64,45 @@ public class PostService {
     }
 
     @Transactional
-    public PostResponse updatePost(PostUpdateRequest request) {
+    public PostUpdateResponse updatePost(PostUpdateRequest request) {
+
+        request.getSavedImageUrl()
+                .stream()
+                .forEach(req -> log.info("request = {}", req));
 
         User user = userRepository.findById(1L).get();
         Post post = postRepository.findByIdAndUser(request.getPostId(), user.getId())
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_POST));
-        if (!Objects.isNull(request.getSavedImageUrl())) {
-            List<PostImage> postImages = postImageRepository.findBySavedImageUrl(request.getPostId());
-            postImages.stream()
-                    .forEach(postImage -> {
-                        if (!request.getSavedImageUrl().equals(postImage.getImageUrl())) {
-                            s3Uploader.deleteImage(postImage.getImageUrl());
-                           postImageRepository.delete(postImage);
-                        }
-                    });
-        }
-//            request.getImageUrl()
-//                            .stream()
-//                                    .map(image -> s3Uploader.)
-//
+        List<PostImage> postImages = postImageRepository.findBySavedImageUrl(request.getPostId());
+
+        List<String> deleteImages = postImages.stream()
+                .filter(image -> !request.getSavedImageUrl().stream().anyMatch(Predicate.isEqual(image.getImageUrl())))
+                .map(url -> {
+                    postImageRepository.delete(url);
+                    s3Uploader.deleteImage(url.getImageUrl());
+                    return url;
+                })
+                .map(deleteImage -> deleteImage.getImageUrl())
+                .collect(Collectors.toList());
+
+        List<String> newPostImages = request.getImageFiles()
+                .stream()
+                .map(file -> s3Uploader.upload(file, "post"))
+                .map(url -> postImageRepository.save(PostImage.builder()
+                        .imageUrl(url)
+                        .storeFilename(StringUtils.getFilename(url))
+                        .post(post)
+                        .build()))
+                .map(images -> images.getImageUrl())
+                .collect(Collectors.toList());
+
+        request.getSavedImageUrl()
+                .stream()
+                .forEach(savedUrl -> newPostImages.add(savedUrl));
+
         post.updatePost(request.getTitle(), request.getContent());
 
-        return new PostResponse(post.getId(), "게시글 변경이 완료되었습니다.");
+        return new PostUpdateResponse(post.getId(), "게시글 변경이 완료되었습니다.", deleteImages, newPostImages);
     }
 
     @Transactional

@@ -61,7 +61,7 @@ public class PostController {
             @ApiResponse(responseCode = "404", description = "회원 OR 게시글의 Id를 찾지 못한 경우")
     })
     @PatchMapping
-    public PostResponse updatePost(@ModelAttribute PostUpdateRequest request) {
+    public PostUpdateResponse updatePost(@ModelAttribute PostUpdateRequest request) {
         return postService.updatePost(request);
     }
 

@@ -26,7 +26,7 @@ public class PostRequest {
     private String categoryName;
 
     @ApiModelProperty(value = "이미지 파일", required = false)
-    private List<MultipartFile> imageUrl = new ArrayList<>();
+    private List<MultipartFile> imageFiles = new ArrayList<>();
 
 }
 

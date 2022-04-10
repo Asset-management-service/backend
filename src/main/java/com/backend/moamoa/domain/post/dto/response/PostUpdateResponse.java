@@ -13,12 +13,16 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class PostResponse {
+public class PostUpdateResponse {
 
-    @ApiModelProperty(value = "게시글 Id")
-    private Long postId;
+        @ApiModelProperty(value = "게시글 Id")
+        private Long postId;
 
-    @ApiModelProperty(value = "응답 메세지")
-    private String message;
+        @ApiModelProperty(value = "응답 메세지")
+        private String message;
+
+        private List<String> deleteImages = new ArrayList<>();
+
+        private List<String> saveImages = new ArrayList<>();
 
 }

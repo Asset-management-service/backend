@@ -32,6 +32,6 @@ public class PostUpdateRequest {
     private List<String> savedImageUrl = new ArrayList<>();
 
     @ApiModelProperty(value = "게시글 이미지", required = false)
-    private List<MultipartFile> imageUrl = new ArrayList<>();
+    private List<MultipartFile> imageFiles = new ArrayList<>();
 
 }
