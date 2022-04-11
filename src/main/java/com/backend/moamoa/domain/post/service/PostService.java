@@ -21,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -44,65 +43,85 @@ public class PostService {
 
     @Transactional
     public PostCreateResponse createPost(PostRequest postRequest) {
-
         PostCategory postCategory = postCategoryRepository.findByCategoryName(postRequest.getCategoryName())
                 .orElseGet(() -> PostCategory.createCategory(postRequest.getCategoryName()));
         User user = userRepository.findById(1L).get();
         Post post = postRepository.save(Post.createPost(postRequest.getTitle(), postRequest.getContent(), user, postCategory));
-        List<PostImage> postImages = postRequest.getImageFiles().stream()
-                    .map(image -> s3Uploader.upload(image, "post"))
-                    .map(url -> postImageRepository.save(PostImage.builder()
-                            .imageUrl(url)
-                            .storeFilename(StringUtils.getFilename(url))
-                            .post(post)
-                            .build()))
-                    .collect(Collectors.toList());
-        return new PostCreateResponse(post.getId(), "게시글 작성이 완료되었습니다.", postImages
-                .stream().map(url -> url.getImageUrl())
-                .collect(Collectors.toList()));
+        List<String> postImages = uploadPostImages(postRequest, post);
 
+        return new PostCreateResponse(post.getId(), "게시글 작성이 완료되었습니다.", postImages);
+    }
+
+    /**
+     * 이미지 파일 S3 저장 + PostImage 생성
+     */
+    private List<String> uploadPostImages(PostRequest postRequest, Post post) {
+        return postRequest.getImageFiles().stream()
+                .map(image -> s3Uploader.upload(image, "post"))
+                .map(url -> createPostImage(post, url))
+                .map(postImage -> postImage.getImageUrl())
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * PostImage 생성 메서드
+     */
+    private PostImage createPostImage(Post post, String url) {
+        return postImageRepository.save(PostImage.builder()
+                .imageUrl(url)
+                .storeFilename(StringUtils.getFilename(url))
+                .post(post)
+                .build());
     }
 
     @Transactional
     public PostUpdateResponse updatePost(PostUpdateRequest request) {
 
-        request.getSavedImageUrl()
-                .stream()
-                .forEach(req -> log.info("request = {}", req));
-
         User user = userRepository.findById(1L).get();
         Post post = postRepository.findByIdAndUser(request.getPostId(), user.getId())
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_POST));
-        List<PostImage> postImages = postImageRepository.findBySavedImageUrl(request.getPostId());
 
-        List<String> deleteImages = postImages.stream()
-                .filter(image -> !request.getSavedImageUrl().stream().anyMatch(Predicate.isEqual(image.getImageUrl())))
-                .map(url -> {
-                    postImageRepository.delete(url);
-                    s3Uploader.deleteImage(url.getImageUrl());
-                    return url;
-                })
-                .map(deleteImage -> deleteImage.getImageUrl())
-                .collect(Collectors.toList());
-
-        List<String> newPostImages = request.getImageFiles()
-                .stream()
-                .map(file -> s3Uploader.upload(file, "post"))
-                .map(url -> postImageRepository.save(PostImage.builder()
-                        .imageUrl(url)
-                        .storeFilename(StringUtils.getFilename(url))
-                        .post(post)
-                        .build()))
-                .map(images -> images.getImageUrl())
-                .collect(Collectors.toList());
-
-        request.getSavedImageUrl()
-                .stream()
-                .forEach(savedUrl -> newPostImages.add(savedUrl));
+        validateDeletedImages(request);
+        List<String> newPostImages = uploadPostImages(request, post);
+        saveImages(request, newPostImages);
 
         post.updatePost(request.getTitle(), request.getContent());
 
-        return new PostUpdateResponse(post.getId(), "게시글 변경이 완료되었습니다.", deleteImages, newPostImages);
+        return new PostUpdateResponse(post.getId(), "게시글 변경이 완료되었습니다.", newPostImages);
+    }
+
+    /**
+     * @Request 로 받아온 이미지 경로랑 저장 되어있던 이미지 경로랑 일치하지 않는다면 모두 삭제
+     */
+    private void validateDeletedImages(PostUpdateRequest request) {
+        postImageRepository.findBySavedImageUrl(request.getPostId()).stream()
+                .filter(image -> !request.getSavedImageUrl().stream().anyMatch(Predicate.isEqual(image.getImageUrl())))
+                .forEach(url -> {
+                    postImageRepository.delete(url);
+                    s3Uploader.deleteImage(url.getImageUrl());
+                });
+    }
+
+    /**
+     * S3에 업로드 및 PostImage 생성
+     */
+    private List<String> uploadPostImages(PostUpdateRequest request, Post post) {
+        List<String> newPostImages = request.getImageFiles()
+                .stream()
+                .map(file -> s3Uploader.upload(file, "post"))
+                .map(url -> createPostImage(post, url))
+                .map(images -> images.getImageUrl())
+                .collect(Collectors.toList());
+        return newPostImages;
+    }
+
+    /**
+     * 업로드한 이미지 파일 경로 + @Request 로 받아온 저장된 이미지를 추가하는 메서드
+     */
+    private void saveImages(PostUpdateRequest request, List<String> newPostImages) {
+        request.getSavedImageUrl()
+                .stream()
+                .forEach(savedUrl -> newPostImages.add(savedUrl));
     }
 
     @Transactional
@@ -173,8 +192,8 @@ public class PostService {
         return new ScrapResponse(false);
     }
 
-    public Page<RecentPostResponse> getRecentPost(Pageable pageable, RecentPostRequest request) {
-        return postRepository.findRecentPosts(pageable, request);
+    public Page<RecentPostResponse> getRecentPost(Pageable pageable, String categoryName) {
+        return postRepository.findRecentPosts(pageable, categoryName);
     }
 
 }

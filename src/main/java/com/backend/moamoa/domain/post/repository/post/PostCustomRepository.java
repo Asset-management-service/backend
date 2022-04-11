@@ -13,7 +13,7 @@ public interface PostCustomRepository {
 
     Optional<PostOneResponse> findOnePostById(Long postId);
 
-    Page<RecentPostResponse> findRecentPosts(Pageable pageable, RecentPostRequest request);
+    Page<RecentPostResponse> findRecentPosts(Pageable pageable, String categoryName);
 
     Optional<Post> findByIdAndUser(Long postId, Long id);
 

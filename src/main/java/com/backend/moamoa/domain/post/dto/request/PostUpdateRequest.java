@@ -29,6 +29,7 @@ public class PostUpdateRequest {
     @ApiModelProperty(value = "게시글 내용", example = "무야호")
     private String content;
 
+    @ApiModelProperty(value = "삭제한 이미지 경로를 제외한 남아있는 게시글 이미지 경로")
     private List<String> savedImageUrl = new ArrayList<>();
 
     @ApiModelProperty(value = "게시글 이미지", required = false)

@@ -2,7 +2,6 @@ package com.backend.moamoa.domain.post.controller;
 
 import com.backend.moamoa.domain.post.dto.request.PostRequest;
 import com.backend.moamoa.domain.post.dto.request.PostUpdateRequest;
-import com.backend.moamoa.domain.post.dto.request.RecentPostRequest;
 import com.backend.moamoa.domain.post.dto.response.*;
 import com.backend.moamoa.domain.post.service.PostService;
 import io.swagger.annotations.Api;
@@ -15,8 +14,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Objects;
 
 @Api(tags = "커뮤니티 게시글 API")
 @RestController
@@ -37,11 +34,12 @@ public class PostController {
         return postService.getOnePost(postId);
     }
 
-    @ApiOperation(value = "카테고리별 최근 게시글 조회", notes = "Request Body 값을 받아 최근 게시글을 조회하는 API")
+    @ApiOperation(value = "카테고리별 최근 게시글 조회", notes = "Request Param 값을 받아 최근 게시글을 조회하는 API")
     @ApiResponse(responseCode = "200", description = "페이징된 게시글이 정상적으로 조회된 경우")
+    @ApiImplicitParam(name = "categoryName", value = "해당 게시글 카테고리 이름", example = "모아모아", required = true)
     @GetMapping("/recent")
-    public Page<RecentPostResponse> getAllPosts(Pageable pageable, @RequestBody RecentPostRequest request){
-        return postService.getRecentPost(pageable, request);
+    public Page<RecentPostResponse> getAllPosts(Pageable pageable, @RequestParam String categoryName){
+        return postService.getRecentPost(pageable, categoryName);
     }
 
     @ApiOperation(value = "게시글 생성", notes = "Request Body 값을 받아와서 글을 생성하는 API",

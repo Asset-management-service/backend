@@ -20,5 +20,6 @@ public class PostCreateResponse {
     @ApiModelProperty(value = "응답 메세지")
     private String message;
 
+    @ApiModelProperty(value = "이미지 경로")
     private List<String> imageUrl;
 }

@@ -21,8 +21,7 @@ public class PostUpdateResponse {
         @ApiModelProperty(value = "응답 메세지")
         private String message;
 
-        private List<String> deleteImages = new ArrayList<>();
-
+        @ApiModelProperty(value = "현재 저장 되어있는 이미지 경로")
         private List<String> saveImages = new ArrayList<>();
 
 }

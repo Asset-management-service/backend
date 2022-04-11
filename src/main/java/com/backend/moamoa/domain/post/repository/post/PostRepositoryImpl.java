@@ -75,7 +75,7 @@ public class PostRepositoryImpl implements PostCustomRepository {
 
 
     @Override
-    public Page<RecentPostResponse> findRecentPosts(Pageable pageable, RecentPostRequest request) {
+    public Page<RecentPostResponse> findRecentPosts(Pageable pageable, String categoryName) {
         List<RecentPostResponse> content = queryFactory
                 .select(new QRecentPostResponse(
                         post.id,
@@ -87,7 +87,7 @@ public class PostRepositoryImpl implements PostCustomRepository {
                         post.timeEntity.createdDate,
                         post.viewCount))
                 .from(post)
-                .where(postCategory.categoryName.eq(request.getCategoryName()))
+                .where(postCategory.categoryName.eq(categoryName))
                 .innerJoin(post.postCategory, postCategory)
                 .innerJoin(post.user, user)
                 .limit(pageable.getPageSize())
