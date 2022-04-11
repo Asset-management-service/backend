@@ -75,18 +75,25 @@ public class PostService {
 
     @Transactional
     public PostUpdateResponse updatePost(PostUpdateRequest request) {
-
         User user = userRepository.findById(1L).get();
         Post post = postRepository.findByIdAndUser(request.getPostId(), user.getId())
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_POST));
 
         validateDeletedImages(request);
-        List<String> newPostImages = uploadPostImages(request, post);
-        saveImages(request, newPostImages);
+        uploadPostImages(request, post);
+        List<String> saveImages = getSaveImages(request);
 
         post.updatePost(request.getTitle(), request.getContent());
 
-        return new PostUpdateResponse(post.getId(), "게시글 변경이 완료되었습니다.", newPostImages);
+        return new PostUpdateResponse(post.getId(), "게시글 변경이 완료되었습니다.", saveImages);
+    }
+
+    private List<String> getSaveImages(PostUpdateRequest request) {
+        List<String> saveImages = postImageRepository.findBySavedImageUrl(request.getPostId())
+                .stream()
+                .map(image -> image.getImageUrl())
+                .collect(Collectors.toList());
+        return saveImages;
     }
 
     /**
@@ -104,23 +111,13 @@ public class PostService {
     /**
      * S3에 업로드 및 PostImage 생성
      */
-    private List<String> uploadPostImages(PostUpdateRequest request, Post post) {
-        List<String> newPostImages = request.getImageFiles()
+    private void uploadPostImages(PostUpdateRequest request, Post post) {
+        request.getImageFiles()
                 .stream()
-                .map(file -> s3Uploader.upload(file, "post"))
-                .map(url -> createPostImage(post, url))
-                .map(images -> images.getImageUrl())
-                .collect(Collectors.toList());
-        return newPostImages;
-    }
-
-    /**
-     * 업로드한 이미지 파일 경로 + @Request 로 받아온 저장된 이미지를 추가하는 메서드
-     */
-    private void saveImages(PostUpdateRequest request, List<String> newPostImages) {
-        request.getSavedImageUrl()
-                .stream()
-                .forEach(savedUrl -> newPostImages.add(savedUrl));
+                .forEach(file -> {
+                    String url = s3Uploader.upload(file, "post");
+                    createPostImage(post, url);
+                });
     }
 
     @Transactional
