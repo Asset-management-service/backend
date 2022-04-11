@@ -2,7 +2,6 @@ package com.backend.moamoa.domain.post.service;
 
 import com.backend.moamoa.domain.post.dto.request.PostRequest;
 import com.backend.moamoa.domain.post.dto.request.PostUpdateRequest;
-import com.backend.moamoa.domain.post.dto.request.RecentPostRequest;
 import com.backend.moamoa.domain.post.dto.response.*;
 import com.backend.moamoa.domain.post.entity.*;
 import com.backend.moamoa.domain.post.repository.comment.CommentRepository;
