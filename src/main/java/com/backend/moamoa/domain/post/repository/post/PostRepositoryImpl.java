@@ -1,10 +1,8 @@
 package com.backend.moamoa.domain.post.repository.post;
 
 
-import com.backend.moamoa.domain.post.dto.request.RecentPostRequest;
 import com.backend.moamoa.domain.post.dto.response.*;
 import com.backend.moamoa.domain.post.entity.Post;
-import com.backend.moamoa.domain.user.entity.QUser;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

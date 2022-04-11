@@ -1,6 +1,5 @@
 package com.backend.moamoa.domain.post.repository.post;
 
-import com.backend.moamoa.domain.post.dto.request.RecentPostRequest;
 import com.backend.moamoa.domain.post.dto.response.PostOneResponse;
 import com.backend.moamoa.domain.post.dto.response.RecentPostResponse;
 import com.backend.moamoa.domain.post.entity.Post;
