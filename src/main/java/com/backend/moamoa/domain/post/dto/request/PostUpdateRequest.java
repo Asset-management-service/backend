@@ -30,7 +30,7 @@ public class PostUpdateRequest {
     private String content;
 
     @ApiModelProperty(value = "삭제한 이미지 경로를 제외한 남아있는 게시글 이미지 경로")
-    private List<String> savedImageUrl = new ArrayList<>();
+    private List<String> saveImageUrl = new ArrayList<>();
 
     @ApiModelProperty(value = "게시글 이미지", required = false)
     private List<MultipartFile> imageFiles = new ArrayList<>();

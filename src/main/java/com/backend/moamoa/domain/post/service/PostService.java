@@ -101,7 +101,7 @@ public class PostService {
      */
     private void validateDeletedImages(PostUpdateRequest request) {
         postImageRepository.findBySavedImageUrl(request.getPostId()).stream()
-                .filter(image -> !request.getSavedImageUrl().stream().anyMatch(Predicate.isEqual(image.getImageUrl())))
+                .filter(image -> !request.getSaveImageUrl().stream().anyMatch(Predicate.isEqual(image.getImageUrl())))
                 .forEach(url -> {
                     postImageRepository.delete(url);
                     s3Uploader.deleteImage(url.getImageUrl());
