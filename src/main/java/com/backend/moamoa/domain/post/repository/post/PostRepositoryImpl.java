@@ -1,10 +1,8 @@
 package com.backend.moamoa.domain.post.repository.post;
 
 
-import com.backend.moamoa.domain.post.dto.request.RecentPostRequest;
 import com.backend.moamoa.domain.post.dto.response.*;
 import com.backend.moamoa.domain.post.entity.Post;
-import com.backend.moamoa.domain.user.entity.QUser;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -75,7 +73,7 @@ public class PostRepositoryImpl implements PostCustomRepository {
 
 
     @Override
-    public Page<RecentPostResponse> findRecentPosts(Pageable pageable, RecentPostRequest request) {
+    public Page<RecentPostResponse> findRecentPosts(Pageable pageable, String categoryName) {
         List<RecentPostResponse> content = queryFactory
                 .select(new QRecentPostResponse(
                         post.id,
@@ -87,7 +85,7 @@ public class PostRepositoryImpl implements PostCustomRepository {
                         post.timeEntity.createdDate,
                         post.viewCount))
                 .from(post)
-                .where(postCategory.categoryName.eq(request.getCategoryName()))
+                .where(postCategory.categoryName.eq(categoryName))
                 .innerJoin(post.postCategory, postCategory)
                 .innerJoin(post.user, user)
                 .limit(pageable.getPageSize())

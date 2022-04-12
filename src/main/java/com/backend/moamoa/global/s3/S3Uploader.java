@@ -2,6 +2,7 @@ package com.backend.moamoa.global.s3;
 
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +13,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -25,11 +28,14 @@ public class S3Uploader {
     @Value("${cloud.aws.s3.bucket}")
     public String bucket;  // S3 버킷 이름
 
-    public String upload(MultipartFile multipartFile, String dirName) throws IOException {
-        File uploadFile = convert(multipartFile)  // 파일 변환할 수 없으면 에러
-                .orElseThrow(() -> new IllegalArgumentException("error: MultipartFile -> File convert fail"));
-
-        return upload(uploadFile, dirName);
+    public String upload(MultipartFile multipartFile, String dirName){
+        try {
+            File uploadFile = convert(multipartFile)  // 파일 변환할 수 없으면 에러
+                    .orElseThrow(() -> new IllegalArgumentException("error: MultipartFile -> File convert fail"));
+            return upload(uploadFile, dirName);
+        } catch (IOException e) {
+            throw new RuntimeException();
+        }
     }
 
     // S3로 파일 업로드하기
@@ -66,5 +72,10 @@ public class S3Uploader {
         }
 
         return Optional.empty();
+    }
+
+    public void deleteImage(String imageUrl) {
+        log.info("deleteImage = {}", imageUrl);
+        amazonS3Client.deleteObject(new DeleteObjectRequest(bucket,"/post/" +imageUrl));
     }
 }
