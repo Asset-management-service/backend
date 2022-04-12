@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -21,5 +22,6 @@ public class PostCreateResponse {
     private String message;
 
     @ApiModelProperty(value = "이미지 경로")
-    private List<String> imageUrl;
+    private List<String> imageUrl = new ArrayList<>();
 }
+

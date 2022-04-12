@@ -4,7 +4,6 @@ import com.backend.moamoa.domain.post.dto.request.PostRequest;
 import com.backend.moamoa.domain.post.dto.request.PostUpdateRequest;
 import com.backend.moamoa.domain.post.dto.response.*;
 import com.backend.moamoa.domain.post.entity.*;
-import com.backend.moamoa.domain.post.repository.comment.CommentRepository;
 import com.backend.moamoa.domain.post.repository.post.*;
 import com.backend.moamoa.domain.user.entity.User;
 import com.backend.moamoa.domain.user.repository.UserRepository;
@@ -35,7 +34,6 @@ public class PostService {
     private final PostCategoryRepository postCategoryRepository;
     private final PostLikeRepository postLikeRepository;
     private final ScrapRepository scrapRepository;
-    private final CommentRepository commentRepository;
     private final S3Uploader s3Uploader;
     private final PostImageRepository postImageRepository;
 
@@ -88,14 +86,6 @@ public class PostService {
         return new PostUpdateResponse(post.getId(), "게시글 변경이 완료되었습니다.", saveImages);
     }
 
-    private List<String> getSaveImages(PostUpdateRequest request) {
-        List<String> saveImages = postImageRepository.findBySavedImageUrl(request.getPostId())
-                .stream()
-                .map(image -> image.getImageUrl())
-                .collect(Collectors.toList());
-        return saveImages;
-    }
-
     /**
      * @Request 로 받아온 이미지 경로랑 저장 되어있던 이미지 경로랑 일치하지 않는다면 모두 삭제
      */
@@ -120,6 +110,16 @@ public class PostService {
                 });
     }
 
+    /**
+     * PostImage 테이블에 저장 되어있는 이미지 경로를 추출
+     */
+    private List<String> getSaveImages(PostUpdateRequest request) {
+        return postImageRepository.findBySavedImageUrl(request.getPostId())
+                .stream()
+                .map(image -> image.getImageUrl())
+                .collect(Collectors.toList());
+    }
+
     @Transactional
     public PostResponse deletePost(Long postId) {
         User user = userRepository.findById(1L).get();
@@ -136,18 +136,9 @@ public class PostService {
      */
     @Transactional
     public PostOneResponse getOnePost(Long postId) {
-        PostOneResponse postOneResponse = postRepository.findOnePostById(postId)
+        User user = userRepository.findById(1L).get();
+        return postRepository.findOnePostById(postId, user.getId())
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_POST));
-        commentsExtractor(postId, postOneResponse);
-        return postOneResponse;
-    }
-
-    private void commentsExtractor(Long postId, PostOneResponse postOneResponse) {
-        postOneResponse.getComments()
-                .forEach(comment -> {
-                            List<CommentsChildrenResponse> comments = commentRepository.findPostComments(postId, comment.getCommentId());
-                            comment.setChildren(comments);
-                });
     }
 
 
