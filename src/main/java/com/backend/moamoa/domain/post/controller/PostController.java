@@ -42,7 +42,7 @@ public class PostController {
         return postService.getRecentPost(pageable, categoryName);
     }
 
-    @ApiOperation(value = "게시글 생성", notes = "Request Body 값을 받아와서 글을 생성하는 API",
+    @ApiOperation(value = "게시글 생성", notes = "Form Data 값을 받아와서 글을 생성하는 API",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "해당 게시글이 정상적으로 생성된 경우"),

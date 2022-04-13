@@ -10,10 +10,10 @@ import java.util.Optional;
 
 public interface PostCustomRepository {
 
-    Optional<PostOneResponse> findOnePostById(Long postId);
+    Optional<PostOneResponse> findOnePostById(Long postId, Long userId);
 
     Page<RecentPostResponse> findRecentPosts(Pageable pageable, String categoryName);
 
-    Optional<Post> findByIdAndUser(Long postId, Long id);
+    Optional<Post> findByIdAndUser(Long postId, Long userId);
 
 }

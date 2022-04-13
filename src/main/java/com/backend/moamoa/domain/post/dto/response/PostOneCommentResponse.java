@@ -23,6 +23,8 @@ public class PostOneCommentResponse {
 
     private String username;
 
+    private boolean myComment;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime createDate;
 
@@ -32,13 +34,15 @@ public class PostOneCommentResponse {
     private List<CommentsChildrenResponse> children = new ArrayList<>();
 
     @QueryProjection
-    public PostOneCommentResponse(Long parentId, Long commentId, String content, String username, LocalDateTime createDate, LocalDateTime updateDate) {
+    public PostOneCommentResponse(Long parentId, Long commentId, String content, String username, boolean myComment, LocalDateTime createDate, LocalDateTime updateDate) {
         this.parentId = parentId;
         this.commentId = commentId;
         this.content = content;
         this.username = username;
+        this.myComment = myComment;
         this.createDate = createDate;
         this.updateDate = updateDate;
     }
+
 
 }

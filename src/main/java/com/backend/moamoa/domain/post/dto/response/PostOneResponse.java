@@ -51,10 +51,20 @@ public class PostOneResponse {
     @ApiModelProperty(value = "해당 게시글의 생성 회원 이름")
     private String username;
 
+    @ApiModelProperty(value = "해당 게시글의 유저 본인 확인")
+    private boolean myPost;
+
+    @ApiModelProperty(value = "해당 게시글의 좋아요 본인 확인")
+    private boolean myLike;
+
+    @ApiModelProperty(value = "해당 게시글의 스크랩 본인 확인")
+    private boolean myScrap;
+
+    @ApiModelProperty(value = "해당 게시글의 댓글")
     private List<PostOneCommentResponse> comments = new ArrayList<>();
 
     @QueryProjection
-    public PostOneResponse(Long postId, String title, String content, int scrapCount, int commentCount, int likeCount, LocalDateTime createDate, LocalDateTime updateDate, Integer viewCount, String username) {
+    public PostOneResponse(Long postId, String title, String content, int scrapCount, int commentCount, int likeCount, LocalDateTime createDate, LocalDateTime updateDate, Integer viewCount, String username, boolean myPost, boolean myLike, boolean myScrap) {
         this.postId = postId;
         this.title = title;
         this.content = content;
@@ -65,6 +75,9 @@ public class PostOneResponse {
         this.updateDate = updateDate;
         this.viewCount = viewCount;
         this.username = username;
+        this.myPost = myPost;
+        this.myLike = myLike;
+        this.myScrap = myScrap;
     }
 
 }

@@ -30,7 +30,7 @@ public class CommentService {
 
     @Transactional
     public CommentResponse createComment(CommentRequest commentRequest) {
-        User user = userRepository.findById(1L).get();
+        User user = userRepository.findById(2L).get();
         Post post = postRepository.findById(commentRequest.getPostId())
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_POST));
         Long parentId = commentRequest.getParentId();
