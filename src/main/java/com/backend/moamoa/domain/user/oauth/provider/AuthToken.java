@@ -80,6 +80,8 @@ public class AuthToken {
         } catch (ExpiredJwtException e) {
             log.info("Expired JWT token.");
             return e.getClaims();
+        } catch (Exception e) {
+            log.info("Invalid JWT token.");
         }
         return null;
     }
