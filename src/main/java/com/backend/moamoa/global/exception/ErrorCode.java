@@ -20,9 +20,9 @@ public enum ErrorCode {
 
     FORBIDDEN_USER(HttpStatus.FORBIDDEN, "권한이 없는 요청입니다"),
 
-    INVALID_TOKEN(HttpStatus.BAD_REQUEST, "유효하지 않은 엑세스 토큰입니다."),
+    INVALID_TOKEN(HttpStatus.FORBIDDEN, "유효하지 않은 엑세스 토큰입니다."),
 
-    INVALID_REFRESH_TOKEN(HttpStatus.BAD_REQUEST, "유효하지 않은 리프레스 토큰입니다.");
+    INVALID_REFRESH_TOKEN(HttpStatus.FORBIDDEN, "유효하지 않은 리프레스 토큰입니다.");
 
 
     private final HttpStatus httpStatus;
