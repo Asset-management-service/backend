@@ -1,5 +1,6 @@
 package com.backend.moamoa.global.exception;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import java.time.OffsetDateTime;
 @RequiredArgsConstructor
 public class ErrorResponse {
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
     private final LocalDateTime time = LocalDateTime.now();
     private final int status;
     private final String error;
