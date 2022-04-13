@@ -24,6 +24,7 @@ public class AuthTokenProvider {
 
     private final Key key;
     private static final String AUTHORITIES_KEY = "role";
+    private static final String GRANT_TYPE = "Bearer";
 
     public AuthTokenProvider(String secret) {
         this.key = Keys.hmacShaKeyFor(secret.getBytes());
@@ -77,7 +78,7 @@ public class AuthTokenProvider {
         );
 
         return TokenResponse.builder()
-                .grantType("Bearer")
+                .grantType(GRANT_TYPE)
                 .accessToken(newAccessToken.getToken())
                 .refreshToken(authRefreshToken.getToken())
                 .accessTokenExpireDate(appProperties.getAuth().getTokenExpiry())
