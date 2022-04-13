@@ -1,7 +1,9 @@
 package com.backend.moamoa.domain.user.oauth.provider;
 
+import com.backend.moamoa.domain.user.enums.RoleType;
+import com.backend.moamoa.domain.user.oauth.dto.response.TokenResponse;
 import com.backend.moamoa.domain.user.oauth.exception.TokenValidFailedException;
-import com.backend.moamoa.domain.user.oauth.provider.AuthToken;
+import com.backend.moamoa.global.config.AppProperties;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
@@ -41,7 +43,7 @@ public class AuthTokenProvider {
 
     public Authentication getAuthentication(AuthToken authToken) {
 
-        if(authToken.validate()) {
+        if (authToken.validate()) {
 
             Claims claims = authToken.getTokenClaims();
             Collection<? extends GrantedAuthority> authorities =
@@ -58,4 +60,29 @@ public class AuthTokenProvider {
         }
     }
 
+    public TokenResponse createTokenResponse(String userId, AppProperties appProperties) {
+
+        Date now = new Date();
+        RoleType roleType = RoleType.USER;
+
+        AuthToken newAccessToken = createAuthToken(
+                userId,
+                roleType.getCode(),
+                new Date(now.getTime() + appProperties.getAuth().getTokenExpiry())
+        );
+
+        AuthToken authRefreshToken = createAuthToken(
+                appProperties.getAuth().getTokenSecret(),
+                new Date(now.getTime() + appProperties.getAuth().getRefreshTokenExpiry())
+        );
+
+        return TokenResponse.builder()
+                .grantType("Bearer")
+                .accessToken(newAccessToken.getToken())
+                .refreshToken(authRefreshToken.getToken())
+                .accessTokenExpireDate(appProperties.getAuth().getTokenExpiry())
+                .build();
+    }
+
 }
+
