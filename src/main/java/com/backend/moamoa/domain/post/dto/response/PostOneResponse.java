@@ -1,5 +1,6 @@
 package com.backend.moamoa.domain.post.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.querydsl.core.annotations.QueryProjection;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -37,9 +38,11 @@ public class PostOneResponse {
     private int likeCount;
 
     @ApiModelProperty(value = "해당 게시글의 생성 시간")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime createDate;
 
     @ApiModelProperty(value = "해당 게시글의 수정 시간")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime updateDate;
 
     @ApiModelProperty(value = "해당 게시글의 조회수")
@@ -48,10 +51,20 @@ public class PostOneResponse {
     @ApiModelProperty(value = "해당 게시글의 생성 회원 이름")
     private String username;
 
+    @ApiModelProperty(value = "해당 게시글의 유저 본인 확인")
+    private boolean myPost;
+
+    @ApiModelProperty(value = "해당 게시글의 좋아요 본인 확인")
+    private boolean myLike;
+
+    @ApiModelProperty(value = "해당 게시글의 스크랩 본인 확인")
+    private boolean myScrap;
+
+    @ApiModelProperty(value = "해당 게시글의 댓글")
     private List<PostOneCommentResponse> comments = new ArrayList<>();
 
     @QueryProjection
-    public PostOneResponse(Long postId, String title, String content, int scrapCount, int commentCount, int likeCount, LocalDateTime createDate, LocalDateTime updateDate, Integer viewCount, String username) {
+    public PostOneResponse(Long postId, String title, String content, int scrapCount, int commentCount, int likeCount, LocalDateTime createDate, LocalDateTime updateDate, Integer viewCount, String username, boolean myPost, boolean myLike, boolean myScrap) {
         this.postId = postId;
         this.title = title;
         this.content = content;
@@ -62,6 +75,9 @@ public class PostOneResponse {
         this.updateDate = updateDate;
         this.viewCount = viewCount;
         this.username = username;
+        this.myPost = myPost;
+        this.myLike = myLike;
+        this.myScrap = myScrap;
     }
 
 }

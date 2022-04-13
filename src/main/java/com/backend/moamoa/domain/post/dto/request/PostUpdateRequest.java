@@ -6,8 +6,11 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
+import java.util.List;
 
 @ApiModel(description = "게시글 수정 요청 데이터 모델")
 @Getter
@@ -25,5 +28,11 @@ public class PostUpdateRequest {
 
     @ApiModelProperty(value = "게시글 내용", example = "무야호")
     private String content;
+
+    @ApiModelProperty(value = "삭제한 이미지 경로를 제외한 남아있는 게시글 이미지 경로")
+    private List<String> saveImageUrl = new ArrayList<>();
+
+    @ApiModelProperty(value = "게시글 이미지", required = false)
+    private List<MultipartFile> imageFiles = new ArrayList<>();
 
 }

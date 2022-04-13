@@ -1,5 +1,6 @@
 package com.backend.moamoa.domain.post.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.querydsl.core.annotations.QueryProjection;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -34,6 +35,7 @@ public class RecentPostResponse {
     private String username;
 
     @ApiModelProperty(value = "게시글 생성 시간")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime localDateTime;
 
     @ApiModelProperty(value = "해당 게시글의 조회수")

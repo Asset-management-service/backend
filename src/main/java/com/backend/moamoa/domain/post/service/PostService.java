@@ -2,30 +2,26 @@ package com.backend.moamoa.domain.post.service;
 
 import com.backend.moamoa.domain.post.dto.request.PostRequest;
 import com.backend.moamoa.domain.post.dto.request.PostUpdateRequest;
-import com.backend.moamoa.domain.post.dto.request.RecentPostRequest;
 import com.backend.moamoa.domain.post.dto.response.*;
-import com.backend.moamoa.domain.post.entity.Post;
-import com.backend.moamoa.domain.post.entity.PostCategory;
-import com.backend.moamoa.domain.post.entity.PostLike;
-import com.backend.moamoa.domain.post.entity.Scrap;
-import com.backend.moamoa.domain.post.repository.comment.CommentRepository;
-import com.backend.moamoa.domain.post.repository.post.PostCategoryRepository;
-import com.backend.moamoa.domain.post.repository.post.PostLikeRepository;
-import com.backend.moamoa.domain.post.repository.post.PostRepository;
-import com.backend.moamoa.domain.post.repository.post.ScrapRepository;
+import com.backend.moamoa.domain.post.entity.*;
+import com.backend.moamoa.domain.post.repository.post.*;
 import com.backend.moamoa.domain.user.entity.User;
 import com.backend.moamoa.domain.user.repository.UserRepository;
 import com.backend.moamoa.global.exception.CustomException;
 import com.backend.moamoa.global.exception.ErrorCode;
+import com.backend.moamoa.global.s3.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -38,29 +34,90 @@ public class PostService {
     private final PostCategoryRepository postCategoryRepository;
     private final PostLikeRepository postLikeRepository;
     private final ScrapRepository scrapRepository;
-    private final CommentRepository commentRepository;
+    private final S3Uploader s3Uploader;
+    private final PostImageRepository postImageRepository;
 
 
     @Transactional
-    public PostResponse createPost(PostRequest postRequest) {
+    public PostCreateResponse createPost(PostRequest postRequest) {
         PostCategory postCategory = postCategoryRepository.findByCategoryName(postRequest.getCategoryName())
                 .orElseGet(() -> PostCategory.createCategory(postRequest.getCategoryName()));
         User user = userRepository.findById(1L).get();
-        Post post = Post.createPost(postRequest.getTitle(), postRequest.getContent(), user, postCategory);
-        postRepository.save(post);
-        return new PostResponse(post.getId(), "게시글 작성이 완료되었습니다.");
+        Post post = postRepository.save(Post.createPost(postRequest.getTitle(), postRequest.getContent(), user, postCategory));
+        List<String> postImages = uploadPostImages(postRequest, post);
+
+        return new PostCreateResponse(post.getId(), "게시글 작성이 완료되었습니다.", postImages);
+    }
+
+    /**
+     * 이미지 파일 S3 저장 + PostImage 생성
+     */
+    private List<String> uploadPostImages(PostRequest postRequest, Post post) {
+        return postRequest.getImageFiles().stream()
+                .map(image -> s3Uploader.upload(image, "post"))
+                .map(url -> createPostImage(post, url))
+                .map(postImage -> postImage.getImageUrl())
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * PostImage 생성 메서드
+     */
+    private PostImage createPostImage(Post post, String url) {
+        return postImageRepository.save(PostImage.builder()
+                .imageUrl(url)
+                .storeFilename(StringUtils.getFilename(url))
+                .post(post)
+                .build());
     }
 
     @Transactional
-    public PostResponse updatePost(PostUpdateRequest request) {
-
+    public PostUpdateResponse updatePost(PostUpdateRequest request) {
         User user = userRepository.findById(1L).get();
         Post post = postRepository.findByIdAndUser(request.getPostId(), user.getId())
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_POST));
 
+        validateDeletedImages(request);
+        uploadPostImages(request, post);
+        List<String> saveImages = getSaveImages(request);
+
         post.updatePost(request.getTitle(), request.getContent());
 
-        return new PostResponse(post.getId(), "게시글 변경이 완료되었습니다.");
+        return new PostUpdateResponse(post.getId(), "게시글 변경이 완료되었습니다.", saveImages);
+    }
+
+    /**
+     * @Request 로 받아온 이미지 경로랑 저장 되어있던 이미지 경로랑 일치하지 않는다면 모두 삭제
+     */
+    private void validateDeletedImages(PostUpdateRequest request) {
+        postImageRepository.findBySavedImageUrl(request.getPostId()).stream()
+                .filter(image -> !request.getSaveImageUrl().stream().anyMatch(Predicate.isEqual(image.getImageUrl())))
+                .forEach(url -> {
+                    postImageRepository.delete(url);
+                    s3Uploader.deleteImage(url.getImageUrl());
+                });
+    }
+
+    /**
+     * S3에 업로드 및 PostImage 생성
+     */
+    private void uploadPostImages(PostUpdateRequest request, Post post) {
+        request.getImageFiles()
+                .stream()
+                .forEach(file -> {
+                    String url = s3Uploader.upload(file, "post");
+                    createPostImage(post, url);
+                });
+    }
+
+    /**
+     * PostImage 테이블에 저장 되어있는 이미지 경로를 추출
+     */
+    private List<String> getSaveImages(PostUpdateRequest request) {
+        return postImageRepository.findBySavedImageUrl(request.getPostId())
+                .stream()
+                .map(image -> image.getImageUrl())
+                .collect(Collectors.toList());
     }
 
     @Transactional
@@ -79,18 +136,9 @@ public class PostService {
      */
     @Transactional
     public PostOneResponse getOnePost(Long postId) {
-        PostOneResponse postOneResponse = postRepository.findOnePostById(postId)
+        User user = userRepository.findById(1L).get();
+        return postRepository.findOnePostById(postId, user.getId())
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_POST));
-        commentsExtractor(postId, postOneResponse);
-        return postOneResponse;
-    }
-
-    private void commentsExtractor(Long postId, PostOneResponse postOneResponse) {
-        postOneResponse.getComments()
-                .forEach(comment -> {
-                            List<CommentsChildrenResponse> comments = commentRepository.findPostComments(postId, comment.getCommentId());
-                            comment.setChildren(comments);
-                });
     }
 
 
@@ -131,7 +179,8 @@ public class PostService {
         return new ScrapResponse(false);
     }
 
-    public Page<RecentPostResponse> getRecentPost(Pageable pageable, RecentPostRequest request) {
-        return postRepository.findRecentPosts(pageable, request);
+    public Page<RecentPostResponse> getRecentPost(Pageable pageable, String categoryName) {
+        return postRepository.findRecentPosts(pageable, categoryName);
     }
+
 }
