@@ -2,16 +2,18 @@ package com.backend.moamoa.domain.user.controller;
 
 import com.backend.moamoa.domain.user.dto.request.UserEmailRequest;
 import com.backend.moamoa.domain.user.dto.request.UserUpdateRequest;
+import com.backend.moamoa.domain.user.dto.response.MyCommentResponse;
+import com.backend.moamoa.domain.user.dto.response.MyPostResponse;
 import com.backend.moamoa.domain.user.dto.response.UserResponse;
 import com.backend.moamoa.domain.user.entity.UserMailAuth;
 import com.backend.moamoa.domain.user.service.MailSendService;
 import com.backend.moamoa.domain.user.service.UserService;
 import com.backend.moamoa.global.common.ApiResponse;
-import com.backend.moamoa.domain.user.entity.User;
-import com.backend.moamoa.global.utils.UserUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,7 +22,7 @@ import java.util.Map;
 
 @Api(tags = "유저 API")
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/users")
 @RequiredArgsConstructor
 public class UserController {
 
@@ -30,6 +32,7 @@ public class UserController {
     /**
      * [GET] api/users
      * 사용자의 accessToken을 받아 사용자의 정보를 반환합니다.
+     *
      * @return ApiResponse 응답 내용
      */
     @GetMapping
@@ -42,6 +45,7 @@ public class UserController {
     /**
      * [PATCH] api/users
      * 현재 사용자의 개인 정보를 변경합니다.
+     *
      * @return 사용자 개인정보 수정
      */
     @PatchMapping
@@ -80,6 +84,38 @@ public class UserController {
     @GetMapping("/emailCheck")
     public ResponseEntity<Boolean> checkEmail(@RequestParam String email) {
         return ResponseEntity.ok(userService.isDuplicateEmail(email));
+    }
+
+    /**
+     * [GET] api/users/mypage/posts&page= &size= &sort=
+     *
+     * page : 가져올 페이지 (기본값 : 0)
+     * size : 페이지의 크기 (기본값 : 20)
+     * sort : 정렬 기준으로 사용할 속성으로 기본적으로 오름차순
+     *
+     * 마이 페이지의 내가 쓴 글의 리스트를 최신순으로 반환합니다.
+     */
+    @ApiOperation(value = "마이 페이지 내가 쓴 글 보기",
+            notes = "마이 페이지의 내가 쓴 글의 리스트를 반환합니다. 헤더에 사용자 토큰 주입을 필요로 합니다.")
+    @GetMapping("/mypage/posts")
+    public Page<MyPostResponse> findMyPosts(Pageable pageable) {
+        return userService.findMyPosts(pageable);
+    }
+
+    /**
+     * [GET] api/users/mypage/comments
+     *
+     * page : 가져올 페이지 (기본값 : 0)
+     * size : 페이지의 크기 (기본값 : 20)
+     * sort : 정렬 기준으로 사용할 속성으로 기본적으로 오름차순
+     *
+     * 마이 페이지의 내가 쓴 댓글의 리스트를 반환합니다.
+     */
+    @ApiOperation(value = "마이 페이지 내가 쓴 댓글 보기",
+            notes = "마이 페이지의 내가 쓴 글의 댓글을 반환합니다. 헤더에 사용자 토큰 주입을 필요로 합니다.")
+    @GetMapping("/mypage/comments")
+    public Page<MyCommentResponse> findMyComments(Pageable pageable) {
+        return userService.findMyComments(pageable);
     }
 
 }
