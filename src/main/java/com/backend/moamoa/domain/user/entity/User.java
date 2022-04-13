@@ -1,5 +1,6 @@
 package com.backend.moamoa.domain.user.entity;
 
+import com.backend.moamoa.domain.post.entity.Post;
 import com.backend.moamoa.domain.user.dto.request.UserUpdateRequest;
 import com.backend.moamoa.domain.user.enums.Gender;
 import com.backend.moamoa.domain.user.oauth.entity.ProviderType;
@@ -11,7 +12,11 @@ import lombok.*;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static javax.persistence.EnumType.STRING;
+import static javax.persistence.FetchType.LAZY;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -29,6 +34,9 @@ public class User implements Auditable {
     @NotNull
     @Column(name = "user_provider_id")
     private String userId;
+
+    @OneToMany(mappedBy = "user")
+    private List<Post> posts = new ArrayList<>();
 
     @Enumerated(STRING)
     @NotNull
