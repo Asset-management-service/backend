@@ -1,6 +1,12 @@
 package com.backend.moamoa.domain.user.service;
 
+import com.backend.moamoa.domain.post.entity.Comment;
+import com.backend.moamoa.domain.post.entity.Post;
+import com.backend.moamoa.domain.post.repository.comment.CommentRepository;
+import com.backend.moamoa.domain.post.repository.post.PostRepository;
 import com.backend.moamoa.domain.user.dto.request.UserUpdateRequest;
+import com.backend.moamoa.domain.user.dto.response.MyCommentResponse;
+import com.backend.moamoa.domain.user.dto.response.MyPostResponse;
 import com.backend.moamoa.domain.user.dto.response.UserResponse;
 import com.backend.moamoa.domain.user.entity.User;
 import com.backend.moamoa.domain.user.entity.UserMailAuth;
@@ -10,10 +16,14 @@ import com.backend.moamoa.global.exception.CustomException;
 import com.backend.moamoa.global.exception.ErrorCode;
 import com.backend.moamoa.global.utils.UserUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -21,10 +31,13 @@ import java.nio.charset.StandardCharsets;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PostRepository postRepository;
+    private final CommentRepository commentRepository;
     private final UserUtil userUtil;
 
     /**
      * 전달받은 accessToken을 통해 현재 유저를 반환합니다.
+     *
      * @return User 현재 유저
      */
     public ApiResponse getUser() {
@@ -35,6 +48,7 @@ public class UserService {
 
     /**
      * 전달받은 유저와 유저의 개인정보를 통해 업데이트합니다.
+     *
      * @param userUpdateRequest 유저 업데이트
      * @return UserResponse
      */
@@ -47,6 +61,7 @@ public class UserService {
 
     /**
      * 전달받은 사용자의 식별자를 통해 유저를 DB에서 조회합니다.
+     *
      * @param id 식별자
      * @return User 유저
      */
@@ -56,6 +71,7 @@ public class UserService {
 
     /**
      * 전달받은 사용자의 식별자를 통해 유저를 DB에서 조회하고, 없으면 예외를 던집니다.
+     *
      * @param id 식별자
      * @return User 유저
      */
@@ -66,6 +82,7 @@ public class UserService {
 
     /**
      * 전달받은 이메일 인증 토큰을 통해 이메일을 변경합니다.
+     *
      * @param authToken 이메일 인증 토큰
      */
     @Transactional
@@ -77,15 +94,47 @@ public class UserService {
 
     /**
      * 전달받은 사용자 email과 같은 email이 DB에 존재하는지 확인합니다.
+     *
      * @param userEmail 전달받은 사용자 email
      * @return DB에 존재 여부. 존재하면 예외, 존재하지 않으면 false를 반환합니다.
      */
     public Boolean isDuplicateEmail(String userEmail) {
-        if(userRepository.existsByEmailAndEmailCheckIsTrue(userEmail)) {
+        if (userRepository.existsByEmailAndEmailCheckIsTrue(userEmail)) {
             throw new CustomException(ErrorCode.ALREADY_EMAIL_EXISTS);
         } else {
             return false;
         }
     }
+
+    /**
+     * 마이페이지의 내가 쓴 글을 조회합니다.
+     */
+    public Page<MyPostResponse> findMyPosts(Pageable pageable) {
+        User user = userUtil.findCurrentUser();
+        Page<Post> post = postRepository.findByUserOrderByIdDesc(user, pageable);
+
+        List<MyPostResponse> postResponses =
+                post.stream()
+                        .map(MyPostResponse::toMyPostResponse)
+                        .collect(Collectors.toList());
+
+        return new PageImpl<>(postResponses, pageable, post.getTotalElements());
+    }
+
+    /**
+     * 마이페이지의 내가 쓴 댓글을 조회합니다.
+     */
+    public Page<MyCommentResponse> findMyComments(Pageable pageable) {
+        User user = userUtil.findCurrentUser();
+        Page<Comment> comments = commentRepository.findByUserOrderByIdDesc(user, pageable);
+
+        List<MyCommentResponse> commentResponses =
+                comments.stream()
+                        .map(MyCommentResponse::toMyCommentResponse)
+                        .collect(Collectors.toList());
+
+        return new PageImpl<>(commentResponses, pageable, comments.getTotalElements());
+    }
+
 
 }
