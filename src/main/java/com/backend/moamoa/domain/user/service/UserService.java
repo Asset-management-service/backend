@@ -11,7 +11,6 @@ import com.backend.moamoa.domain.user.dto.response.UserResponse;
 import com.backend.moamoa.domain.user.entity.User;
 import com.backend.moamoa.domain.user.entity.UserMailAuth;
 import com.backend.moamoa.domain.user.repository.UserRepository;
-import com.backend.moamoa.global.common.ApiResponse;
 import com.backend.moamoa.global.exception.CustomException;
 import com.backend.moamoa.global.exception.ErrorCode;
 import com.backend.moamoa.global.utils.UserUtil;
@@ -40,9 +39,9 @@ public class UserService {
      *
      * @return User 현재 유저
      */
-    public ApiResponse getUser() {
+    public UserResponse getUser() {
         User user = userUtil.findCurrentUser();
-        return ApiResponse.success("user", user);
+        return UserResponse.toUserResponse(user);
 
     }
 

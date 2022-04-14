@@ -8,7 +8,6 @@ import com.backend.moamoa.domain.user.dto.response.UserResponse;
 import com.backend.moamoa.domain.user.entity.UserMailAuth;
 import com.backend.moamoa.domain.user.service.MailSendService;
 import com.backend.moamoa.domain.user.service.UserService;
-import com.backend.moamoa.global.common.ApiResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -38,7 +37,7 @@ public class UserController {
     @GetMapping
     @ApiOperation(value = "현재 사용자 조회",
             notes = "현재 사용자의 정보를 가져옵니다. 헤더에 사용자 토큰 주입을 필요로 합니다.")
-    public ApiResponse getUser() {
+    public UserResponse getUser() {
         return userService.getUser();
     }
 
