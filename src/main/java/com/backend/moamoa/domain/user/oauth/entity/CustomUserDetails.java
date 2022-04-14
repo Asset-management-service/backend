@@ -1,7 +1,8 @@
 package com.backend.moamoa.domain.user.oauth.entity;
 
 import com.backend.moamoa.domain.user.entity.User;
-import com.backend.moamoa.domain.user.enums.RoleType;
+import com.backend.moamoa.domain.user.entity.enums.RoleType;
+import com.backend.moamoa.domain.user.oauth.entity.enums.ProviderType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
