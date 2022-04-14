@@ -1,4 +1,4 @@
-package com.backend.moamoa.global.config;
+package com.backend.moamoa.global.bean;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
@@ -13,11 +13,10 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @RequiredArgsConstructor
 @Configuration
 @EnableRedisRepositories
-public class RedisRepositoryConfig {
+public class RedisConfig {
 
     private final RedisProperties redisProperties;
 
-    // lettuce
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
         return new LettuceConnectionFactory(redisProperties.getHost(), redisProperties.getPort());
@@ -31,4 +30,5 @@ public class RedisRepositoryConfig {
         redisTemplate.setValueSerializer(new StringRedisSerializer());
         return redisTemplate;
     }
+
 }

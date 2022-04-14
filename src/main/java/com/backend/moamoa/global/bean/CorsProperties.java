@@ -1,4 +1,4 @@
-package com.backend.moamoa.global.config;
+package com.backend.moamoa.global.bean;
 
 import lombok.Getter;
 import lombok.Setter;

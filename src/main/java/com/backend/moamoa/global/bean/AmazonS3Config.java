@@ -1,4 +1,4 @@
-package com.backend.moamoa.global.config;
+package com.backend.moamoa.global.bean;
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
