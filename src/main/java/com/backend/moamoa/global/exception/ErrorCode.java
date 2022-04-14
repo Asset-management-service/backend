@@ -18,6 +18,8 @@ public enum ErrorCode {
 
     NOT_FOUND_COMMENT(HttpStatus.NOT_FOUND, "해당 뎃글을 찾을 수 없습니다."),
 
+    NOT_FOUND_ASSET(HttpStatus.NOT_FOUND, "해당 가계부 설정을 찾을 수 없습니다."),
+
     FORBIDDEN_USER(HttpStatus.FORBIDDEN, "권한이 없는 요청입니다");
 
 

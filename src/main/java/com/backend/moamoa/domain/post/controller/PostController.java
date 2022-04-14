@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @Api(tags = "커뮤니티 게시글 API")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/posts")
+@RequestMapping("/posts")
 public class PostController {
 
     private final PostService postService;

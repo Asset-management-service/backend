@@ -1,25 +1,22 @@
 package com.backend.moamoa.domain.asset.controller;
 
-import com.backend.moamoa.domain.asset.dto.request.RevenueCategoryRequest;
+import com.backend.moamoa.domain.asset.dto.request.AssetCategoryRequest;
+import com.backend.moamoa.domain.asset.service.AssetService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/assets")
+@RequestMapping("/assets")
 public class AssetController {
 
+    private final AssetService assetService;
+
     @PostMapping("/setting")
-    public ResponseEntity assetSetting() {
-
-        return null;
-    }
-
-    @PostMapping("/revenueCategory")
-    public ResponseEntity addRevenueCategory(RevenueCategoryRequest request){
-        return null;
+    public Long addCategory(@RequestBody AssetCategoryRequest request) {
+        return assetService.addCategory(request);
     }
 }
