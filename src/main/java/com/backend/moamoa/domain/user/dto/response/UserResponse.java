@@ -1,7 +1,7 @@
 package com.backend.moamoa.domain.user.dto.response;
 
 import com.backend.moamoa.domain.user.entity.User;
-import com.backend.moamoa.domain.user.enums.Gender;
+import com.backend.moamoa.domain.user.entity.enums.Gender;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

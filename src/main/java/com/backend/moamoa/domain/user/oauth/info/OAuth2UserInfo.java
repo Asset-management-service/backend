@@ -1,6 +1,6 @@
 package com.backend.moamoa.domain.user.oauth.info;
 
-import com.backend.moamoa.domain.user.enums.Gender;
+import com.backend.moamoa.domain.user.entity.enums.Gender;
 
 import java.util.Map;
 

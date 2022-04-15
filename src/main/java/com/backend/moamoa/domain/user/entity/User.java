@@ -2,8 +2,8 @@ package com.backend.moamoa.domain.user.entity;
 
 import com.backend.moamoa.domain.post.entity.Post;
 import com.backend.moamoa.domain.user.dto.request.UserUpdateRequest;
-import com.backend.moamoa.domain.user.enums.Gender;
-import com.backend.moamoa.domain.user.oauth.entity.ProviderType;
+import com.backend.moamoa.domain.user.entity.enums.Gender;
+import com.backend.moamoa.domain.user.oauth.entity.enums.ProviderType;
 import com.backend.moamoa.global.audit.AuditListener;
 import com.backend.moamoa.global.audit.Auditable;
 import com.backend.moamoa.global.audit.TimeEntity;
@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static javax.persistence.EnumType.STRING;
-import static javax.persistence.FetchType.LAZY;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

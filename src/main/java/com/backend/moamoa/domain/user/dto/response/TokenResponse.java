@@ -1,5 +1,6 @@
-package com.backend.moamoa.domain.user.oauth.dto.response;
+package com.backend.moamoa.domain.user.dto.response;
 
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
@@ -8,6 +9,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@ApiModel("토큰 재발급 반환 정보")
 public class TokenResponse {
 
     @ApiModelProperty(value = "accessToken의 타입", example = "Bearer")

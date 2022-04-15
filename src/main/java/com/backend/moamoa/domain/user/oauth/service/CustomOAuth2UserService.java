@@ -1,14 +1,11 @@
 package com.backend.moamoa.domain.user.oauth.service;
 
 import com.backend.moamoa.domain.user.oauth.entity.CustomUserDetails;
-import com.backend.moamoa.domain.user.oauth.entity.ProviderType;
+import com.backend.moamoa.domain.user.oauth.entity.enums.ProviderType;
 import com.backend.moamoa.domain.user.entity.User;
-import com.backend.moamoa.domain.user.oauth.exception.OAuthProviderMissMatchException;
 import com.backend.moamoa.domain.user.oauth.info.OAuth2UserInfo;
 import com.backend.moamoa.domain.user.oauth.info.OAuth2UserInfoFactory;
 import com.backend.moamoa.domain.user.repository.UserRepository;
-import com.backend.moamoa.global.exception.CustomException;
-import com.backend.moamoa.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.AuthenticationException;
@@ -48,12 +45,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         Optional<User> savedUser = userRepository.findByUserId(userInfo.getId());
 
         if (savedUser.isPresent()) {
-            if (providerType != savedUser.get().getProviderType()) {
-                throw new OAuthProviderMissMatchException(
-                        "Looks like you're signed up with " + providerType +
-                                " account. Please use your " + savedUser.get().getProviderType() + " account to login."
-                );
-            }
             updateUser(savedUser.get(), userInfo);
         } else {
             savedUser = Optional.of(createUser(userInfo, providerType));

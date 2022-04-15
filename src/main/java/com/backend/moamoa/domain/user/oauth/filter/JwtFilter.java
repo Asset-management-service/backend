@@ -1,11 +1,12 @@
 package com.backend.moamoa.domain.user.oauth.filter;
 
-import com.backend.moamoa.domain.user.oauth.provider.AuthToken;
-import com.backend.moamoa.domain.user.oauth.provider.AuthTokenProvider;
+import com.backend.moamoa.domain.user.oauth.token.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
@@ -17,23 +18,29 @@ import java.io.IOException;
 @Slf4j
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
+
     private final static String HEADER_AUTHORIZATION = "Authorization";
     private final static String TOKEN_PREFIX = "Bearer ";
 
-    private final AuthTokenProvider tokenProvider;
+    private final JwtProvider jwtProvider;
+    private final RedisTemplate redisTemplate;
 
     @Override
     protected void doFilterInternal(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            FilterChain filterChain)  throws ServletException, IOException {
+                    HttpServletRequest request,
+                    HttpServletResponse response,
+                    FilterChain filterChain) throws ServletException, IOException {
 
-        String tokenStr = getAccessToken(request);
-        AuthToken token = tokenProvider.convertAuthToken(tokenStr);
+                String token = getAccessToken(request);
 
-        if (token.validate()) {
-            Authentication authentication = tokenProvider.getAuthentication(token);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+                if (jwtProvider.getTokenClaims(token) && token != null) {
+
+                    String isLogout = (String) redisTemplate.opsForValue().get(token);
+
+            if (ObjectUtils.isEmpty(isLogout)) {
+                Authentication authentication = jwtProvider.getAuthentication(token);
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
         }
 
         filterChain.doFilter(request, response);
@@ -49,7 +56,6 @@ public class JwtFilter extends OncePerRequestFilter {
         if (headerValue.startsWith(TOKEN_PREFIX)) {
             return headerValue.substring(TOKEN_PREFIX.length());
         }
-
         return null;
     }
 

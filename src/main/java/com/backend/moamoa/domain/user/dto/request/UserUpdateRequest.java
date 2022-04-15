@@ -1,6 +1,6 @@
 package com.backend.moamoa.domain.user.dto.request;
 
-import com.backend.moamoa.domain.user.enums.Gender;
+import com.backend.moamoa.domain.user.entity.enums.Gender;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
