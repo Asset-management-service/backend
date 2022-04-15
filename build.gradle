@@ -36,6 +36,8 @@ dependencies {
 
 	implementation group: 'io.springfox', name: 'springfox-boot-starter', version: '3.0.0'
 	implementation 'io.springfox:springfox-swagger-ui:3.0.0'
+	implementation("io.swagger:swagger-annotations:1.5.21")
+	implementation("io.swagger:swagger-models:1.5.21")
 
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 

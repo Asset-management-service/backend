@@ -10,9 +10,8 @@ import lombok.Setter;
 @NoArgsConstructor
 public class AssetCategoryRequest {
 
-    private Long assetId;
-
     private AssetCategoryType categoryType;
 
     private String categoryName;
+
 }
