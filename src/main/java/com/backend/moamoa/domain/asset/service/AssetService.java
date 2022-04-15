@@ -4,6 +4,7 @@ import com.backend.moamoa.domain.asset.dto.request.AssetCategoryRequest;
 import com.backend.moamoa.domain.asset.dto.request.BudgetRequest;
 import com.backend.moamoa.domain.asset.dto.request.ExpenditureRequest;
 import com.backend.moamoa.domain.asset.entity.AssetCategory;
+import com.backend.moamoa.domain.asset.entity.AssetCategoryType;
 import com.backend.moamoa.domain.asset.entity.Budget;
 import com.backend.moamoa.domain.asset.entity.ExpenditureRatio;
 import com.backend.moamoa.domain.asset.repository.AssetCategoryRepository;
@@ -12,9 +13,10 @@ import com.backend.moamoa.domain.asset.repository.ExpenditureRatioRepository;
 import com.backend.moamoa.domain.user.entity.User;
 import com.backend.moamoa.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -44,12 +46,12 @@ public class AssetService {
         if (request.getFixed() + request.getVariable() != 100) {
             throw new IllegalArgumentException();
         }
+
         return expenditureRatioRepository.save(ExpenditureRatio.createExpenditureRatio(request.getFixed(), request.getVariable(), user)).getId();
     }
 
-    public ResponseEntity getCategories(String categoryName) {
+    public List<String> getCategories(String categoryType) {
         User user = userRepository.findById(1L).get();
-        assetCategoryRepository.findByCategoryNameAndUserId(categoryName, user.getId());
-        return ResponseEntity.ok().body(null);
+        return assetCategoryRepository.findByAssetCategoryTypeAndUserId(categoryType, user.getId());
     }
 }

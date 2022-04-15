@@ -3,6 +3,8 @@ package com.backend.moamoa.domain.asset.controller;
 import com.backend.moamoa.domain.asset.dto.request.AssetCategoryRequest;
 import com.backend.moamoa.domain.asset.dto.request.BudgetRequest;
 import com.backend.moamoa.domain.asset.dto.request.ExpenditureRequest;
+import com.backend.moamoa.domain.asset.dto.response.AssetCategoriesResponse;
+import com.backend.moamoa.domain.asset.dto.response.AssetCategoryResponse;
 import com.backend.moamoa.domain.asset.service.AssetService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -15,9 +17,9 @@ public class AssetController {
 
     private final AssetService assetService;
 
-    @GetMapping("/category/{categoryName}")
-    public ResponseEntity getCategory(@PathVariable String categoryName) {
-        return assetService.getCategories(categoryName);
+    @GetMapping("/category")
+    public ResponseEntity getCategory(@RequestParam String categoryType) {
+        return ResponseEntity.ok(new AssetCategoriesResponse(assetService.getCategories(categoryType)));
     }
 
     @PostMapping("/budget")
@@ -26,8 +28,8 @@ public class AssetController {
     }
 
     @PostMapping("/category")
-    public Long addCategory(@RequestBody AssetCategoryRequest request) {
-        return assetService.addCategory(request);
+    public ResponseEntity addCategory(@RequestBody AssetCategoryRequest request) {
+        return ResponseEntity.ok(new AssetCategoryResponse(assetService.addCategory(request)));
     }
 
     @PostMapping("/expenditure")
