@@ -35,7 +35,6 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     public final static String REFRESH_TOKEN = "refresh_token";
 
     private final JwtProvider jwtProvider;
-    private final long refreshTokenExpiry = 604800000;
     private final RedisTemplate redisTemplate;
 
     @Override
@@ -67,9 +66,9 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         TokenResponse tokenResponse = jwtProvider.createTokenResponse(userInfo.getId());
 
         redisTemplate.opsForValue()
-                .set("RT:" + userInfo.getId(), tokenResponse.getRefreshToken(), refreshTokenExpiry, TimeUnit.MILLISECONDS);
+                .set("RT:" + userInfo.getId(), tokenResponse.getRefreshToken(), tokenResponse.getRefreshTokenExpireDate(), TimeUnit.MILLISECONDS);
 
-        int cookieMaxAge = (int) refreshTokenExpiry / 60;
+        int cookieMaxAge = (int) tokenResponse.getRefreshTokenExpireDate() / 60;
 
         CookieUtil.deleteCookie(request, response, REFRESH_TOKEN);
         CookieUtil.addCookie(response, REFRESH_TOKEN, tokenResponse.getRefreshToken(), cookieMaxAge);

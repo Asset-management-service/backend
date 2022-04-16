@@ -12,16 +12,19 @@ import lombok.*;
 @ApiModel("토큰 재발급 반환 정보")
 public class TokenResponse {
 
-    @ApiModelProperty(value = "accessToken의 타입", example = "Bearer")
+    @ApiModelProperty(value = "accessToken의 헤더타입", example = "Bearer")
     private String grantType;
 
-    @ApiModelProperty(value = "발급된 accessToken")
+    @ApiModelProperty(value = "재발급된 accessToken")
     private String accessToken;
 
-    @ApiModelProperty(value = "발급된 refreshToken")
+    @ApiModelProperty(value = "재발급된 RefreshToken")
     private String refreshToken;
 
-    @ApiModelProperty(value = "accessToken의 만료 기간 ms(30분)", example = "60000")
-    private Long accessTokenExpireDate;
+    @ApiModelProperty(value = "accessToken의 만료 기간 ms(30분)", example = "1800000")
+    private long accessTokenExpireDate;
+
+    @ApiModelProperty(value = "refreshToken의 만료 기간 ms(일주일)", example = "604800000")
+    private long refreshTokenExpireDate;
 
 }
