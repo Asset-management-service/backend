@@ -28,7 +28,7 @@ public class JwtProvider {
 
     private final CustomUserDetailsService userDetailsService;
 
-    private final Long tokenExpiry = 30 * 1000L; // 30 minutes
+    private final Long tokenExpiry = 30 * 60 * 1000L; // 30 minutes
     private final Long refreshTokenExpiry = 7 * 24 * 60 * 60 * 1000L; // 14 day
 
     private static final String AUTHORITIES_KEY = "role";
