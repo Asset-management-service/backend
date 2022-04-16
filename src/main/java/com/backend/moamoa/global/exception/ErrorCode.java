@@ -22,7 +22,13 @@ public enum ErrorCode {
 
     INVALID_TOKEN(HttpStatus.FORBIDDEN, "유효하지 않은 엑세스 토큰입니다."),
 
-    INVALID_REFRESH_TOKEN(HttpStatus.FORBIDDEN, "유효하지 않은 리프레스 토큰입니다.");
+    INVALID_REFRESH_TOKEN(HttpStatus.FORBIDDEN, "유효하지 않은 리프레스 토큰입니다."),
+
+    ALREADY_NICKNAME_EXISTS(HttpStatus.ALREADY_REPORTED, "이미 존재하는 닉네임입니다."),
+
+    ALREADY_PHONE_NUM_EXISTS(HttpStatus.ALREADY_REPORTED, "이미 존재하는 휴대폰 번호 입니다.");
+
+
 
 
     private final HttpStatus httpStatus;
