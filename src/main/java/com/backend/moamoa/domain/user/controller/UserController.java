@@ -15,6 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
 import java.util.Map;
@@ -36,7 +37,7 @@ public class UserController {
      */
     @GetMapping
     @ApiOperation(value = "현재 사용자 조회",
-            notes = "현재 사용자의 정보를 가져옵니다. 헤더에 사용자 토큰 주입을 필요로 합니다.")
+            notes = "현재 사용자의 정보를 가져옵니다. 헤더(Bearer)에 사용자 토큰 주입을 필요로 합니다.")
     public UserResponse getUser() {
         return userService.getUser();
     }
@@ -49,7 +50,7 @@ public class UserController {
      */
     @PatchMapping
     @ApiOperation(value = "개인정보 수정",
-            notes = "현재 사용자의 개인정보를 업데이트 합니다. 헤더에 사용자 토큰 주입을 필요로 합니다.")
+            notes = "현재 사용자의 개인정보를 업데이트 합니다. 헤더(Bearer)에 사용자 토큰 주입을 필요로 합니다.")
     public UserResponse update(@RequestBody @Valid UserUpdateRequest userUpdateRequest) {
         return userService.update(userUpdateRequest);
     }
@@ -59,16 +60,18 @@ public class UserController {
      * 변경할 이메일을 받아 이메일 인증 메일을 보냅니다.
      */
     @GetMapping("/registerEmail")
-    @ApiOperation(value = "이메일 전송",
-            notes = "변경할 이메일을 받아 인증 메일을 보냅니다. 헤더에 사용자 토큰 주입을 필요로 합니다.")
+    @ApiOperation(value = "이메일 인증하기",
+            notes = "변경할 이메일을 받아 인증 메일을 보내고 이메일을 인증합니다. 헤더(Bearer)에 사용자 토큰 주입을 필요로 합니다.")
     public void registerEmail(@RequestBody UserEmailRequest userEmailRequest) {
+        userService.isDuplicateEmail(userEmailRequest.getEmail());
         String authKey = mailSendService.sendAuthMail(userEmailRequest.getEmail());
         mailSendService.save(userEmailRequest.getEmail(), authKey);
     }
 
     @GetMapping("/confirm")
     @ApiOperation(value = "이메일 인증",
-            notes = "사용자가 전송받은 이메일의 인증하기 버튼을 누르면 인증 로직을 시행합니다.")
+            notes = "사용자가 전송받은 인증 이메일의 인증하기 버튼을 누르면 인증 로직을 시행합니다.")
+    @ApiIgnore
     public void confirmEmail(@RequestParam Map<String, String> map) {
         UserMailAuth authToken = mailSendService.getAuthToken(map);
         userService.confirmEmail(authToken);
@@ -95,7 +98,7 @@ public class UserController {
      * 마이 페이지의 내가 쓴 글의 리스트를 최신순으로 반환합니다.
      */
     @ApiOperation(value = "마이 페이지 내가 쓴 글 보기",
-            notes = "마이 페이지의 내가 쓴 글의 리스트를 반환합니다. 헤더에 사용자 토큰 주입을 필요로 합니다.")
+            notes = "마이 페이지의 내가 쓴 글의 리스트를 반환합니다. 헤더(Bearer)에 사용자 토큰 주입을 필요로 합니다.")
     @GetMapping("/mypage/posts")
     public Page<MyPostResponse> findMyPosts(Pageable pageable) {
         return userService.findMyPosts(pageable);
@@ -111,7 +114,7 @@ public class UserController {
      * 마이 페이지의 내가 쓴 댓글의 리스트를 반환합니다.
      */
     @ApiOperation(value = "마이 페이지 내가 쓴 댓글 보기",
-            notes = "마이 페이지의 내가 쓴 글의 댓글을 반환합니다. 헤더에 사용자 토큰 주입을 필요로 합니다.")
+            notes = "마이 페이지의 내가 쓴 글의 댓글을 반환합니다. 헤더(Bearer)에 사용자 토큰 주입을 필요로 합니다.")
     @GetMapping("/mypage/comments")
     public Page<MyCommentResponse> findMyComments(Pageable pageable) {
         return userService.findMyComments(pageable);

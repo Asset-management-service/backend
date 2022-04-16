@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -17,6 +18,7 @@ import java.io.IOException;
 
 @Slf4j
 @RequiredArgsConstructor
+@Component
 public class JwtFilter extends OncePerRequestFilter {
 
     private final static String HEADER_AUTHORIZATION = "Authorization";
@@ -27,15 +29,15 @@ public class JwtFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(
-                    HttpServletRequest request,
-                    HttpServletResponse response,
-                    FilterChain filterChain) throws ServletException, IOException {
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain) throws ServletException, IOException {
 
-                String token = getAccessToken(request);
+        String token = getAccessToken(request);
 
-                if (jwtProvider.getTokenClaims(token) && token != null) {
+        if (jwtProvider.validationToken(token) && token != null) {
 
-                    String isLogout = (String) redisTemplate.opsForValue().get(token);
+            String isLogout = (String) redisTemplate.opsForValue().get(token);
 
             if (ObjectUtils.isEmpty(isLogout)) {
                 Authentication authentication = jwtProvider.getAuthentication(token);

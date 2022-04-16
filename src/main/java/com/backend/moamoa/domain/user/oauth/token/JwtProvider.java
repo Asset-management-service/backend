@@ -2,48 +2,50 @@ package com.backend.moamoa.domain.user.oauth.token;
 
 import com.backend.moamoa.domain.user.entity.enums.RoleType;
 import com.backend.moamoa.domain.user.dto.response.TokenResponse;
+import com.backend.moamoa.domain.user.oauth.service.CustomUserDetailsService;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.security.Key;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
-import java.util.stream.Collectors;
 
 @Slf4j
+@RequiredArgsConstructor
+@Component
 public class JwtProvider {
 
-    private final Key key;
-    private final Long tokenExpiry = 30 * 60 * 1000L;
-    private final Long refreshTokenExpiry = 7 * 24 * 60 * 60 * 1000L;
+    @Value("${jwt.secret}")
+    private String secretKey;
+    private Key key;
+
+    private final CustomUserDetailsService userDetailsService;
+
+    private final Long tokenExpiry = 30 * 60 * 1000L; // 30 minutes
+    private final Long refreshTokenExpiry = 7 * 24 * 60 * 60 * 1000L; // 14 day
 
     private static final String AUTHORITIES_KEY = "role";
     private static final String GRANT_TYPE = "Bearer";
 
-    public JwtProvider(String secret) {
-        this.key = Keys.hmacShaKeyFor(secret.getBytes());
+    @PostConstruct
+    protected void init() {
+        this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 
     public Authentication getAuthentication(String token) {
-        Claims claims = this.getUserInfo(token);
-        Collection<? extends GrantedAuthority> authorities =
-                Arrays.stream(new String[]{claims.get(AUTHORITIES_KEY).toString()})
-                        .map(SimpleGrantedAuthority::new)
-                        .collect(Collectors.toList());
-
-        User principal = new User(claims.getSubject(), "", authorities);
-
-        return new UsernamePasswordAuthenticationToken(principal, token, authorities);
+        Claims claims = parseClaims(token);
+        UserDetails userDetails = userDetailsService.loadUserByUsername(claims.getSubject());
+        return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 
-    public Claims getUserInfo(String token) {
+    public Claims parseClaims(String token) {
         try {
             return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
         } catch (ExpiredJwtException e) {
@@ -73,10 +75,11 @@ public class JwtProvider {
                 .accessToken(newAccessToken)
                 .refreshToken(authRefreshToken)
                 .accessTokenExpireDate(tokenExpiry)
+                .refreshTokenExpireDate(refreshTokenExpiry)
                 .build();
     }
 
-    public boolean getTokenClaims(String authToken) {
+    public boolean validationToken(String authToken) {
         try {
             Jwts.parserBuilder()
                     .setSigningKey(key)
@@ -98,7 +101,7 @@ public class JwtProvider {
         return false;
     }
 
-    public boolean getExpiredTokenClaims(String authToken) {
+    public boolean ExpiredToken(String authToken) {
         try {
             Jwts.parserBuilder()
                     .setSigningKey(key)
@@ -116,7 +119,6 @@ public class JwtProvider {
 
     public Long getExpiration(String authToken) {
         Date expiration = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(authToken).getBody().getExpiration();
-        // 현재 시간
         Long now = new Date().getTime();
         return (expiration.getTime() - now);
     }

@@ -54,6 +54,20 @@ public class UserService {
     @Transactional
     public UserResponse update(UserUpdateRequest userUpdateRequest) {
         User user = userUtil.findCurrentUser();
+        // 닉네임 중복 확인
+        if (userRepository.existsByNickname(userUpdateRequest.getNickname())) {
+            throw new CustomException(ErrorCode.ALREADY_NICKNAME_EXISTS);
+        }
+
+        // 휴대폰 번호 중복 확인
+        if (userRepository.existsByPhoneNum(userUpdateRequest.getPhoneNum())) {
+            throw new CustomException(ErrorCode.ALREADY_PHONE_NUM_EXISTS);
+        }
+
+        // 이메일 중복 확인
+        if (userRepository.existsByEmail(userUpdateRequest.getEmail())) {
+            throw new CustomException(ErrorCode.ALREADY_EMAIL_EXISTS);
+        }
         user.update(userUpdateRequest);
         return UserResponse.toUserResponse(user);
     }

@@ -1,6 +1,6 @@
 package com.backend.moamoa;
 
-import com.backend.moamoa.global.bean.CorsProperties;
+import com.backend.moamoa.global.bean.cors.CorsProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
