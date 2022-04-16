@@ -9,4 +9,6 @@ public interface AssetCategoryRepository extends JpaRepository<AssetCategory, Lo
 
     Optional<AssetCategory> findByIdAndUserId(Long categoryId, Long id);
 
+    Optional<AssetCategory> findByCategoryNameAndUserId(String categoryName, Long id);
+
 }

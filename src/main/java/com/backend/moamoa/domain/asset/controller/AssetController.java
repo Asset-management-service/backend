@@ -2,16 +2,17 @@ package com.backend.moamoa.domain.asset.controller;
 
 import com.backend.moamoa.domain.asset.dto.request.AssetCategoryRequest;
 import com.backend.moamoa.domain.asset.dto.request.BudgetRequest;
+import com.backend.moamoa.domain.asset.dto.request.CreateRevenueExpenditureRequest;
 import com.backend.moamoa.domain.asset.dto.request.ExpenditureRequest;
-import com.backend.moamoa.domain.asset.dto.response.AssetCategoriesResponse;
-import com.backend.moamoa.domain.asset.dto.response.AssetCategoryResponse;
-import com.backend.moamoa.domain.asset.dto.response.CreateBudgetResponse;
-import com.backend.moamoa.domain.asset.dto.response.CreateExpenditureResponse;
+import com.backend.moamoa.domain.asset.dto.response.*;
 import com.backend.moamoa.domain.asset.service.AssetService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
 
 @RestController
 @RequiredArgsConstructor
@@ -44,6 +45,17 @@ public class AssetController {
     @PostMapping("/expenditure")
     public ResponseEntity addExpenditure(@RequestBody ExpenditureRequest request) {
         return ResponseEntity.ok(new CreateExpenditureResponse(assetService.addExpenditure(request)));
+    }
+
+    @PostMapping("/revenueExpenditure")
+    public ResponseEntity addRevenueExpenditure(@RequestBody CreateRevenueExpenditureRequest request) {
+        return ResponseEntity.ok(new CreateRevenueExpenditureResponse(assetService.addRevenueExpenditure(request)));
+    }
+
+    @GetMapping("/revenueExpenditure")
+    public ResponseEntity getRevenueExpenditures(@RequestParam LocalDate month, Pageable pageable) {
+        assetService.findRevenueExpenditureByMonth(month, pageable);
+        return null;
     }
 
 }
