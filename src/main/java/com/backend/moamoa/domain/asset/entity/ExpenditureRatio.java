@@ -1,17 +1,15 @@
 package com.backend.moamoa.domain.asset.entity;
 
 import com.backend.moamoa.domain.user.entity.User;
-import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 
-import static javax.persistence.FetchType.*;
+import static javax.persistence.FetchType.LAZY;
 import static javax.persistence.GenerationType.IDENTITY;
-import static lombok.AccessLevel.*;
+import static lombok.AccessLevel.PROTECTED;
 
 @Entity
 @Getter
@@ -23,13 +21,13 @@ public class ExpenditureRatio {
     @Column(name = "expenditure_ratio_id")
     private Long id;
 
-    @NotNull
+    @Column(nullable = false)
     private int fixed;
 
-    @NotNull
+    @Column(nullable = false)
     private int variable;
 
-    @ManyToOne(fetch = LAZY)
+    @OneToOne(fetch = LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 

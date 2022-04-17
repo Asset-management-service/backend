@@ -1,16 +1,13 @@
 package com.backend.moamoa.domain.asset.repository;
 
-import com.backend.moamoa.domain.asset.entity.AssetCategory;
 import com.backend.moamoa.domain.asset.entity.AssetCategoryType;
-import com.backend.moamoa.domain.asset.entity.QAssetCategory;
-import com.backend.moamoa.domain.user.entity.QUser;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
-import static com.backend.moamoa.domain.asset.entity.QAssetCategory.*;
-import static com.backend.moamoa.domain.user.entity.QUser.*;
+import static com.backend.moamoa.domain.asset.entity.QAssetCategory.assetCategory;
+import static com.backend.moamoa.domain.user.entity.QUser.user;
 
 @RequiredArgsConstructor
 public class AssetCategoryRepositoryImpl implements AssetCategoryRepositoryCustom{

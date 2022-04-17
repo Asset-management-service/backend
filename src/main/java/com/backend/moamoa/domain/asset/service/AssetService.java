@@ -85,6 +85,8 @@ public class AssetService {
     }
 
     public void findRevenueExpenditureByMonth(LocalDate month, Pageable pageable) {
+        User user = userRepository.findById(1L).get();
+        
         revenueExpenditureRepository.findRevenueAndExpenditureByMonth(month, pageable);
     }
 }
