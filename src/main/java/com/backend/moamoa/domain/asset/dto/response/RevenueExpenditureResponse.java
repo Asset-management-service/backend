@@ -1,5 +1,6 @@
 package com.backend.moamoa.domain.asset.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.querydsl.core.annotations.QueryProjection;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,9 +12,9 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 public class RevenueExpenditureResponse {
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
     private LocalDate date;
 
     private String categoryName;
@@ -26,18 +27,12 @@ public class RevenueExpenditureResponse {
 
     private int remainingBudget;
 
-    private int revenue;
-
-    private int expenditure;
-
-
     @QueryProjection
-    public RevenueExpenditureResponse(LocalDate date, String categoryName, String content, String paymentMethod, int revenue, int expenditure) {
+    public RevenueExpenditureResponse(LocalDate date, String categoryName, String content, String paymentMethod, int cost) {
         this.date = date;
         this.categoryName = categoryName;
         this.content = content;
         this.paymentMethod = paymentMethod;
-        this.revenue = revenue;
-        this.expenditure = expenditure;
+        this.cost = cost;
     }
 }

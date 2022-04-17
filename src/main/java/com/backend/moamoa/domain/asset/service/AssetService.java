@@ -4,6 +4,7 @@ import com.backend.moamoa.domain.asset.dto.request.AssetCategoryRequest;
 import com.backend.moamoa.domain.asset.dto.request.BudgetRequest;
 import com.backend.moamoa.domain.asset.dto.request.CreateRevenueExpenditureRequest;
 import com.backend.moamoa.domain.asset.dto.request.ExpenditureRequest;
+import com.backend.moamoa.domain.asset.dto.response.RevenueExpenditureResponse;
 import com.backend.moamoa.domain.asset.entity.AssetCategory;
 import com.backend.moamoa.domain.asset.entity.Budget;
 import com.backend.moamoa.domain.asset.entity.ExpenditureRatio;
@@ -17,6 +18,7 @@ import com.backend.moamoa.domain.user.repository.UserRepository;
 import com.backend.moamoa.global.exception.CustomException;
 import com.backend.moamoa.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -84,9 +86,8 @@ public class AssetService {
                 .build()).getId();
     }
 
-    public void findRevenueExpenditureByMonth(LocalDate month, Pageable pageable) {
+    public Page<RevenueExpenditureResponse> findRevenueExpenditureByMonth(String month, Pageable pageable) {
         User user = userRepository.findById(1L).get();
-        
-        revenueExpenditureRepository.findRevenueAndExpenditureByMonth(month, pageable);
+        return revenueExpenditureRepository.findRevenueAndExpenditureByMonth(LocalDate.parse(month + "-01"), pageable, user.getId());
     }
 }
