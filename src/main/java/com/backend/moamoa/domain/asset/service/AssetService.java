@@ -35,6 +35,9 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class AssetService {
 
+    public static final String TYPE_REVENUE = "REVENUE";
+    public static final String TYPE_EXPENDITURE = "EXPENDITURE";
+
     private final UserRepository userRepository;
     private final AssetCategoryRepository assetCategoryRepository;
     private final BudgetRepository budgetRepository;
@@ -64,6 +67,7 @@ public class AssetService {
 
     public List<String> getCategories(String categoryType) {
         User user = userRepository.findById(1L).get();
+
         return assetCategoryRepository.findByAssetCategoryTypeAndUserId(categoryType, user.getId());
     }
 
@@ -72,6 +76,7 @@ public class AssetService {
         User user = userRepository.findById(1L).get();
         AssetCategory category = assetCategoryRepository.findByIdAndUserId(categoryId, user.getId())
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_ASSET_CATEGORY));
+
         assetCategoryRepository.delete(category);
     }
 
@@ -92,29 +97,27 @@ public class AssetService {
 
     public RevenueExpenditureSumResponse findRevenueExpenditureByMonth(String month, Pageable pageable) {
         User user = userRepository.findById(1L).get();
+
         Page<RevenueExpenditureResponse> revenueExpenditure = revenueExpenditureRepository.findRevenueAndExpenditureByMonth(LocalDate.parse(month + "-01"), pageable, user.getId());
+
         Budget budget = budgetRepository.findBudgetAmountByUserId(user.getId())
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_BUDGET));
-        int revenue = revenueExpenditure
-                .stream()
-                .filter(r -> Objects.isNull(r.getPaymentMethod()))
-                .mapToInt(RevenueExpenditureResponse::getCost)
-                .sum();
 
-        int expenditure = revenueExpenditure
-                .stream()
-                .filter(r -> !Objects.isNull(r.getPaymentMethod()))
-                .mapToInt(RevenueExpenditureResponse::getCost)
-                .sum();
+        List<RevenueExpenditure> revenueExpenditureList = revenueExpenditureRepository.findRevenueExpenditure(LocalDate.parse(month + "-01"), user.getId());
 
+        int revenue = getRevenueExpenditure(revenueExpenditureList, TYPE_REVENUE);
+        int expenditure = getRevenueExpenditure(revenueExpenditureList, TYPE_EXPENDITURE);
         int remainingBudget = budget.getBudgetAmount() - expenditure;
 
-        RevenueExpenditureSumResponse sumResponse = new RevenueExpenditureSumResponse();
-        sumResponse.setRevenueExpenditureResponses(revenueExpenditure);
-        sumResponse.setTotalRevenue(revenue);
-        sumResponse.setTotalExpenditure(expenditure);
-        sumResponse.setRemainingBudget(remainingBudget);
+        return new RevenueExpenditureSumResponse(revenue, expenditure, remainingBudget, revenueExpenditure);
 
-        return sumResponse;
+    }
+
+    private int getRevenueExpenditure(List<RevenueExpenditure> revenueExpenditureList, String type) {
+        return revenueExpenditureList
+                    .stream()
+                    .filter(r -> r.getRevenueExpenditureType().toString().equals(type))
+                    .mapToInt(RevenueExpenditure::getCost)
+                    .sum();
     }
 }
