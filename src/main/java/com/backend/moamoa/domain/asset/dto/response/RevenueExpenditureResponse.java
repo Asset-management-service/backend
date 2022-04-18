@@ -2,7 +2,6 @@ package com.backend.moamoa.domain.asset.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.querydsl.core.annotations.QueryProjection;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -24,8 +23,6 @@ public class RevenueExpenditureResponse {
     private String paymentMethod;
 
     private int cost;
-
-    private int remainingBudget;
 
     @QueryProjection
     public RevenueExpenditureResponse(LocalDate date, String categoryName, String content, String paymentMethod, int cost) {

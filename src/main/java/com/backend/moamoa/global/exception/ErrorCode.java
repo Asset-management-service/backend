@@ -14,6 +14,8 @@ public enum ErrorCode {
 
     NOT_FOUND_POST(HttpStatus.NOT_FOUND, "해당 글을 찾을 수 없습니다."),
 
+    NOT_FOUND_BUDGET(HttpStatus.NOT_FOUND, "예산 금액을 찾을 수 없습니다."),
+
     NOT_FOUND_ASSET_CATEGORY(HttpStatus.NOT_FOUND, "해당 카테고리를 찾을 수 없습니다."),
 
     NOT_FOUND_MEMBER(HttpStatus.NOT_FOUND, "해당 유저를 찾을 수 없습니다."),

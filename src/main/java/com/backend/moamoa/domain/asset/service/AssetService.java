@@ -5,6 +5,7 @@ import com.backend.moamoa.domain.asset.dto.request.BudgetRequest;
 import com.backend.moamoa.domain.asset.dto.request.CreateRevenueExpenditureRequest;
 import com.backend.moamoa.domain.asset.dto.request.ExpenditureRequest;
 import com.backend.moamoa.domain.asset.dto.response.RevenueExpenditureResponse;
+import com.backend.moamoa.domain.asset.dto.response.RevenueExpenditureSumResponse;
 import com.backend.moamoa.domain.asset.entity.AssetCategory;
 import com.backend.moamoa.domain.asset.entity.Budget;
 import com.backend.moamoa.domain.asset.entity.ExpenditureRatio;
@@ -24,7 +25,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -86,8 +90,31 @@ public class AssetService {
                 .build()).getId();
     }
 
-    public Page<RevenueExpenditureResponse> findRevenueExpenditureByMonth(String month, Pageable pageable) {
+    public RevenueExpenditureSumResponse findRevenueExpenditureByMonth(String month, Pageable pageable) {
         User user = userRepository.findById(1L).get();
-        return revenueExpenditureRepository.findRevenueAndExpenditureByMonth(LocalDate.parse(month + "-01"), pageable, user.getId());
+        Page<RevenueExpenditureResponse> revenueExpenditure = revenueExpenditureRepository.findRevenueAndExpenditureByMonth(LocalDate.parse(month + "-01"), pageable, user.getId());
+        Budget budget = budgetRepository.findBudgetAmountByUserId(user.getId())
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_BUDGET));
+        int revenue = revenueExpenditure
+                .stream()
+                .filter(r -> Objects.isNull(r.getPaymentMethod()))
+                .mapToInt(RevenueExpenditureResponse::getCost)
+                .sum();
+
+        int expenditure = revenueExpenditure
+                .stream()
+                .filter(r -> !Objects.isNull(r.getPaymentMethod()))
+                .mapToInt(RevenueExpenditureResponse::getCost)
+                .sum();
+
+        int remainingBudget = budget.getBudgetAmount() - expenditure;
+
+        RevenueExpenditureSumResponse sumResponse = new RevenueExpenditureSumResponse();
+        sumResponse.setRevenueExpenditureResponses(revenueExpenditure);
+        sumResponse.setTotalRevenue(revenue);
+        sumResponse.setTotalExpenditure(expenditure);
+        sumResponse.setRemainingBudget(remainingBudget);
+
+        return sumResponse;
     }
 }

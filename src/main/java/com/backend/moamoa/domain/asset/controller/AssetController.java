@@ -7,7 +7,6 @@ import com.backend.moamoa.domain.asset.dto.request.ExpenditureRequest;
 import com.backend.moamoa.domain.asset.dto.response.*;
 import com.backend.moamoa.domain.asset.service.AssetService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -52,7 +51,7 @@ public class AssetController {
     }
 
     @GetMapping("/revenueExpenditure")
-    public ResponseEntity<Page<RevenueExpenditureResponse>> getRevenueExpenditures(@RequestParam String month, Pageable pageable) {
+    public ResponseEntity<RevenueExpenditureSumResponse> getRevenueExpenditures(@RequestParam String month, Pageable pageable) {
         return ResponseEntity.ok(assetService.findRevenueExpenditureByMonth(month, pageable));
 
     }
