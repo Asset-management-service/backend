@@ -1,12 +1,11 @@
 package com.backend.moamoa.domain.user.oauth.handler;
 
-import com.backend.moamoa.domain.user.oauth.dto.response.TokenResponse;
-import com.backend.moamoa.domain.user.oauth.entity.ProviderType;
+import com.backend.moamoa.domain.user.dto.response.TokenResponse;
+import com.backend.moamoa.domain.user.oauth.entity.enums.ProviderType;
 import com.backend.moamoa.domain.user.oauth.info.OAuth2UserInfo;
 import com.backend.moamoa.domain.user.oauth.info.OAuth2UserInfoFactory;
-import com.backend.moamoa.domain.user.oauth.provider.AuthTokenProvider;
 import com.backend.moamoa.domain.user.oauth.repository.OAuth2AuthorizationRequestBasedOnCookieRepository;
-import com.backend.moamoa.global.config.AppProperties;
+import com.backend.moamoa.domain.user.oauth.token.JwtProvider;
 import com.backend.moamoa.global.utils.CookieUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -26,16 +25,16 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-import static com.backend.moamoa.domain.user.oauth.repository.OAuth2AuthorizationRequestBasedOnCookieRepository.REDIRECT_URI_PARAM_COOKIE_NAME;
-import static com.backend.moamoa.domain.user.oauth.repository.OAuth2AuthorizationRequestBasedOnCookieRepository.REFRESH_TOKEN;
 
 @Component
 @RequiredArgsConstructor
 public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
-    private final AuthTokenProvider tokenProvider;
-    private final AppProperties appProperties;
-    private final OAuth2AuthorizationRequestBasedOnCookieRepository authorizationRequestRepository;
+    public final static String OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME = "oauth2_auth_request";
+    public final static String REDIRECT_URI_PARAM_COOKIE_NAME = "redirect_uri";
+    public final static String REFRESH_TOKEN = "refresh_token";
+
+    private final JwtProvider jwtProvider;
     private final RedisTemplate redisTemplate;
 
     @Override
@@ -64,16 +63,12 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         OidcUser user = ((OidcUser) authentication.getPrincipal());
         OAuth2UserInfo userInfo = OAuth2UserInfoFactory.getOAuth2UserInfo(providerType, user.getAttributes());
 
-        TokenResponse tokenResponse = tokenProvider.createTokenResponse(userInfo.getId(), appProperties);
+        TokenResponse tokenResponse = jwtProvider.createTokenResponse(userInfo.getId());
 
-        // refresh 토큰 설정
-        long refreshTokenExpiry = appProperties.getAuth().getRefreshTokenExpiry();
-
-        // Redis에 refreshToken 저장
         redisTemplate.opsForValue()
-                .set("RT:" + userInfo.getId(), tokenResponse.getRefreshToken(), refreshTokenExpiry, TimeUnit.MILLISECONDS);
+                .set("RT:" + userInfo.getId(), tokenResponse.getRefreshToken(), tokenResponse.getRefreshTokenExpireDate(), TimeUnit.MILLISECONDS);
 
-        int cookieMaxAge = (int) refreshTokenExpiry / 60;
+        int cookieMaxAge = (int) tokenResponse.getRefreshTokenExpireDate() / 60;
 
         CookieUtil.deleteCookie(request, response, REFRESH_TOKEN);
         CookieUtil.addCookie(response, REFRESH_TOKEN, tokenResponse.getRefreshToken(), cookieMaxAge);
@@ -85,7 +80,8 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
     protected void clearAuthenticationAttributes(HttpServletRequest request, HttpServletResponse response) {
         super.clearAuthenticationAttributes(request);
-        authorizationRequestRepository.removeAuthorizationRequestCookies(request, response);
+        CookieUtil.deleteCookie(request, response, OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME);
+        CookieUtil.deleteCookie(request, response, REDIRECT_URI_PARAM_COOKIE_NAME);
     }
 
 }

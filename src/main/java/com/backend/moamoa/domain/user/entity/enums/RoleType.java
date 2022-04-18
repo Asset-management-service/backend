@@ -1,4 +1,4 @@
-package com.backend.moamoa.domain.user.enums;
+package com.backend.moamoa.domain.user.entity.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

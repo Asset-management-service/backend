@@ -1,4 +1,4 @@
-package com.backend.moamoa.domain.user.oauth.dto.request;
+package com.backend.moamoa.domain.user.dto.request;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -11,15 +11,15 @@ import javax.validation.constraints.NotNull;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@ApiModel("토큰 재발급 요청 정보")
-public class TokenRequest {
+@ApiModel("로그아웃 요청 정보")
+public class LogoutRequest {
 
     @NotNull
-    @ApiModelProperty(value = "만료된 accessToken", required = true)
+    @ApiModelProperty(value = "유저의 accessToken", example = "", required = true)
     private String accessToken;
 
     @NotNull
-    @ApiModelProperty(value = "유저의 refreshToken", required = true)
+    @ApiModelProperty(value = "유저의 refreshToken", example = "", required = true)
     private String refreshToken;
 
 }

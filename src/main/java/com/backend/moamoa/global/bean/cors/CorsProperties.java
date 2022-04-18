@@ -1,4 +1,4 @@
-package com.backend.moamoa.global.config;
+package com.backend.moamoa.global.bean.cors;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -8,6 +8,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Setter
 @ConfigurationProperties(prefix = "cors")
 public class CorsProperties {
+
     private String allowedOrigins;
 
     private String allowedMethods;

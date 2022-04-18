@@ -1,7 +1,7 @@
 package com.backend.moamoa.domain.user.oauth.info;
 
 
-import com.backend.moamoa.domain.user.oauth.entity.ProviderType;
+import com.backend.moamoa.domain.user.oauth.entity.enums.ProviderType;
 import com.backend.moamoa.domain.user.oauth.info.impl.GoogleOAuth2UserInfo;
 import com.backend.moamoa.domain.user.oauth.info.impl.KakaoOAuth2UserInfo;
 import com.backend.moamoa.domain.user.oauth.info.impl.NaverOAuth2UserInfo;

@@ -11,7 +11,6 @@ import com.backend.moamoa.domain.user.dto.response.UserResponse;
 import com.backend.moamoa.domain.user.entity.User;
 import com.backend.moamoa.domain.user.entity.UserMailAuth;
 import com.backend.moamoa.domain.user.repository.UserRepository;
-import com.backend.moamoa.global.common.ApiResponse;
 import com.backend.moamoa.global.exception.CustomException;
 import com.backend.moamoa.global.exception.ErrorCode;
 import com.backend.moamoa.global.utils.UserUtil;
@@ -40,9 +39,9 @@ public class UserService {
      *
      * @return User 현재 유저
      */
-    public ApiResponse getUser() {
+    public UserResponse getUser() {
         User user = userUtil.findCurrentUser();
-        return ApiResponse.success("user", user);
+        return UserResponse.toUserResponse(user);
 
     }
 
@@ -55,6 +54,20 @@ public class UserService {
     @Transactional
     public UserResponse update(UserUpdateRequest userUpdateRequest) {
         User user = userUtil.findCurrentUser();
+        // 닉네임 중복 확인
+        if (userRepository.existsByNickname(userUpdateRequest.getNickname())) {
+            throw new CustomException(ErrorCode.ALREADY_NICKNAME_EXISTS);
+        }
+
+        // 휴대폰 번호 중복 확인
+        if (userRepository.existsByPhoneNum(userUpdateRequest.getPhoneNum())) {
+            throw new CustomException(ErrorCode.ALREADY_PHONE_NUM_EXISTS);
+        }
+
+        // 이메일 중복 확인
+        if (userRepository.existsByEmail(userUpdateRequest.getEmail())) {
+            throw new CustomException(ErrorCode.ALREADY_EMAIL_EXISTS);
+        }
         user.update(userUpdateRequest);
         return UserResponse.toUserResponse(user);
     }
