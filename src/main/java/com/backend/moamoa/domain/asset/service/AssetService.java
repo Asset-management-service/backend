@@ -35,8 +35,8 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class AssetService {
 
-    public static final String TYPE_REVENUE = "REVENUE";
-    public static final String TYPE_EXPENDITURE = "EXPENDITURE";
+    private static final String TYPE_REVENUE = "REVENUE";
+    private static final String TYPE_EXPENDITURE = "EXPENDITURE";
 
     private final UserRepository userRepository;
     private final AssetCategoryRepository assetCategoryRepository;
