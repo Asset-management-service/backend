@@ -41,7 +41,7 @@ public class CommentService {
         Comment parent = commentRepository.findById(parentId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COMMENT));
         Comment comment = commentRepository.save(Comment.createComment(parent, user, post, commentRequest.getContent()));
-        return new CommentResponse(comment.getId());
+        return new CommentResponse(comment.getId(), comment.getUser().getNickname(), comment.getTimeEntity().getCreatedDate());
     }
 
     private CommentResponse createParentComment(CommentRequest commentRequest, User user, Post post) {
@@ -50,7 +50,7 @@ public class CommentService {
                 .post(post)
                 .content(commentRequest.getContent())
                 .build());
-        return new CommentResponse(comment.getId());
+        return new CommentResponse(comment.getId(), comment.getUser().getNickname(), comment.getTimeEntity().getCreatedDate());
     }
 
     @Transactional
