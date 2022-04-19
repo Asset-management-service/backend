@@ -109,10 +109,13 @@ public class AssetService {
         int expenditure = getRevenueExpenditure(revenueExpenditureList, TYPE_EXPENDITURE);
         int remainingBudget = budget.getBudgetAmount() - expenditure;
 
-        return new RevenueExpenditureSumResponse(revenue, expenditure, remainingBudget, revenueExpenditure);
+        return RevenueExpenditureSumResponse.of(revenue, expenditure, remainingBudget, revenueExpenditure);
 
     }
 
+    /**
+     * 수익 지출 타입을 받아서 합을 반환해주는 메소드
+     */
     private int getRevenueExpenditure(List<RevenueExpenditure> revenueExpenditureList, String type) {
         return revenueExpenditureList
                     .stream()

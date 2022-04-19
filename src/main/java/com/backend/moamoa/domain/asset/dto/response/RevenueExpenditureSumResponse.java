@@ -27,4 +27,8 @@ public class RevenueExpenditureSumResponse {
     @ApiModelProperty(value = "수익 지출 내역")
     private Page<RevenueExpenditureResponse> revenueExpenditureResponses;
 
+
+    public static RevenueExpenditureSumResponse of(int totalRevenue, int totalExpenditure, int remainingBudget, Page<RevenueExpenditureResponse> revenueExpenditureResponses) {
+        return new RevenueExpenditureSumResponse(totalRevenue, totalExpenditure, remainingBudget, revenueExpenditureResponses);
+    }
 }
