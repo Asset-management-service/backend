@@ -15,6 +15,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.BeanIds;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -34,6 +35,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final RedisTemplate redisTemplate;
 
     @Override
+    public void configure(WebSecurity web) throws Exception {
+        web.ignoring().mvcMatchers("/exception/**",
+                "/swagger-ui/**", "/swagger-resources/**", "/v2/api-docs/**");
+    }
+
+    @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
                     .cors()
@@ -48,6 +55,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                     .authorizeRequests()
                     .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
+                    .anyRequest().authenticated()
                 .and()
                     .oauth2Login()
                     .authorizationEndpoint()
