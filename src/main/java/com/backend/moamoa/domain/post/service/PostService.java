@@ -6,10 +6,10 @@ import com.backend.moamoa.domain.post.dto.response.*;
 import com.backend.moamoa.domain.post.entity.*;
 import com.backend.moamoa.domain.post.repository.post.*;
 import com.backend.moamoa.domain.user.entity.User;
-import com.backend.moamoa.domain.user.repository.UserRepository;
 import com.backend.moamoa.global.exception.CustomException;
 import com.backend.moamoa.global.exception.ErrorCode;
 import com.backend.moamoa.global.s3.S3Uploader;
+import com.backend.moamoa.global.utils.UserUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -30,19 +30,19 @@ import java.util.stream.Collectors;
 public class PostService {
 
     private final PostRepository postRepository;
-    private final UserRepository userRepository;
     private final PostCategoryRepository postCategoryRepository;
     private final PostLikeRepository postLikeRepository;
     private final ScrapRepository scrapRepository;
     private final S3Uploader s3Uploader;
     private final PostImageRepository postImageRepository;
+    private final UserUtil userUtil;
 
 
     @Transactional
     public PostCreateResponse createPost(PostRequest postRequest) {
         PostCategory postCategory = postCategoryRepository.findByCategoryName(postRequest.getCategoryName())
                 .orElseGet(() -> PostCategory.createCategory(postRequest.getCategoryName()));
-        User user = userRepository.findById(1L).get();
+        User user = userUtil.findCurrentUser();
         Post post = postRepository.save(Post.createPost(postRequest.getTitle(), postRequest.getContent(), user, postCategory));
         List<String> postImages = uploadPostImages(postRequest, post);
 
@@ -73,7 +73,7 @@ public class PostService {
 
     @Transactional
     public PostUpdateResponse updatePost(PostUpdateRequest request) {
-        User user = userRepository.findById(1L).get();
+        User user = userUtil.findCurrentUser();
         Post post = postRepository.findByIdAndUser(request.getPostId(), user.getId())
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_POST));
 
@@ -122,7 +122,7 @@ public class PostService {
 
     @Transactional
     public PostResponse deletePost(Long postId) {
-        User user = userRepository.findById(1L).get();
+        User user = userUtil.findCurrentUser();
         Post post = postRepository.findByIdAndUser(postId, user.getId())
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_POST));
 
@@ -136,7 +136,7 @@ public class PostService {
      */
     @Transactional
     public PostOneResponse getOnePost(Long postId) {
-        User user = userRepository.findById(1L).get();
+        User user = userUtil.findCurrentUser();
         return postRepository.findOnePostById(postId, user.getId())
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_POST));
     }
@@ -153,7 +153,7 @@ public class PostService {
 
     @Transactional
     public LikeResponse likePost(Long postId) {
-        User user = userRepository.findById(1L).get();
+        User user = userUtil.findCurrentUser();
         Post post = getPost(postId);
         Optional<PostLike> postLike = postLikeRepository.findByUserAndPost(user, post);
 
@@ -167,7 +167,7 @@ public class PostService {
 
     @Transactional
     public ScrapResponse scrapPost(Long postId) {
-        User user = userRepository.findById(1L).get();
+        User user = userUtil.findCurrentUser();
         Post post = getPost(postId);
 
         Optional<Scrap> scrap = scrapRepository.findByUserAndPost(user, post);

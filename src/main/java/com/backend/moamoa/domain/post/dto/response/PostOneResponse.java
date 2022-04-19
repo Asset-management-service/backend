@@ -60,6 +60,9 @@ public class PostOneResponse {
     @ApiModelProperty(value = "해당 게시글의 스크랩 본인 확인")
     private boolean myScrap;
 
+    @ApiModelProperty(value = "해당 게시글에 저장된 이미지 경로")
+    private List<String> imageUrl = new ArrayList<>();
+
     @ApiModelProperty(value = "해당 게시글의 댓글")
     private List<PostOneCommentResponse> comments = new ArrayList<>();
 

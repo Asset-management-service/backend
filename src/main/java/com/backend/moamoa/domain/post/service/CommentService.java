@@ -10,9 +10,9 @@ import com.backend.moamoa.domain.post.entity.Post;
 import com.backend.moamoa.domain.post.repository.comment.CommentRepository;
 import com.backend.moamoa.domain.post.repository.post.PostRepository;
 import com.backend.moamoa.domain.user.entity.User;
-import com.backend.moamoa.domain.user.repository.UserRepository;
 import com.backend.moamoa.global.exception.CustomException;
 import com.backend.moamoa.global.exception.ErrorCode;
+import com.backend.moamoa.global.utils.UserUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,13 +24,13 @@ import java.util.Objects;
 @Transactional(readOnly = true)
 public class CommentService {
 
-    private final UserRepository userRepository;
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
+    private final UserUtil userUtil;
 
     @Transactional
     public CommentResponse createComment(CommentRequest commentRequest) {
-        User user = userRepository.findById(2L).get();
+        User user = userUtil.findCurrentUser();
         Post post = postRepository.findById(commentRequest.getPostId())
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_POST));
         Long parentId = commentRequest.getParentId();
@@ -55,7 +55,7 @@ public class CommentService {
 
     @Transactional
     public CommentDeleteResponse deleteComment(Long commentId) {
-        User user = userRepository.findById(1L).get();
+        User user = userUtil.findCurrentUser();
 
         commentRepository.delete(getComment(commentId, user));
 
@@ -64,7 +64,7 @@ public class CommentService {
 
     @Transactional
     public CommentUpdateResponse updateComment(CommentUpdateRequest request) {
-        User user = userRepository.findById(1L).get();
+        User user = userUtil.findCurrentUser();
         Comment comment = getComment(request.getCommentId(), user);
         comment.updateContent(request.getContent());
 
