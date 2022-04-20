@@ -44,7 +44,7 @@ public class CommentController {
         return commentService.deleteComment(commentId);
     }
 
-    @ApiOperation(value = "댓글 업데이트", notes = "댓글의 ID 와 내용을 입력받아 해당 댓글을 갱신하는 API")
+    @ApiOperation(value = "댓글 수정", notes = "댓글의 ID 와 내용을 입력받아 해당 댓글을 갱신하는 API")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "해당 댓글이 정상적으로 갱신된 경우"),
             @ApiResponse(responseCode = "404", description = "회원의 Id 값을 찾지 못한 경우"),

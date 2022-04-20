@@ -7,7 +7,6 @@ import com.backend.moamoa.domain.user.oauth.info.OAuth2UserInfo;
 import com.backend.moamoa.domain.user.oauth.info.OAuth2UserInfoFactory;
 import com.backend.moamoa.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -21,7 +20,6 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private final UserRepository userRepository;
@@ -44,7 +42,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         ProviderType providerType = ProviderType.valueOf(userRequest.getClientRegistration().getRegistrationId().toUpperCase());
 
         OAuth2UserInfo userInfo = OAuth2UserInfoFactory.getOAuth2UserInfo(providerType, user.getAttributes());
-        log.info("CustomOauth2USer!!");
         Optional<User> savedUser = userRepository.findByUserId(userInfo.getId());
 
         if (savedUser.isPresent()) {
