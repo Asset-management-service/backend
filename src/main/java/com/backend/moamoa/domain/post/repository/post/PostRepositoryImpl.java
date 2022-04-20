@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import static com.backend.moamoa.domain.post.entity.QComment.comment;
 import static com.backend.moamoa.domain.post.entity.QPost.post;
 import static com.backend.moamoa.domain.post.entity.QPostCategory.postCategory;
+import static com.backend.moamoa.domain.post.entity.QPostImage.postImage;
 import static com.backend.moamoa.domain.post.entity.QPostLike.postLike;
 import static com.backend.moamoa.domain.post.entity.QScrap.scrap;
 import static com.backend.moamoa.domain.user.entity.QUser.user;
@@ -65,6 +66,15 @@ public class PostRepositoryImpl implements PostCustomRepository {
         if (response.isEmpty()) {
             return Optional.empty();
         }
+
+        List<String> postImages = queryFactory
+                .select(postImage.imageUrl)
+                .from(postImage)
+                .innerJoin(postImage.post, post)
+                .where(post.id.eq(postId))
+                .fetch();
+
+        response.get().setImageUrl(postImages);
 
         List<PostOneCommentResponse> comments = queryFactory
                 .select(new QPostOneCommentResponse(
