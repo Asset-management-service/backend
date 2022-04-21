@@ -52,11 +52,11 @@ public class PostRepositoryImpl implements PostCustomRepository {
                                 .exists(),
                         JPAExpressions
                                 .selectFrom(postLike)
-                                .where(postLike.post.eq(post).and(user.id.eq(userId)))
+                                .where(postLike.post.eq(post).and(postLike.user.id.eq(userId)))
                                 .exists(),
                         JPAExpressions
                                 .selectFrom(scrap)
-                                .where(scrap.post.eq(post).and(user.id.eq(userId)))
+                                .where(scrap.post.eq(post).and(scrap.user.id.eq(userId)))
                                 .exists()))
                 .from(post)
                 .innerJoin(post.user, user)

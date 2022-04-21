@@ -20,8 +20,7 @@ public class CommentRepositoryImpl implements CommentCustomRepository {
         return Optional.ofNullable(queryFactory
                 .selectFrom(comment)
                 .where(user.id.eq(userId).and(comment.id.eq(commentId)))
-                .innerJoin(comment.post, post)
-                .innerJoin(post.user, user)
+                .innerJoin(comment.user, user)
                 .fetchOne());
     }
 
