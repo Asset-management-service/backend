@@ -35,6 +35,10 @@ public class Budget {
         this.user = user;
     }
 
+    public void updateBudgetAmount(int budgetAmount){
+        this.budgetAmount = budgetAmount;
+    }
+
     public static Budget createBudget(int budgetAmount, User user) {
         return Budget.builder()
                 .budgetAmount(budgetAmount)

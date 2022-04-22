@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @Api(tags = "가계부 API")
@@ -41,7 +42,7 @@ public class AssetController {
             @ApiResponse(responseCode = "200", description = "한달 예산 금액이 정상적으로 설정된 경우"),
             @ApiResponse(responseCode = "404", description = "회원 Id를 찾지 못한 경우")
     })
-    @PostMapping("/budget")
+    @PutMapping("/budget")
     public ResponseEntity<CreateBudgetResponse> addBudget(@RequestBody BudgetRequest request) {
         return ResponseEntity.ok(new CreateBudgetResponse(assetService.addBudget(request)));
     }
@@ -74,8 +75,8 @@ public class AssetController {
             @ApiResponse(responseCode = "404", description = "회원 Id를 찾지 못한 경우"),
             @ApiResponse(responseCode = "400", description = "고정비, 변동비의 합이 100%가 아닌 경우")
     })
-    @PostMapping("/expenditure")
-    public ResponseEntity<CreateExpenditureResponse> addExpenditure(@RequestBody ExpenditureRequest request) {
+    @PutMapping("/expenditure")
+    public ResponseEntity<CreateExpenditureResponse> addExpenditure(@Validated @RequestBody ExpenditureRequest request) {
         return ResponseEntity.ok(new CreateExpenditureResponse(assetService.addExpenditure(request)));
     }
 
