@@ -1,5 +1,7 @@
 package com.backend.moamoa.domain.settlement.service;
 
+import com.backend.moamoa.domain.asset.entity.AssetCategory;
+import com.backend.moamoa.domain.asset.entity.AssetCategoryType;
 import com.backend.moamoa.domain.settlement.dto.response.*;
 import com.backend.moamoa.domain.settlement.dto.response.settle.MonthSettleResponse;
 import com.backend.moamoa.domain.settlement.dto.response.settle.WeekSettleResponse;
@@ -35,7 +37,6 @@ import static java.time.temporal.TemporalAdjusters.lastDayOfYear;
 @Transactional(readOnly = true)
 public class SettlementService {
 
-    private static final String TYPE_REVENUE = "REVENUE";
     private static final String TYPE_EXPENDITURE = "EXPENDITURE";
     private static final String TYPE_NET_PROFIT = "NET_PROFIT";
     private static final String TYPE_FIXED = "FIXED";
@@ -137,17 +138,26 @@ public class SettlementService {
             revenueExpenditure = revenueExpenditureRepository.findRevenueYearExpenditure(LocalDate.parse(date + "-01-01"), user.getId());
         }
 
-        Integer totalExp = getRevenueExpenditure(revenueExpenditure, TYPE_EXPENDITURE);
-        Integer totalRevenue = getRevenueExpenditure(revenueExpenditure, TYPE_REVENUE);
-        Integer totalFixed = getExpenditureByCategory(revenueExpenditure, TYPE_FIXED);
-        Integer totalVariable = getExpenditureByCategory(revenueExpenditure, TYPE_VARIABLE);
+        TotalResponse totalResponse = new TotalResponse();
+        getTotalCost(revenueExpenditure, totalResponse);
 
-        int totalFixedPercent = (int) ((double) totalFixed / totalExp * 100.0);
-        int totalVariablePercent = (int) ((double) totalVariable / totalExp * 100.0);
+        int totalFixedPercent = (int) ((double) totalResponse.getTotalFixed() / totalResponse.getTotalExp() * 100.0);
+        int totalVariablePercent = (int) ((double) totalResponse.getTotalVariable() / totalResponse.getTotalExp() * 100.0);
 
-        List<String> fixed = assetCategoryRepository.findByAssetCategoryTypeAndUserId(TYPE_FIXED, user.getId());
-        List<String> variable = assetCategoryRepository.findByAssetCategoryTypeAndUserId(TYPE_VARIABLE, user.getId());
-        List<String> revenues = assetCategoryRepository.findByAssetCategoryTypeAndUserId(TYPE_REVENUE, user.getId());
+        List<AssetCategory> assetCategory = assetCategoryRepository.findByUser(user);
+        List<String> fixed = new ArrayList<>();
+        List<String> variable = new ArrayList<>();
+        List<String> revenues = new ArrayList<>();
+
+        for (AssetCategory category : assetCategory) {
+            if (category.getAssetCategoryType().equals(AssetCategoryType.FIXED)) {
+                fixed.add(category.getCategoryName());
+            } else if (category.getAssetCategoryType().equals(AssetCategoryType.VARIABLE)) {
+                variable.add(category.getCategoryName());
+            } else if (category.getAssetCategoryType().equals(AssetCategoryType.REVENUE)) {
+                revenues.add(category.getCategoryName());
+            }
+        }
 
         ExpenditureRatio expenditureRatio = expenditureRatioRepository.findByUser(user).orElseThrow(
                 () -> new CustomException(ErrorCode.NOT_FOUND_RATIO));
@@ -163,15 +173,15 @@ public class SettlementService {
         List<CostResponse> costRes = new ArrayList<>();
         List<RevenueResponse> revenueRes = new ArrayList<>();
 
-        setCostResponse(revenueExpenditure, totalExp, totalFixed, totalFixedPercent, fixed, fixedRes);
-        setCostResponse(revenueExpenditure, totalExp, totalVariable, totalVariablePercent, variable, costRes);
+        setCostResponse(revenueExpenditure, totalResponse.getTotalExp(), totalResponse.getTotalVariable(), totalFixedPercent, fixed, fixedRes);
+        setCostResponse(revenueExpenditure, totalResponse.getTotalExp(), totalResponse.getTotalVariable(), totalVariablePercent, variable, costRes);
 
         for (String revenue : revenues) {
             RevenueResponse revenueResponse =
                     RevenueResponse.builder()
                             .CategoryName(revenue)
                             .revenue(getExpenditureByCost(revenueExpenditure, revenue))
-                            .percent((int) ((double) getExpenditureByCost(revenueExpenditure, revenue) / totalRevenue * 100.0))
+                            .percent((int) ((double) getExpenditureByCost(revenueExpenditure, revenue) / totalResponse.getTotalRevenue() * 100.0))
                             .build();
 
             revenueRes.add(revenueResponse);
@@ -185,12 +195,12 @@ public class SettlementService {
         return MonthResponse.builder()
                 .mostExpCategory(categories.get(0))
                 .leastExpCategory(categories.get(1))
-                .totalExp(totalExp)
-                .totalRevenue(totalRevenue)
+                .totalExp(totalResponse.getTotalExp())
+                .totalRevenue(totalResponse.getTotalRevenue())
                 .fixedCostResponses(fixedRes)
                 .variableCostResponses(costRes)
                 .revenueResponses(revenueRes)
-                .netIncome(totalRevenue - totalExp)
+                .netIncome(totalResponse.getTotalRevenue() - totalResponse.getTotalExp())
                 .fixedExceed(fixedExceed)
                 .variableExceed(variableExceed)
                 .build();
@@ -256,24 +266,17 @@ public class SettlementService {
 
     // 달, 년 자세한 지출 내역 비교하기
     private ComparisonsResponse getComparisonRes(MonthResponse prevRes, MonthResponse presentRes) {
-
         ComparisonResponse totalExp = getComparisonResponse(prevRes.getTotalExp(), presentRes.getTotalExp(), TYPE_EXPENDITURE);
 
-        List<TotalComparisonResponse> totalFixedResponses = new ArrayList<>();
-        List<CostResponse> fixedPrev = prevRes.getFixedCostResponses();
-        List<CostResponse> fixedPresent = presentRes.getFixedCostResponses();
-        setTotalComparisonResponse(fixedPrev, fixedPresent, totalFixedResponses, TYPE_FIXED);
-
-        List<TotalComparisonResponse> totalVarResponses = new ArrayList<>();
-        List<CostResponse> varPrev = prevRes.getVariableCostResponses();
-        List<CostResponse> varPresent = presentRes.getVariableCostResponses();
-        setTotalComparisonResponse(varPrev, varPresent, totalVarResponses, TYPE_VARIABLE);
+        List<TotalComparisonResponse> totalFixedResponses = getTotalComparisonResponses(prevRes, presentRes, TYPE_FIXED);
+        List<TotalComparisonResponse> totalVarResponses = getTotalComparisonResponses(prevRes, presentRes, TYPE_VARIABLE);
 
         ComparisonResponse netResponse = getComparisonResponse(prevRes.getTotalRevenue() - prevRes.getTotalExp(),
                 presentRes.getTotalRevenue() - presentRes.getTotalExp(), TYPE_NET_PROFIT);
 
         return new ComparisonsResponse(totalExp, totalFixedResponses, totalVarResponses, netResponse);
     }
+
 
     // 년 지출 내역 구하기
     public List<YearSettleResponse> getYearExpenditure(String date, String type) {
@@ -309,6 +312,24 @@ public class SettlementService {
         return yearSettleResponses;
     }
 
+
+    public Integer getWeekNumber(LocalDate date) {
+        LocalDate firstMondayOfMonth = date.with(TemporalAdjusters.firstInMonth(DayOfWeek.MONDAY));
+
+        // 첫 월요일이면 바로 리턴
+        if (firstMondayOfMonth.isEqual(date)) return 1;
+
+        if (date.isAfter(firstMondayOfMonth)) {
+            // 첫 월요일 이후일 때
+            int diffFromFirstMonday = date.getDayOfMonth() - firstMondayOfMonth.getDayOfMonth();
+            int weekNumber = (int) Math.ceil(diffFromFirstMonday / 7.0);
+            if (date.getDayOfWeek() == DayOfWeek.MONDAY) weekNumber += 1;
+            return weekNumber;
+        }
+        // 첫 월요일 이전이면 회귀식으로 전 달 마지막 주차를 구함
+        return getWeekNumber(date.minusMonths(1).with(TemporalAdjusters.lastDayOfMonth()));
+    }
+
     private ComparisonResponse getComparisonResponse(int prevTotal, int presentTotal, String type) {
         int diff = presentTotal - prevTotal;
         int ratio = getRatio(diff, prevTotal);
@@ -331,7 +352,7 @@ public class SettlementService {
 
     private int getRatio(int difference, int prev) {
         if (prev != 0) {
-            if(prev < 0)
+            if (prev < 0)
                 return (int) ((double) difference / (double) prev * 100.0) * -1;
             else
                 return (int) ((double) difference / (double) prev * 100.0);
@@ -342,16 +363,9 @@ public class SettlementService {
         }
     }
 
-    private int getRevenueExpenditure(List<RevenueExpenditure> revenueExpenditureList, String type) {
-        return revenueExpenditureList.stream().filter(r -> r.getRevenueExpenditureType().toString().equals(type)).mapToInt(RevenueExpenditure::getCost).sum();
-    }
-
-    private int getExpenditureByCategory(List<RevenueExpenditure> revenueExpenditureList, String category) {
-        return revenueExpenditureList.stream().filter(r -> r.getCategoryName().equals(category)).mapToInt(RevenueExpenditure::getCost).sum();
-    }
-
-    private int getExpenditureByCost(List<RevenueExpenditure> revenueExpenditureList, String cost) {
-        return revenueExpenditureList.stream().filter(r -> r.getContent().equals(cost)).mapToInt(RevenueExpenditure::getCost).sum();
+    private void getTotalCost(List<RevenueExpenditure> revenueExpenditureList, TotalResponse totalResponse) {
+        revenueExpenditureList.stream()
+                .forEach(r -> totalResponse.setTotalResponse(r.getRevenueExpenditureType().toString(), r.getCategoryName(), r.getCost()));
     }
 
     private List<String> getMostAndLeastCategory(List<CostResponse> fixedRes, List<CostResponse> costRes) {
@@ -372,23 +386,6 @@ public class SettlementService {
         return nameList;
     }
 
-    public Integer getWeekNumber(LocalDate date) {
-        LocalDate firstMondayOfMonth = date.with(TemporalAdjusters.firstInMonth(DayOfWeek.MONDAY));
-
-        // 첫 월요일이면 바로 리턴
-        if (firstMondayOfMonth.isEqual(date)) return 1;
-
-        if (date.isAfter(firstMondayOfMonth)) {
-            // 첫 월요일 이후일 때
-            int diffFromFirstMonday = date.getDayOfMonth() - firstMondayOfMonth.getDayOfMonth();
-            int weekNumber = (int) Math.ceil(diffFromFirstMonday / 7.0);
-            if (date.getDayOfWeek() == DayOfWeek.MONDAY) weekNumber += 1;
-            return weekNumber;
-        }
-        // 첫 월요일 이전이면 회귀식으로 전 달 마지막 주차를 구함
-        return getWeekNumber(date.minusMonths(1).with(TemporalAdjusters.lastDayOfMonth()));
-    }
-
     private void setCostResponse(List<RevenueExpenditure> revenueExpenditure,
                                  int totalExp, int totalCost, int percent, List<String> names, List<CostResponse> lists) {
         for (String name : names) {
@@ -397,6 +394,23 @@ public class SettlementService {
 
             lists.add(costResponse);
         }
+    }
+
+    private int getExpenditureByCost(List<RevenueExpenditure> revenueExpenditureList, String cost) {
+        return revenueExpenditureList.stream().filter(r -> r.getContent().equals(cost)).mapToInt(RevenueExpenditure::getCost).sum();
+    }
+
+    private int getRevenueExpenditure(List<RevenueExpenditure> revenueExpenditureList, String type) {
+        return revenueExpenditureList.stream().filter(r -> r.getRevenueExpenditureType().toString().equals(type)).mapToInt(RevenueExpenditure::getCost).sum();
+    }
+
+    private List<TotalComparisonResponse> getTotalComparisonResponses(MonthResponse prevRes, MonthResponse presentRes, String type) {
+        List<TotalComparisonResponse> totalFixedResponses = new ArrayList<>();
+        List<CostResponse> fixedPrev = prevRes.getFixedCostResponses();
+        List<CostResponse> fixedPresent = presentRes.getFixedCostResponses();
+        setTotalComparisonResponse(fixedPrev, fixedPresent, totalFixedResponses, TYPE_FIXED);
+
+        return totalFixedResponses;
     }
 
 }

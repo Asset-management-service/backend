@@ -17,10 +17,10 @@ public class MonthSettleResponse {
     private int year;
 
     @ApiModelProperty(value = "지출 내역", example = "15000")
-    private Integer cost;
+    private int cost;
 
     @ApiModelProperty(value = "수익 내역", example = "15000")
-    private Integer revenue;
+    private int revenue;
 
     @Builder
     public MonthSettleResponse(int month, int year, Integer cost, Integer revenue) {

@@ -23,7 +23,7 @@ public class WeekSettleResponse {
     private Integer dayOfWeek;
 
     @ApiModelProperty(value = "지출 내역", example = "15000")
-    private Integer cost;
+    private int cost;
 
     @ApiModelProperty(value = "시작 년 월 일", example = "15000")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
