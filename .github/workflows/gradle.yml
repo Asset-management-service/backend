@@ -44,3 +44,8 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: aws s3 cp --region ap-northeast-2 ./springboot-intro-build.zip s3://moamoa1-bucket/springboot-intro-build.zip
+        
+        # Deploy
+      - name: Code Deploy
+        run: aws deploy create-deployment --application-name springboot-intro --deployment-config-name CodeDeployDefault.AllAtOnce --deployment-group-name springboot-intro-deploy-group --s3-location bucket=moamoa1-bucket,bundleType=zip,key=springboot-intro-build.zip
+
