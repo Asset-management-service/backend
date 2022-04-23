@@ -34,7 +34,9 @@ public enum ErrorCode {
 
     ALREADY_NICKNAME_EXISTS(HttpStatus.ALREADY_REPORTED, "이미 존재하는 닉네임입니다."),
 
-    ALREADY_PHONE_NUM_EXISTS(HttpStatus.ALREADY_REPORTED, "이미 존재하는 휴대폰 번호 입니다.");
+    ALREADY_PHONE_NUM_EXISTS(HttpStatus.ALREADY_REPORTED, "이미 존재하는 휴대폰 번호 입니다."),
+
+    NOT_FOUND_RATIO(HttpStatus.NOT_FOUND, "지출 비율을 찾을 수 없습니다.");
 
 
 

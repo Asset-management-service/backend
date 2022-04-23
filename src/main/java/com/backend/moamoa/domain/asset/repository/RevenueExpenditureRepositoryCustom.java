@@ -14,4 +14,8 @@ public interface RevenueExpenditureRepositoryCustom {
 
     List<RevenueExpenditure> findRevenueExpenditure(LocalDate month, Long userId);
 
+    List<RevenueExpenditure> findRevenueWeekExpenditure(LocalDate week, Long userId);
+
+    List<RevenueExpenditure> findRevenueYearExpenditure(LocalDate year, Long userId);
+
 }

@@ -23,4 +23,16 @@ public class AssetCategoryRepositoryImpl implements AssetCategoryRepositoryCusto
                 .where(assetCategory.assetCategoryType.eq(AssetCategoryType.valueOf(assetCategoryType.toUpperCase())).and(user.id.eq(userId)))
                 .fetch();
     }
+
+    @Override
+    public List<String> findByTwoAssetCategoriesAndUserId(String firstType, String secondType, Long userId) {
+        return queryFactory
+                .select(assetCategory.categoryName)
+                .from(assetCategory)
+                .innerJoin(assetCategory.user, user)
+                .where((assetCategory.assetCategoryType.eq(AssetCategoryType.valueOf(firstType.toUpperCase()))
+                        .or(assetCategory.assetCategoryType.eq(AssetCategoryType.valueOf(secondType.toUpperCase()))))
+                        .and(user.id.eq(userId)))
+                .fetch();
+    }
 }

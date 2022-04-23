@@ -4,6 +4,7 @@ import com.backend.moamoa.domain.user.dto.request.UserEmailRequest;
 import com.backend.moamoa.domain.user.dto.request.UserUpdateRequest;
 import com.backend.moamoa.domain.user.dto.response.MyCommentResponse;
 import com.backend.moamoa.domain.user.dto.response.MyPostResponse;
+import com.backend.moamoa.domain.user.dto.response.MyScrapResponse;
 import com.backend.moamoa.domain.user.dto.response.UserResponse;
 import com.backend.moamoa.domain.user.entity.UserMailAuth;
 import com.backend.moamoa.domain.user.service.MailSendService;
@@ -118,6 +119,22 @@ public class UserController {
     @GetMapping("/mypage/comments")
     public Page<MyCommentResponse> findMyComments(Pageable pageable) {
         return userService.findMyComments(pageable);
+    }
+
+    /**
+     * [GET] api/users/mypage/comments
+     *
+     * page : 가져올 페이지 (기본값 : 0)
+     * size : 페이지의 크기 (기본값 : 20)
+     * sort : 정렬 기준으로 사용할 속성으로 기본적으로 오름차순
+     *
+     * 마이 페이지의 내가 쓴 댓글의 리스트를 반환합니다.
+     */
+    @ApiOperation(value = "마이 페이지 내가 스크랩한 글 보기",
+            notes = "마이 페이지의 내가 스크랩한 글을 반환합니다. 헤더(Bearer)에 사용자 토큰 주입을 필요로 합니다.")
+    @GetMapping("/mypage/scraps")
+    public Page<MyScrapResponse> findMyScraps(Pageable pageable) {
+        return userService.findMyScraps(pageable);
     }
 
 }
