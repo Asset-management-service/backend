@@ -7,5 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 public interface ExpenditureRatioRepository extends JpaRepository<ExpenditureRatio, Long> {
+
     Optional<ExpenditureRatio> findByUser(User user);
+
 }

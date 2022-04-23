@@ -2,11 +2,14 @@ package com.backend.moamoa.domain.user.service;
 
 import com.backend.moamoa.domain.post.entity.Comment;
 import com.backend.moamoa.domain.post.entity.Post;
+import com.backend.moamoa.domain.post.entity.Scrap;
 import com.backend.moamoa.domain.post.repository.comment.CommentRepository;
 import com.backend.moamoa.domain.post.repository.post.PostRepository;
+import com.backend.moamoa.domain.post.repository.post.ScrapRepository;
 import com.backend.moamoa.domain.user.dto.request.UserUpdateRequest;
 import com.backend.moamoa.domain.user.dto.response.MyCommentResponse;
 import com.backend.moamoa.domain.user.dto.response.MyPostResponse;
+import com.backend.moamoa.domain.user.dto.response.MyScrapResponse;
 import com.backend.moamoa.domain.user.dto.response.UserResponse;
 import com.backend.moamoa.domain.user.entity.User;
 import com.backend.moamoa.domain.user.entity.UserMailAuth;
@@ -32,6 +35,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
+    private final ScrapRepository scrapRepository;
     private final UserUtil userUtil;
 
     /**
@@ -147,6 +151,21 @@ public class UserService {
                         .collect(Collectors.toList());
 
         return new PageImpl<>(commentResponses, pageable, comments.getTotalElements());
+    }
+
+    /**
+     * 마이페이지의 내가 스크랩한 글을 조회합니다.
+     */
+    public Page<MyScrapResponse> findMyScraps(Pageable pageable) {
+        User user = userUtil.findCurrentUser();
+        Page<Scrap> scraps = scrapRepository.findByUserOrderByIdDesc(user, pageable);
+
+        List<MyScrapResponse> scrapResponses =
+                scraps.stream()
+                        .map(MyScrapResponse::toMyScrapResponse)
+                        .collect(Collectors.toList());
+
+        return new PageImpl<>(scrapResponses, pageable, scraps.getTotalElements());
     }
 
 
