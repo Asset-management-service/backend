@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -98,9 +99,21 @@ public class AssetController {
         return ResponseEntity.ok(assetService.findRevenueExpenditureByMonth(month, pageable));
     }
 
+    @ApiOperation(value = "자산 관리 목표 작성", notes = "해당 년, 월을 입력받아 자산 관리 목표를 작성하는 API")
+    @ApiResponse(responseCode = "200", description = "해당 자산 관리 목표를 정상적으로 추가한 경우")
     @PutMapping("/asset-goal")
     public ResponseEntity<CreateAssetGoalResponse> addAssetGoal(@RequestBody CreateAssetGoalRequest request) {
         return ResponseEntity.ok(new CreateAssetGoalResponse(assetService.addAssetGoal(request)));
     }
 
+    @ApiOperation(value = "머니 로그 작성", notes = "날짜, 내용, 이미지 파일을 입력받아 머니로 그를 작성하는 API",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "머니 로그 작성이 정상적으로 추가된 경우"),
+            @ApiResponse(responseCode = "404", description = "회원 Id를 찾지 못한 경우")
+    })
+    @PostMapping("/money-log")
+    public ResponseEntity<CreateMoneyLogResponse> createMoneyLog(@Validated @ModelAttribute CreateMoneyLogRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(assetService.createMoneyLog(request));
+    }
 }
