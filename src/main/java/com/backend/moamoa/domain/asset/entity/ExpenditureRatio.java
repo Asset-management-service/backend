@@ -45,4 +45,9 @@ public class ExpenditureRatio {
                 .user(user)
                 .build();
     }
+
+    public void updateExpenditureRatio(int variable, int fixed) {
+        this.variable = variable;
+        this.fixed = fixed;
+    }
 }

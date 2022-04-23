@@ -26,6 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -50,16 +52,25 @@ public class AssetService {
     @Transactional
     public Long addBudget(BudgetRequest request) {
         User user = userUtil.findCurrentUser();
-        return budgetRepository.save(Budget.createBudget(request.getBudgetAmount(), user)).getId();
+        Budget budget = budgetRepository.findBudgetAmountByUserId(user.getId())
+                .orElseGet(() -> budgetRepository.save(Budget.createBudget(request.getBudgetAmount(), user)));
+        budget.updateBudgetAmount(request.getBudgetAmount());
+        return budget.getId();
     }
 
     @Transactional
     public Long addExpenditure(ExpenditureRequest request) {
         User user = userUtil.findCurrentUser();
+
         if (request.getFixed() + request.getVariable() != 100) {
             throw new CustomException(ErrorCode.BAD_REQUEST_EXPENDITURE);
         }
-        return expenditureRatioRepository.save(ExpenditureRatio.createExpenditureRatio(request.getFixed(), request.getVariable(), user)).getId();
+        ExpenditureRatio expenditureRatio = expenditureRatioRepository.findByUser(user)
+                .orElseGet(() -> expenditureRatioRepository.save(ExpenditureRatio.createExpenditureRatio(request.getFixed(), request.getVariable(), user)));
+
+        expenditureRatio.updateExpenditureRatio(request.getVariable(), request.getFixed());
+
+        return expenditureRatio.getId();
     }
 
     public List<String> getCategories(String categoryType) {
