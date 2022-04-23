@@ -1,19 +1,10 @@
 package com.backend.moamoa.domain.asset.service;
 
-import com.backend.moamoa.domain.asset.dto.request.AssetCategoryRequest;
-import com.backend.moamoa.domain.asset.dto.request.BudgetRequest;
-import com.backend.moamoa.domain.asset.dto.request.CreateRevenueExpenditureRequest;
-import com.backend.moamoa.domain.asset.dto.request.ExpenditureRequest;
+import com.backend.moamoa.domain.asset.dto.request.*;
 import com.backend.moamoa.domain.asset.dto.response.RevenueExpenditureResponse;
 import com.backend.moamoa.domain.asset.dto.response.RevenueExpenditureSumResponse;
-import com.backend.moamoa.domain.asset.entity.AssetCategory;
-import com.backend.moamoa.domain.asset.entity.Budget;
-import com.backend.moamoa.domain.asset.entity.ExpenditureRatio;
-import com.backend.moamoa.domain.asset.entity.RevenueExpenditure;
-import com.backend.moamoa.domain.asset.repository.AssetCategoryRepository;
-import com.backend.moamoa.domain.asset.repository.BudgetRepository;
-import com.backend.moamoa.domain.asset.repository.ExpenditureRatioRepository;
-import com.backend.moamoa.domain.asset.repository.RevenueExpenditureRepository;
+import com.backend.moamoa.domain.asset.entity.*;
+import com.backend.moamoa.domain.asset.repository.*;
 import com.backend.moamoa.domain.user.entity.User;
 import com.backend.moamoa.global.exception.CustomException;
 import com.backend.moamoa.global.exception.ErrorCode;
@@ -41,6 +32,7 @@ public class AssetService {
     private final BudgetRepository budgetRepository;
     private final ExpenditureRatioRepository expenditureRatioRepository;
     private final RevenueExpenditureRepository revenueExpenditureRepository;
+    private final AssetGoalRepository assetGoalRepository;
     private final UserUtil userUtil;
 
     @Transactional
@@ -130,5 +122,14 @@ public class AssetService {
                     .filter(r -> r.getRevenueExpenditureType().toString().equals(type))
                     .mapToInt(RevenueExpenditure::getCost)
                     .sum();
+    }
+
+    @Transactional
+    public Long addAssetGoal(CreateAssetGoalRequest request) {
+        User user = userUtil.findCurrentUser();
+        AssetGoal assetGoal = assetGoalRepository.findByUserAndDate(user, request.getDate())
+                .orElseGet(() -> assetGoalRepository.save(AssetGoal.createAssetGoal(request.getContent(), user, request.getDate())));
+        assetGoal.updateAssetGoal(request.getContent());
+        return assetGoal.getId();
     }
 }

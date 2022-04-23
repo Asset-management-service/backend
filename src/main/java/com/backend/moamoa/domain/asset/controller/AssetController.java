@@ -1,9 +1,6 @@
 package com.backend.moamoa.domain.asset.controller;
 
-import com.backend.moamoa.domain.asset.dto.request.AssetCategoryRequest;
-import com.backend.moamoa.domain.asset.dto.request.BudgetRequest;
-import com.backend.moamoa.domain.asset.dto.request.CreateRevenueExpenditureRequest;
-import com.backend.moamoa.domain.asset.dto.request.ExpenditureRequest;
+import com.backend.moamoa.domain.asset.dto.request.*;
 import com.backend.moamoa.domain.asset.dto.response.*;
 import com.backend.moamoa.domain.asset.service.AssetService;
 import io.swagger.annotations.Api;
@@ -99,6 +96,11 @@ public class AssetController {
     @GetMapping("/revenueExpenditure")
     public ResponseEntity<RevenueExpenditureSumResponse> getRevenueExpenditures(@RequestParam String month, Pageable pageable) {
         return ResponseEntity.ok(assetService.findRevenueExpenditureByMonth(month, pageable));
+    }
+
+    @PutMapping("/asset-goal")
+    public ResponseEntity<CreateAssetGoalResponse> addAssetGoal(@RequestBody CreateAssetGoalRequest request) {
+        return ResponseEntity.ok(new CreateAssetGoalResponse(assetService.addAssetGoal(request)));
     }
 
 }
