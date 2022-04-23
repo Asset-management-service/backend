@@ -14,9 +14,11 @@ import java.util.List;
 
 import static com.backend.moamoa.domain.asset.entity.QRevenueExpenditure.revenueExpenditure;
 import static com.backend.moamoa.domain.user.entity.QUser.user;
+import static java.time.temporal.TemporalAdjusters.firstDayOfYear;
+import static java.time.temporal.TemporalAdjusters.lastDayOfYear;
 
 @RequiredArgsConstructor
-public class RevenueExpenditureRepositoryImpl implements RevenueExpenditureRepositoryCustom{
+public class RevenueExpenditureRepositoryImpl implements RevenueExpenditureRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
 
@@ -62,6 +64,28 @@ public class RevenueExpenditureRepositoryImpl implements RevenueExpenditureRepos
                         .and(user.id.eq(userId)))
                 .fetch();
 
+    }
+
+    @Override
+    public List<RevenueExpenditure> findRevenueWeekExpenditure(LocalDate week, Long userId) {
+        return queryFactory
+                .selectFrom(revenueExpenditure)
+                .innerJoin(revenueExpenditure.user, user)
+                .where(revenueExpenditure.date
+                        .between(week, week.plusDays(6))
+                        .and(user.id.eq(userId)))
+                .fetch();
+    }
+
+    @Override
+    public List<RevenueExpenditure> findRevenueYearExpenditure(LocalDate year, Long userId) {
+        return queryFactory
+                .selectFrom(revenueExpenditure)
+                .innerJoin(revenueExpenditure.user, user)
+                .where(revenueExpenditure.date
+                        .between(year.with(firstDayOfYear()), year.with(lastDayOfYear()))
+                        .and(user.id.eq(userId)))
+                .fetch();
     }
 
 }

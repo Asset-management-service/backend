@@ -6,4 +6,6 @@ public interface AssetCategoryRepositoryCustom {
 
     List<String> findByAssetCategoryTypeAndUserId(String assetCategoryType, Long userId);
 
+    List<String> findByTwoAssetCategoriesAndUserId(String firstType, String secondType, Long userId);
+
 }
