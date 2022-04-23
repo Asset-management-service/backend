@@ -47,5 +47,5 @@ jobs:
         
         # Deploy
       - name: Code Deploy
-        run: aws deploy create-deployment --application-name springboot-intro --deployment-config-name CodeDeployDefault.AllAtOnce --deployment-group-name springboot-intro-deploy-group --s3-location bucket=moamoa1-bucket,bundleType=zip,key=springboot-intro-build.zip
+        run: aws deploy create-deployment --application-name springboot-intro --deployment-group-name springboot-intro-deploy-group --s3-location bucket=moamoa1-bucket,bundleType=zip,key=springboot-intro-build.zip --region ap-northeast-2
 
