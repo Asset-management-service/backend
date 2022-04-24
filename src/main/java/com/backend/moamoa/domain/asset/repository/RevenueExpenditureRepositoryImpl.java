@@ -100,4 +100,21 @@ public class RevenueExpenditureRepositoryImpl implements RevenueExpenditureRepos
                 .fetchOne());
     }
 
+    @Override
+    public List<RevenueExpenditureResponse> findMoneyLogRevenueExpenditure(Long userId, LocalDate date) {
+        return queryFactory
+                .select(new QRevenueExpenditureResponse(
+                        revenueExpenditure.id,
+                        revenueExpenditure.revenueExpenditureType,
+                        revenueExpenditure.date,
+                        revenueExpenditure.categoryName,
+                        revenueExpenditure.content,
+                        revenueExpenditure.paymentMethod,
+                        revenueExpenditure.cost))
+                .from(revenueExpenditure)
+                .innerJoin(revenueExpenditure.user, user)
+                .where(user.id.eq(userId).and(revenueExpenditure.date.eq(date)))
+                .fetch();
+    }
+
 }

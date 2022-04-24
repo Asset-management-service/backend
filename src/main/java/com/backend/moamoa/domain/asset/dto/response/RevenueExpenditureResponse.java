@@ -24,12 +24,16 @@ public class RevenueExpenditureResponse {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
     private LocalDate date;
 
+    @ApiModelProperty(value = "카테고리 이름")
     private String categoryName;
 
+    @ApiModelProperty(value = "카테고리 내용")
     private String content;
 
+    @ApiModelProperty(value = "결제 수단")
     private String paymentMethod;
 
+    @ApiModelProperty(value = "수익 OR 지출")
     private int cost;
 
     @QueryProjection

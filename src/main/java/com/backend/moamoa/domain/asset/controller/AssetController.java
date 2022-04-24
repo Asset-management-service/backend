@@ -151,4 +151,15 @@ public class AssetController {
     public ResponseEntity<UpdateMoneyLogResponse> updateMoneyLog(@Validated @ModelAttribute UpdateMoneyLogRequest request) {
         return ResponseEntity.ok((assetService.updateMoneyLog(request)));
     }
+
+    @ApiOperation(value = "머니 로그 수익 지출 목록", notes = "날짜를 입력받아 해당 수익 지출 내역을 조회하는 API")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "정상적으로 조회를 한 경우"),
+            @ApiResponse(responseCode = "404", description = "회원 ID OR 예산 설정 ID를 찾지 못한 경우")
+    })
+    @ApiImplicitParam(name = "date", value = "해당 날짜", example = "2022-04-23", required = true)
+    @GetMapping("/money-log/revenue-expenditure")
+    public ResponseEntity<MoneyLogRevenueExpenditureResponse> getRevenueExpenditure(@RequestParam String date) {
+        return ResponseEntity.ok(assetService.getRevenueExpenditure(date));
+    }
 }

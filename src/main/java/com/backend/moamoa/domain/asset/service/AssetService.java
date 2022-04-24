@@ -42,21 +42,30 @@ public class AssetService {
     private final S3Uploader s3Uploader;
     private final UserUtil userUtil;
 
+    /**
+     * 카테고리 생성
+     */
     @Transactional
     public Long addCategory(AssetCategoryRequest request) {
         User user = userUtil.findCurrentUser();
         return assetCategoryRepository.save(AssetCategory.createCategory(request.getCategoryType(), request.getCategoryName(), user)).getId();
     }
 
+    /**
+     * 예산 설정
+     */
     @Transactional
     public Long addBudget(BudgetRequest request) {
         User user = userUtil.findCurrentUser();
-        Budget budget = budgetRepository.findBudgetAmountByUserId(user.getId())
+        Budget budget = budgetRepository.findBudgetAmountByUser(user)
                 .orElseGet(() -> budgetRepository.save(Budget.createBudget(request.getBudgetAmount(), user)));
         budget.updateBudgetAmount(request.getBudgetAmount());
         return budget.getId();
     }
 
+    /**
+     * 지출 비율 설정
+     */
     @Transactional
     public Long addExpenditure(ExpenditureRequest request) {
         User user = userUtil.findCurrentUser();
@@ -72,6 +81,9 @@ public class AssetService {
         return expenditureRatio.getId();
     }
 
+    /**
+     * 카테고리 조회
+ 회   */
     public AssetCategoryDtoResponse getCategories(String categoryType) {
         User user = userUtil.findCurrentUser();
         List<AssetCategory> assetCategories = assetCategoryRepository.findByAssetCategoryTypeAndUserId(categoryType, user.getId());
@@ -83,6 +95,9 @@ public class AssetService {
         return new AssetCategoryDtoResponse(categories);
     }
 
+    /**
+     * 카테고리 삭제
+     */
     @Transactional
     public void deleteCategoryName(Long categoryId) {
         User user = userUtil.findCurrentUser();
@@ -92,6 +107,9 @@ public class AssetService {
         assetCategoryRepository.delete(category);
     }
 
+    /**
+     * 수익 지출 설정
+     */
     @Transactional
     public Long addRevenueExpenditure(CreateRevenueExpenditureRequest request) {
         User user = userUtil.findCurrentUser();
@@ -107,12 +125,15 @@ public class AssetService {
                 .build()).getId();
     }
 
+    /**
+     * 가계부 수익 지출 조회
+     */
     public RevenueExpenditureSumResponse findRevenueExpenditureByMonth(String month, Pageable pageable) {
         User user = userUtil.findCurrentUser();
 
         Page<RevenueExpenditureResponse> revenueExpenditure = revenueExpenditureRepository.findRevenueAndExpenditureByMonth(LocalDate.parse(month + "-01"), pageable, user.getId());
 
-        Budget budget = budgetRepository.findBudgetAmountByUserId(user.getId())
+        Budget budget = budgetRepository.findBudgetAmountByUser(user)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_BUDGET));
 
         List<RevenueExpenditure> revenueExpenditureList = revenueExpenditureRepository.findRevenueExpenditure(LocalDate.parse(month + "-01"), user.getId());
@@ -136,6 +157,9 @@ public class AssetService {
                     .sum();
     }
 
+    /**
+     * 자산 관리 목표 설정
+     */
     @Transactional
     public Long addAssetGoal(CreateAssetGoalRequest request) {
         User user = userUtil.findCurrentUser();
@@ -145,6 +169,9 @@ public class AssetService {
         return assetGoal.getId();
     }
 
+    /**
+     * 머니 로그 생성
+     */
     @Transactional
     public CreateMoneyLogResponse createMoneyLog(CreateMoneyLogRequest request) {
         User user = userUtil.findCurrentUser();
@@ -154,6 +181,9 @@ public class AssetService {
         return new CreateMoneyLogResponse(moneyLog.getId(), imageUrl);
     }
 
+    /**
+     * 머니 로그 생성 시 이미지 파일을 을장하는 메서드
+     */
     private List<String> uploadMoneyLogImages(List<MultipartFile> images, MoneyLog moneyLog) {
         return  images.stream()
                 .map(image -> s3Uploader.upload(image, "moneyLog"))
@@ -162,6 +192,9 @@ public class AssetService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * 이미지 경로 저장
+     */
     private PostImage createPostImage(MoneyLog moneyLog, String url) {
         return postImageRepository.save(PostImage.builder()
                 .imageUrl(url)
@@ -170,8 +203,9 @@ public class AssetService {
                 .build());
     }
 
-
-
+    /**
+     * 수익 지출 내역 수정
+     */
     @Transactional
     public void updateRevenueExpenditure(UpdateRevenueExpenditure request) {
         User user = userUtil.findCurrentUser();
@@ -182,6 +216,9 @@ public class AssetService {
                 request.getDate(), request.getPaymentMethod(), request.getCategoryName(), request.getCost());
     }
 
+    /**
+     * 수익 지출 내역 삭제
+     */
     @Transactional
     public void deleteRevenueExpenditure(Long revenueExpenditureId) {
         User user = userUtil.findCurrentUser();
@@ -197,6 +234,9 @@ public class AssetService {
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_REVENUE_EXPENDITURE));
     }
 
+    /**
+     * 머니 로그 수정
+     */
     @Transactional
     public UpdateMoneyLogResponse updateMoneyLog(UpdateMoneyLogRequest request) {
         User user = userUtil.findCurrentUser();
@@ -215,6 +255,9 @@ public class AssetService {
         return new UpdateMoneyLogResponse(moneyLog.getId(), saveImages);
     }
 
+    /**
+     * 머니 로그 수정 시 이미지를 S3에 저장하는 메서드
+     */
     private void uploadImages(UpdateMoneyLogRequest request, MoneyLog moneyLog) {
         request.getImageFiles()
                 .stream()
@@ -230,5 +273,29 @@ public class AssetService {
                     postImageRepository.delete(url);
                     s3Uploader.deleteImage(url.getImageUrl());
                 });
+    }
+
+    /**
+     * 머니 로그 수익 지출 조회
+     */
+    public MoneyLogRevenueExpenditureResponse getRevenueExpenditure(String date) {
+        User user = userUtil.findCurrentUser();
+        List<RevenueExpenditureResponse> moneyLogRevenueExpenditure = revenueExpenditureRepository.findMoneyLogRevenueExpenditure(user.getId(), LocalDate.parse(date));
+        int revenue = revenueExpenditureExtractor(moneyLogRevenueExpenditure, TYPE_REVENUE);
+        int expenditure = revenueExpenditureExtractor(moneyLogRevenueExpenditure, TYPE_EXPENDITURE);
+        int remainingBudget = revenue - expenditure;
+
+        return new MoneyLogRevenueExpenditureResponse(revenue, expenditure, remainingBudget, moneyLogRevenueExpenditure);
+    }
+
+    /**
+     * 타입을 받아서 합계를 return 해주는 메소드
+     */
+    private int revenueExpenditureExtractor(List<RevenueExpenditureResponse> moneyLogRevenueExpenditure, String type) {
+        return moneyLogRevenueExpenditure
+                .stream()
+                .filter(revenueExpenditure -> revenueExpenditure.getRevenueExpenditureType().toString().equals(type))
+                .mapToInt(RevenueExpenditureResponse::getCost)
+                .sum();
     }
 }

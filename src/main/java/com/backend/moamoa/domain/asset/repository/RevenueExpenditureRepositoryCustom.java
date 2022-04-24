@@ -22,4 +22,6 @@ public interface RevenueExpenditureRepositoryCustom {
 
     Optional<RevenueExpenditure> findByUserAndId(User user, Long revenueExpenditureId);
 
+    List<RevenueExpenditureResponse> findMoneyLogRevenueExpenditure(Long userId, LocalDate date);
+
 }
