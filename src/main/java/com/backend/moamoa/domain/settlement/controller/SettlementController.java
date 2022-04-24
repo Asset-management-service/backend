@@ -31,7 +31,7 @@ public class SettlementController {
      * @return
      */
     @GetMapping("/week")
-    @ApiOperation(value = "가계부 주별 결산", notes = "입력받은 주의 속한 날짜를 기준으로 8개의 데이터를 출력합니다.")
+    @ApiOperation(value = "가계부 주별 결산", notes = "입력받은 주의 속한 날짜를 기준으로 8개의 데이터를 출력합니다. 테스트 용 입니다!")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "date", value = "해당 주의 속한 날짜(입력하지 않으면 현재 날짜로 설정 합니다.)", example = "2022-04-11", required = false),
             @ApiImplicitParam(name = "type", value = "과거 데이터 출력(left), 미래 데이터 출력(right)", example = "left", required = true)
@@ -41,7 +41,7 @@ public class SettlementController {
     }
 
     @GetMapping("/week/detail")
-    @ApiOperation(value = "가계부 주 자세한 결산 내역", notes = "입력받은 날짜를 기준으로 해당 주의 자세한 결산 내역을 출력합니다.")
+    @ApiOperation(value = "가계부 주 자세한 결산 내역", notes = "입력받은 날짜를 기준으로 해당 주의 자세한 결산 내역을 출력합니다. 테스트 용 입니다!")
     @ApiImplicitParam(name = "date", value = "출력하고자 하는 주의 시작 날짜를 입력해주세요.", example = "2022-04-21", required = true)
     public WeekResponse getWeekDetail(@RequestParam String date) {
         return settlementService.getWeekDetail(date);
