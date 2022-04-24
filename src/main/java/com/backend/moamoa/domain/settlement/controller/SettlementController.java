@@ -21,7 +21,7 @@ import java.util.List;
 @Api(tags = "결산 API")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/settlement")
+@RequestMapping("/settlements")
 public class SettlementController {
 
     private final SettlementService settlementService;
