@@ -1,14 +1,9 @@
 package com.backend.moamoa.domain.asset.service;
 
 import com.backend.moamoa.domain.asset.dto.request.*;
-import com.backend.moamoa.domain.asset.dto.response.CreateMoneyLogResponse;
-import com.backend.moamoa.domain.asset.dto.response.RevenueExpenditureResponse;
-import com.backend.moamoa.domain.asset.dto.response.RevenueExpenditureSumResponse;
-import com.backend.moamoa.domain.asset.dto.response.UpdateMoneyLogResponse;
+import com.backend.moamoa.domain.asset.dto.response.*;
 import com.backend.moamoa.domain.asset.entity.*;
 import com.backend.moamoa.domain.asset.repository.*;
-import com.backend.moamoa.domain.post.dto.request.PostRequest;
-import com.backend.moamoa.domain.post.entity.Post;
 import com.backend.moamoa.domain.post.entity.PostImage;
 import com.backend.moamoa.domain.post.repository.post.PostImageRepository;
 import com.backend.moamoa.domain.user.entity.User;
@@ -17,7 +12,6 @@ import com.backend.moamoa.global.exception.ErrorCode;
 import com.backend.moamoa.global.s3.S3Uploader;
 import com.backend.moamoa.global.utils.UserUtil;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -27,8 +21,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -80,10 +72,15 @@ public class AssetService {
         return expenditureRatio.getId();
     }
 
-    public List<String> getCategories(String categoryType) {
+    public AssetCategoryDtoResponse getCategories(String categoryType) {
         User user = userUtil.findCurrentUser();
+        List<AssetCategory> assetCategories = assetCategoryRepository.findByAssetCategoryTypeAndUserId(categoryType, user.getId());
+        List<AssetCategoriesResponse> categories = assetCategories
+                .stream()
+                .map(category -> new AssetCategoriesResponse(category.getId(), category.getCategoryName()))
+                .collect(Collectors.toList());
 
-        return assetCategoryRepository.findByAssetCategoryTypeAndUserId(categoryType, user.getId());
+        return new AssetCategoryDtoResponse(categories);
     }
 
     @Transactional

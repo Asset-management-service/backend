@@ -16,6 +16,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Api(tags = "가계부 API")
 @RestController
 @RequiredArgsConstructor
@@ -31,8 +33,8 @@ public class AssetController {
             @ApiResponse(responseCode = "404", description = "회원 Id를 찾지 못한 경우")
     })
     @GetMapping("/category")
-    public ResponseEntity<AssetCategoriesResponse> getCategory(@RequestParam String categoryType) {
-        return ResponseEntity.ok(new AssetCategoriesResponse(assetService.getCategories(categoryType)));
+    public ResponseEntity<AssetCategoryDtoResponse> getCategory(@RequestParam String categoryType) {
+        return ResponseEntity.ok(assetService.getCategories(categoryType));
     }
 
     @ApiOperation(value = "예산 설정", notes = "한달 예산 금액을 설정하는 API")
