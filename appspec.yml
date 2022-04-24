@@ -3,6 +3,7 @@ os: linux
 files:
   - source:  /
     destination: /home/ec2-user/action
+    overwrite: true
 
 permissions:
   - object: /home/ec2-user/action
