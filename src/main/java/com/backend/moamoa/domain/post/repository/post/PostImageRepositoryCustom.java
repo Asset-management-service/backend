@@ -7,4 +7,6 @@ import java.util.List;
 public interface PostImageRepositoryCustom {
     List<PostImage> findBySavedImageUrl(Long postId);
 
+    List<PostImage> findBySavedMoneyLogImageUrl(Long moneyLogId);
+
 }

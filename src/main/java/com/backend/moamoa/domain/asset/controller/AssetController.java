@@ -129,7 +129,7 @@ public class AssetController {
         return ResponseEntity.ok(new CreateAssetGoalResponse(assetService.addAssetGoal(request)));
     }
 
-    @ApiOperation(value = "머니 로그 작성", notes = "날짜, 내용, 이미지 파일을 입력받아 머니로 그를 작성하는 API",
+    @ApiOperation(value = "머니 로그 작성", notes = "날짜, 내용, 이미지 파일을 입력받아 머니 로그를 작성하는 API",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "머니 로그 작성이 정상적으로 추가된 경우"),
@@ -138,5 +138,15 @@ public class AssetController {
     @PostMapping("/money-log")
     public ResponseEntity<CreateMoneyLogResponse> createMoneyLog(@Validated @ModelAttribute CreateMoneyLogRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(assetService.createMoneyLog(request));
+    }
+
+    @ApiOperation(value = "머니 로그 수정", notes = "머니로그 PK를 입력받아 해당 머니 로그를 수정하는 API")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "머니 로그 수정이 정상 작동한 경우"),
+            @ApiResponse(responseCode = "404", description = "회원 Id OR 머니 로그 Id를 찾지 못한 경우")
+    })
+    @PatchMapping("/money-log")
+    public ResponseEntity<UpdateMoneyLogResponse> updateMoneyLog(@Validated @ModelAttribute UpdateMoneyLogRequest request) {
+        return ResponseEntity.ok((assetService.updateMoneyLog(request)));
     }
 }

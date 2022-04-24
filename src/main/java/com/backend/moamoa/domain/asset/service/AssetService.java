@@ -4,6 +4,7 @@ import com.backend.moamoa.domain.asset.dto.request.*;
 import com.backend.moamoa.domain.asset.dto.response.CreateMoneyLogResponse;
 import com.backend.moamoa.domain.asset.dto.response.RevenueExpenditureResponse;
 import com.backend.moamoa.domain.asset.dto.response.RevenueExpenditureSumResponse;
+import com.backend.moamoa.domain.asset.dto.response.UpdateMoneyLogResponse;
 import com.backend.moamoa.domain.asset.entity.*;
 import com.backend.moamoa.domain.asset.repository.*;
 import com.backend.moamoa.domain.post.dto.request.PostRequest;
@@ -16,6 +17,7 @@ import com.backend.moamoa.global.exception.ErrorCode;
 import com.backend.moamoa.global.s3.S3Uploader;
 import com.backend.moamoa.global.utils.UserUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -27,6 +29,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
@@ -170,12 +173,13 @@ public class AssetService {
                 .build());
     }
 
+
+
     @Transactional
     public void updateRevenueExpenditure(UpdateRevenueExpenditure request) {
         User user = userUtil.findCurrentUser();
 
-        RevenueExpenditure revenueExpenditure = revenueExpenditureRepository.findByUserAndId(user, request.getRevenueExpenditureId())
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_REVENUE_EXPENDITURE));
+        RevenueExpenditure revenueExpenditure = getRevenueExpenditure(request.getRevenueExpenditureId(), user);
 
         revenueExpenditure.updateRevenueExpenditure(request.getRevenueExpenditureType(), request.getContent(),
                 request.getDate(), request.getPaymentMethod(), request.getCategoryName(), request.getCost());
@@ -184,8 +188,50 @@ public class AssetService {
     @Transactional
     public void deleteRevenueExpenditure(Long revenueExpenditureId) {
         User user = userUtil.findCurrentUser();
-        RevenueExpenditure revenueExpenditure = revenueExpenditureRepository.findByUserAndId(user, revenueExpenditureId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_REVENUE_EXPENDITURE));
+        RevenueExpenditure revenueExpenditure = getRevenueExpenditure(revenueExpenditureId, user);
         revenueExpenditureRepository.delete(revenueExpenditure);
+    }
+
+    /**
+     * 수익 지출 공통 로직
+     */
+    private RevenueExpenditure getRevenueExpenditure(Long revenueExpenditureId, User user) {
+        return revenueExpenditureRepository.findByUserAndId(user, revenueExpenditureId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_REVENUE_EXPENDITURE));
+    }
+
+    @Transactional
+    public UpdateMoneyLogResponse updateMoneyLog(UpdateMoneyLogRequest request) {
+        User user = userUtil.findCurrentUser();
+
+        MoneyLog moneyLog = moneyLogRepository.findByUserAndId(user, request.getMoneyLogId())
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_MONEY_LOG));
+
+        moneyLog.updateMoneyLog(request.getDate(), request.getContent());
+
+        validateDeleteImages(request, moneyLog);
+        uploadImages(request, moneyLog);
+
+        List<String> saveImages = postImageRepository.findBySavedMoneyLogImageUrl(moneyLog.getId())
+                .stream().map(image -> image.getImageUrl()).collect(Collectors.toList());
+
+        return new UpdateMoneyLogResponse(moneyLog.getId(), saveImages);
+    }
+
+    private void uploadImages(UpdateMoneyLogRequest request, MoneyLog moneyLog) {
+        request.getImageFiles()
+                .stream()
+                .map(image -> s3Uploader.upload(image, "moneyLog"))
+                .forEach(url -> createPostImage(moneyLog, url));
+    }
+
+    private void validateDeleteImages(UpdateMoneyLogRequest request, MoneyLog moneyLog) {
+        postImageRepository.findBySavedMoneyLogImageUrl(moneyLog.getId())
+                .stream()
+                .filter(image -> !request.getSaveImageUrl().stream().anyMatch(Predicate.isEqual(image.getImageUrl())))
+                .forEach(url -> {
+                    postImageRepository.delete(url);
+                    s3Uploader.deleteImage(url.getImageUrl());
+                });
     }
 }
