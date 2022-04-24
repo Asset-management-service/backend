@@ -1,33 +1,33 @@
 package com.backend.moamoa.domain.asset.service;
 
-import com.backend.moamoa.domain.asset.dto.request.AssetCategoryRequest;
-import com.backend.moamoa.domain.asset.dto.request.BudgetRequest;
-import com.backend.moamoa.domain.asset.dto.request.CreateRevenueExpenditureRequest;
-import com.backend.moamoa.domain.asset.dto.request.ExpenditureRequest;
+import com.backend.moamoa.domain.asset.dto.request.*;
+import com.backend.moamoa.domain.asset.dto.response.CreateMoneyLogResponse;
 import com.backend.moamoa.domain.asset.dto.response.RevenueExpenditureResponse;
 import com.backend.moamoa.domain.asset.dto.response.RevenueExpenditureSumResponse;
-import com.backend.moamoa.domain.asset.entity.AssetCategory;
-import com.backend.moamoa.domain.asset.entity.Budget;
-import com.backend.moamoa.domain.asset.entity.ExpenditureRatio;
-import com.backend.moamoa.domain.asset.entity.RevenueExpenditure;
-import com.backend.moamoa.domain.asset.repository.AssetCategoryRepository;
-import com.backend.moamoa.domain.asset.repository.BudgetRepository;
-import com.backend.moamoa.domain.asset.repository.ExpenditureRatioRepository;
-import com.backend.moamoa.domain.asset.repository.RevenueExpenditureRepository;
+import com.backend.moamoa.domain.asset.entity.*;
+import com.backend.moamoa.domain.asset.repository.*;
+import com.backend.moamoa.domain.post.dto.request.PostRequest;
+import com.backend.moamoa.domain.post.entity.Post;
+import com.backend.moamoa.domain.post.entity.PostImage;
+import com.backend.moamoa.domain.post.repository.post.PostImageRepository;
 import com.backend.moamoa.domain.user.entity.User;
 import com.backend.moamoa.global.exception.CustomException;
 import com.backend.moamoa.global.exception.ErrorCode;
+import com.backend.moamoa.global.s3.S3Uploader;
 import com.backend.moamoa.global.utils.UserUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -41,6 +41,10 @@ public class AssetService {
     private final BudgetRepository budgetRepository;
     private final ExpenditureRatioRepository expenditureRatioRepository;
     private final RevenueExpenditureRepository revenueExpenditureRepository;
+    private final AssetGoalRepository assetGoalRepository;
+    private final PostImageRepository postImageRepository;
+    private final MoneyLogRepository moneyLogRepository;
+    private final S3Uploader s3Uploader;
     private final UserUtil userUtil;
 
     @Transactional
@@ -130,5 +134,39 @@ public class AssetService {
                     .filter(r -> r.getRevenueExpenditureType().toString().equals(type))
                     .mapToInt(RevenueExpenditure::getCost)
                     .sum();
+    }
+
+    @Transactional
+    public Long addAssetGoal(CreateAssetGoalRequest request) {
+        User user = userUtil.findCurrentUser();
+        AssetGoal assetGoal = assetGoalRepository.findByUserAndDate(user, request.getDate())
+                .orElseGet(() -> assetGoalRepository.save(AssetGoal.createAssetGoal(request.getContent(), user, request.getDate())));
+        assetGoal.updateAssetGoal(request.getContent());
+        return assetGoal.getId();
+    }
+
+    @Transactional
+    public CreateMoneyLogResponse createMoneyLog(CreateMoneyLogRequest request) {
+        User user = userUtil.findCurrentUser();
+        MoneyLog moneyLog = moneyLogRepository.save(MoneyLog.createMoneyLog(request.getDate(), request.getContent(), user));
+        List<String> imageUrl = uploadMoneyLogImages(request.getImageFiles(), moneyLog);
+
+        return new CreateMoneyLogResponse(moneyLog.getId(), imageUrl);
+    }
+
+    private List<String> uploadMoneyLogImages(List<MultipartFile> images, MoneyLog moneyLog) {
+        return  images.stream()
+                .map(image -> s3Uploader.upload(image, "moneyLog"))
+                .map(url -> createPostImage(moneyLog, url))
+                .map(PostImage::getImageUrl)
+                .collect(Collectors.toList());
+    }
+
+    private PostImage createPostImage(MoneyLog moneyLog, String url) {
+        return postImageRepository.save(PostImage.builder()
+                .imageUrl(url)
+                .storeFilename(StringUtils.getFilename(url))
+                .moneyLog(moneyLog)
+                .build());
     }
 }

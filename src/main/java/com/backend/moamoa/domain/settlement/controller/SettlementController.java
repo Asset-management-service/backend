@@ -21,7 +21,7 @@ import java.util.List;
 @Api(tags = "결산 API")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/settlement")
+@RequestMapping("/settlements")
 public class SettlementController {
 
     private final SettlementService settlementService;
@@ -52,7 +52,7 @@ public class SettlementController {
      * @return
      */
     @GetMapping("/month")
-    @ApiOperation(value = "가계부 달별결산", notes = "입력받은 년과 월를 기준으로 5개의 데이터를 가져와 주별 결산을 출력합니다.")
+    @ApiOperation(value = "가계부 달별 결산", notes = "입력받은 년과 월를 기준으로 5개의 데이터를 가져와 주별 결산을 출력합니다.")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "date", value = "해당 년 월 (입력하지 않으면 현재 날짜로 설정합니다.)", example = "2022-04", required = false),
             @ApiImplicitParam(name = "type", value = "달 기준 과거 데이터 출력(left), 미래 데이터 출력(right)", example = "left", required = true)
