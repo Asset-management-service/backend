@@ -88,6 +88,29 @@ public class AssetController {
         return ResponseEntity.ok(new CreateRevenueExpenditureResponse(assetService.addRevenueExpenditure(request)));
     }
 
+    @ApiOperation(value = "수익 지출 내역 수정", notes = "Request Body 값을 받아와서 수익 지출 내역을 추가하는 API")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "해당 수익 지출 내역이 정상적으로 수정된 경우"),
+            @ApiResponse(responseCode = "404", description = "해당 수익 지출 내역 OR 회원 Id를 찾지 못한 경우")
+    })
+    @PatchMapping("/revenueExpenditure")
+    public ResponseEntity<Void> updateRevenueExpenditure(@RequestBody UpdateRevenueExpenditure request) {
+        assetService.updateRevenueExpenditure(request);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @ApiOperation(value = "수익 지출 내역 삭제", notes = "revenueExpenditure PK를 받아서 해당 수익 지출 내역을 삭제하는 API")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "해당 수익 지출 내역을 정상적으로 삭제한 경우"),
+            @ApiResponse(responseCode = "404", description = "해당 수익 지출 내역 OR 회원 Id를 찾지 못한 경우")
+    })
+    @ApiImplicitParam(name = "revenueExpenditureId", value = "해당 수익 지출 PK", example = "1", required = true)
+    @DeleteMapping("/revenueExpenditure/{revenueExpenditureId}")
+    public ResponseEntity<Void> deleteRevenueExpenditure(@PathVariable Long revenueExpenditureId) {
+        assetService.deleteRevenueExpenditure(revenueExpenditureId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
     @ApiOperation(value = "수익 지출 내역 조회", notes = "해당 년 월, page, size 를 입력받아 한달 수익 지출 내역을 조회하는 API")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "해당 수익 지출 내역을 정상적으로 조회한 경우"),

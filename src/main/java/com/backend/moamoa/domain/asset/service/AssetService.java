@@ -169,4 +169,23 @@ public class AssetService {
                 .moneyLog(moneyLog)
                 .build());
     }
+
+    @Transactional
+    public void updateRevenueExpenditure(UpdateRevenueExpenditure request) {
+        User user = userUtil.findCurrentUser();
+
+        RevenueExpenditure revenueExpenditure = revenueExpenditureRepository.findByUserAndId(user, request.getRevenueExpenditureId())
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_REVENUE_EXPENDITURE));
+
+        revenueExpenditure.updateRevenueExpenditure(request.getRevenueExpenditureType(), request.getContent(),
+                request.getDate(), request.getPaymentMethod(), request.getCategoryName(), request.getCost());
+    }
+
+    @Transactional
+    public void deleteRevenueExpenditure(Long revenueExpenditureId) {
+        User user = userUtil.findCurrentUser();
+        RevenueExpenditure revenueExpenditure = revenueExpenditureRepository.findByUserAndId(user, revenueExpenditureId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_REVENUE_EXPENDITURE));
+        revenueExpenditureRepository.delete(revenueExpenditure);
+    }
 }
