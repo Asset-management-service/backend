@@ -4,7 +4,7 @@ REPOSITORY=/home/ec2-user/action
 cd $REPOSITORY
 
 APP_NAME=moamoa-0.0.1-SNAPSHOT.jar
-JAR_NAME=$(ls $REPOSITORY/build/libs/moamoa-0.0.1-SNAPSHOT.jar | grep '.jar' | tail -n 1)
+JAR_NAME=$(ls $REPOSITORY/build/libs/ | grep '.jar' | tail -n 1)
 JAR_PATH=$REPOSITORY/build/libs/$JAR_NAME
 
 CURRENT_PID=$(pgrep -f $APP_NAME)
