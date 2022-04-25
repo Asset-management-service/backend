@@ -57,6 +57,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
                     .antMatchers("/posts/recent").permitAll()
                     .antMatchers("/posts/{postId}").permitAll()
+                    .antMatchers("/auth/reissue").permitAll()
                     .anyRequest().authenticated()
                 .and()
                     .oauth2Login()
