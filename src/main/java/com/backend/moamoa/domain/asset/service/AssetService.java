@@ -298,4 +298,18 @@ public class AssetService {
                 .mapToInt(RevenueExpenditureResponse::getCost)
                 .sum();
     }
+
+    /**
+     * 머니 로그 조회
+     */
+    public MoneyLogResponse getMoneyLog(String date) {
+        User user = userUtil.findCurrentUser();
+        MoneyLog moneyLog = moneyLogRepository.findByUserAndDate(user, LocalDate.parse(date))
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_MONEY_LOG));
+        List<String> imageUrl = postImageRepository.findBySavedMoneyLogImageUrl(moneyLog.getId())
+                .stream()
+                .map(image -> image.getImageUrl())
+                .collect(Collectors.toList());
+        return new MoneyLogResponse(moneyLog.getId(), moneyLog.getContent(), imageUrl);
+    }
 }

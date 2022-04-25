@@ -162,4 +162,15 @@ public class AssetController {
     public ResponseEntity<MoneyLogRevenueExpenditureResponse> getRevenueExpenditure(@RequestParam String date) {
         return ResponseEntity.ok(assetService.getRevenueExpenditure(date));
     }
+
+    @ApiOperation(value = "머니 로그 조회", notes = "날짜를 입력받아 해당 머니로그를 조회하는 API")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "해당 머니로그를 정상적으로 조회한 경우"),
+            @ApiResponse(responseCode = "404", description = "회원 ID OR 머니로그 ID를 찾지 못한 경우")
+    })
+    @ApiImplicitParam(name = "date", value = "해당 날짜", example = "2022-04-23", required = true)
+    @GetMapping("/money-log")
+    public ResponseEntity<MoneyLogResponse> getMoneyLog(@RequestParam String date) {
+        return ResponseEntity.ok(assetService.getMoneyLog(date));
+    }
 }
