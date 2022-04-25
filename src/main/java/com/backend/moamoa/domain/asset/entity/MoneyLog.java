@@ -67,4 +67,9 @@ public class MoneyLog implements Auditable {
                 .user(user)
                 .build();
     }
+
+    public void updateMoneyLog(LocalDate date, String content) {
+        this.date = date;
+        this.content = content;
+    }
 }
