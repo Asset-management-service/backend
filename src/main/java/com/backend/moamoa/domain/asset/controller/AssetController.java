@@ -16,6 +16,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Api(tags = "가계부 API")
 @RestController
 @RequiredArgsConstructor
@@ -31,8 +33,8 @@ public class AssetController {
             @ApiResponse(responseCode = "404", description = "회원 Id를 찾지 못한 경우")
     })
     @GetMapping("/category")
-    public ResponseEntity<AssetCategoriesResponse> getCategory(@RequestParam String categoryType) {
-        return ResponseEntity.ok(new AssetCategoriesResponse(assetService.getCategories(categoryType)));
+    public ResponseEntity<AssetCategoryDtoResponse> getCategory(@RequestParam String categoryType) {
+        return ResponseEntity.ok(assetService.getCategories(categoryType));
     }
 
     @ApiOperation(value = "예산 설정", notes = "한달 예산 금액을 설정하는 API")
@@ -88,6 +90,29 @@ public class AssetController {
         return ResponseEntity.ok(new CreateRevenueExpenditureResponse(assetService.addRevenueExpenditure(request)));
     }
 
+    @ApiOperation(value = "수익 지출 내역 수정", notes = "Request Body 값을 받아와서 수익 지출 내역을 추가하는 API")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "해당 수익 지출 내역이 정상적으로 수정된 경우"),
+            @ApiResponse(responseCode = "404", description = "해당 수익 지출 내역 OR 회원 Id를 찾지 못한 경우")
+    })
+    @PatchMapping("/revenueExpenditure")
+    public ResponseEntity<Void> updateRevenueExpenditure(@RequestBody UpdateRevenueExpenditure request) {
+        assetService.updateRevenueExpenditure(request);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @ApiOperation(value = "수익 지출 내역 삭제", notes = "revenueExpenditure PK를 받아서 해당 수익 지출 내역을 삭제하는 API")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "해당 수익 지출 내역을 정상적으로 삭제한 경우"),
+            @ApiResponse(responseCode = "404", description = "해당 수익 지출 내역 OR 회원 Id를 찾지 못한 경우")
+    })
+    @ApiImplicitParam(name = "revenueExpenditureId", value = "해당 수익 지출 PK", example = "1", required = true)
+    @DeleteMapping("/revenueExpenditure/{revenueExpenditureId}")
+    public ResponseEntity<Void> deleteRevenueExpenditure(@PathVariable Long revenueExpenditureId) {
+        assetService.deleteRevenueExpenditure(revenueExpenditureId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
     @ApiOperation(value = "수익 지출 내역 조회", notes = "해당 년 월, page, size 를 입력받아 한달 수익 지출 내역을 조회하는 API")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "해당 수익 지출 내역을 정상적으로 조회한 경우"),
@@ -106,7 +131,7 @@ public class AssetController {
         return ResponseEntity.ok(new CreateAssetGoalResponse(assetService.addAssetGoal(request)));
     }
 
-    @ApiOperation(value = "머니 로그 작성", notes = "날짜, 내용, 이미지 파일을 입력받아 머니로 그를 작성하는 API",
+    @ApiOperation(value = "머니 로그 작성", notes = "날짜, 내용, 이미지 파일을 입력받아 머니 로그를 작성하는 API",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "머니 로그 작성이 정상적으로 추가된 경우"),
@@ -115,5 +140,37 @@ public class AssetController {
     @PostMapping("/money-log")
     public ResponseEntity<CreateMoneyLogResponse> createMoneyLog(@Validated @ModelAttribute CreateMoneyLogRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(assetService.createMoneyLog(request));
+    }
+
+    @ApiOperation(value = "머니 로그 수정", notes = "머니로그 PK를 입력받아 해당 머니 로그를 수정하는 API")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "머니 로그 수정이 정상 작동한 경우"),
+            @ApiResponse(responseCode = "404", description = "회원 Id OR 머니 로그 Id를 찾지 못한 경우")
+    })
+    @PatchMapping("/money-log")
+    public ResponseEntity<UpdateMoneyLogResponse> updateMoneyLog(@Validated @ModelAttribute UpdateMoneyLogRequest request) {
+        return ResponseEntity.ok((assetService.updateMoneyLog(request)));
+    }
+
+    @ApiOperation(value = "머니 로그 수익 지출 목록", notes = "날짜를 입력받아 해당 수익 지출 내역을 조회하는 API")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "정상적으로 조회를 한 경우"),
+            @ApiResponse(responseCode = "404", description = "회원 ID OR 예산 설정 ID를 찾지 못한 경우")
+    })
+    @ApiImplicitParam(name = "date", value = "해당 날짜", example = "2022-04-23", required = true)
+    @GetMapping("/money-log/revenue-expenditure")
+    public ResponseEntity<MoneyLogRevenueExpenditureResponse> getRevenueExpenditure(@RequestParam String date) {
+        return ResponseEntity.ok(assetService.getRevenueExpenditure(date));
+    }
+
+    @ApiOperation(value = "머니 로그 조회", notes = "날짜를 입력받아 해당 머니로그를 조회하는 API")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "해당 머니로그를 정상적으로 조회한 경우"),
+            @ApiResponse(responseCode = "404", description = "회원 ID OR 머니로그 ID를 찾지 못한 경우")
+    })
+    @ApiImplicitParam(name = "date", value = "해당 날짜", example = "2022-04-23", required = true)
+    @GetMapping("/money-log")
+    public ResponseEntity<MoneyLogResponse> getMoneyLog(@RequestParam String date) {
+        return ResponseEntity.ok(assetService.getMoneyLog(date));
     }
 }

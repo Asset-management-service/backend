@@ -34,7 +34,7 @@ jobs:
 
       # 압축파일 형태로 전달
       - name: Make zip file
-        run: zip -r ./springboot-intro-build.zip .
+        run: zip -r ./springboot-intro-build.zip . -x '*.git*' '*.gradle*' './gradle/*' './src/*'
 
       # S3 Bucket으로 copy
       - name: Deliver to AWS S3

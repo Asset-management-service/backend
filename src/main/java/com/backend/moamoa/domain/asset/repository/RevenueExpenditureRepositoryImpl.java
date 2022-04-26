@@ -3,6 +3,7 @@ package com.backend.moamoa.domain.asset.repository;
 import com.backend.moamoa.domain.asset.dto.response.QRevenueExpenditureResponse;
 import com.backend.moamoa.domain.asset.dto.response.RevenueExpenditureResponse;
 import com.backend.moamoa.domain.asset.entity.RevenueExpenditure;
+import com.backend.moamoa.domain.user.entity.User;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -11,6 +12,7 @@ import org.springframework.data.support.PageableExecutionUtils;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import static com.backend.moamoa.domain.asset.entity.QRevenueExpenditure.revenueExpenditure;
 import static com.backend.moamoa.domain.user.entity.QUser.user;
@@ -27,6 +29,8 @@ public class RevenueExpenditureRepositoryImpl implements RevenueExpenditureRepos
 
         List<RevenueExpenditureResponse> content = queryFactory
                 .select(new QRevenueExpenditureResponse(
+                        revenueExpenditure.id,
+                        revenueExpenditure.revenueExpenditureType,
                         revenueExpenditure.date,
                         revenueExpenditure.categoryName,
                         revenueExpenditure.content,
@@ -85,6 +89,31 @@ public class RevenueExpenditureRepositoryImpl implements RevenueExpenditureRepos
                 .where(revenueExpenditure.date
                         .between(year.with(firstDayOfYear()), year.with(lastDayOfYear()))
                         .and(user.id.eq(userId)))
+                .fetch();
+    }
+
+    @Override
+    public Optional<RevenueExpenditure> findByUserAndId(User user, Long revenueExpenditureId) {
+        return Optional.ofNullable(queryFactory
+                .selectFrom(revenueExpenditure)
+                .where(revenueExpenditure.id.eq(revenueExpenditureId).and(revenueExpenditure.user.eq(user)))
+                .fetchOne());
+    }
+
+    @Override
+    public List<RevenueExpenditureResponse> findMoneyLogRevenueExpenditure(Long userId, LocalDate date) {
+        return queryFactory
+                .select(new QRevenueExpenditureResponse(
+                        revenueExpenditure.id,
+                        revenueExpenditure.revenueExpenditureType,
+                        revenueExpenditure.date,
+                        revenueExpenditure.categoryName,
+                        revenueExpenditure.content,
+                        revenueExpenditure.paymentMethod,
+                        revenueExpenditure.cost))
+                .from(revenueExpenditure)
+                .innerJoin(revenueExpenditure.user, user)
+                .where(user.id.eq(userId).and(revenueExpenditure.date.eq(date)))
                 .fetch();
     }
 

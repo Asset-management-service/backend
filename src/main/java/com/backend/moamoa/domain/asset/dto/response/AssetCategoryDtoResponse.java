@@ -7,17 +7,17 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@ApiModel(description = "결과 응답 데이터 모델")
+import java.util.ArrayList;
+import java.util.List;
+
+@ApiModel
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class AssetCategoriesResponse {
+public class AssetCategoryDtoResponse {
 
-    @ApiModelProperty(value = "카테고리 PK")
-    private Long categoryId;
-
-    @ApiModelProperty(value = "카테고리 이름")
-    private String categoryName;
+    @ApiModelProperty(value = "카테고리 리스트")
+    private List<AssetCategoriesResponse> categories = new ArrayList<>();
 
 }

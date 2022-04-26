@@ -1,5 +1,6 @@
 package com.backend.moamoa.domain.asset.repository;
 
+import com.backend.moamoa.domain.asset.entity.AssetCategory;
 import com.backend.moamoa.domain.asset.entity.AssetCategoryType;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -14,11 +15,9 @@ public class AssetCategoryRepositoryImpl implements AssetCategoryRepositoryCusto
 
     private final JPAQueryFactory queryFactory;
     @Override
-    public List<String> findByAssetCategoryTypeAndUserId(String assetCategoryType, Long userId) {
-
+    public List<AssetCategory> findByAssetCategoryTypeAndUserId(String assetCategoryType, Long userId) {
         return queryFactory
-                .select(assetCategory.categoryName)
-                .from(assetCategory)
+                .selectFrom(assetCategory)
                 .innerJoin(assetCategory.user, user)
                 .where(assetCategory.assetCategoryType.eq(AssetCategoryType.valueOf(assetCategoryType.toUpperCase())).and(user.id.eq(userId)))
                 .fetch();
