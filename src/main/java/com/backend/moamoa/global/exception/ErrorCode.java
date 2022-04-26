@@ -28,6 +28,8 @@ public enum ErrorCode {
 
     NOT_FOUND_REVENUE_EXPENDITURE(HttpStatus.NOT_FOUND, "해당 수익 지출 내역을 찾을 수 없습니다."),
 
+    NOT_FOUND_ASSET_GOAL(HttpStatus.NOT_FOUND, "해당 자산 관리 목표를 찾을 수 없습니다."),
+
     FORBIDDEN_USER(HttpStatus.FORBIDDEN, "권한이 없는 요청입니다"),
 
     INVALID_TOKEN(HttpStatus.FORBIDDEN, "유효하지 않은 엑세스 토큰입니다."),
