@@ -3,16 +3,17 @@ os: linux
 files:
   - source:  /
     destination: /home/ec2-user/action
-    overwrite: true
+    overwrite: yes
+file_exists_behavior: OVERWRITE
 
 permissions:
-  - object: /home/ec2-user/action
+  - object: /
+    pattern: "**"
     owner: ec2-user
     group: ec2-user
-    mode: 755
 
 hooks:
   AfterInstall:
     - location: deploy.sh
       timeout: 60
-      runas: root
+      runas: ec2-user
