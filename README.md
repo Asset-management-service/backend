@@ -27,9 +27,11 @@
 
 ## 프로젝트 아키텍쳐 🏘
 
+<img src="https://user-images.githubusercontent.com/87658765/165399725-0bb6a629-5bfb-460b-970b-0e92f7781753.png" width="700" height="600">
+
 ## ERD ⚙️
 
-<img src="https://user-images.githubusercontent.com/87658765/165195105-0329800f-0879-45de-94c0-948403f7aa9a.png" width="550" height="500"/>
+<img src="https://user-images.githubusercontent.com/87658765/165195105-0329800f-0879-45de-94c0-948403f7aa9a.png" width="700" height="600"/>
 
 ## 기획 및 설계 🛠
 
