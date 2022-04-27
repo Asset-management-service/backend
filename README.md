@@ -49,7 +49,7 @@
 ## 기획 및 설계 🛠
 
 - [와이어프레임](https://www.figma.com/file/mR3rO5fsSPaECuU6k7dotb/모아모아?node-id=0%3A1)
-- [Swagger API](https://moamoadev.shop/api/swagger-ui/index.html
+- [Swagger API](https://moamoadev.shop/api/swagger-ui/index.html)
 
 ## 맡은 역할 🧙
 이름|역할
