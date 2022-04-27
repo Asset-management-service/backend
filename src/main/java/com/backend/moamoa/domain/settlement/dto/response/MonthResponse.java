@@ -26,11 +26,23 @@ public class MonthResponse
     @ApiModelProperty(value = "총 수익 내역", example = "15000")
     private int totalRevenue;
 
+    @ApiModelProperty(value = "총 고정 비용 내역", example = "150000")
+    private int totalFixed;
+
+    @ApiModelProperty(value = "총 고정 비용 퍼센트", example = "88")
+    private int totalFixedPercent;
+
+    @ApiModelProperty(value = "총 변동 비용 내역", example = "150000")
+    private int totalVariable;
+
+    @ApiModelProperty(value = "총 변동 비용 퍼센트", example = "22")
+    private int totalVarPercent;
+
     private List<CostResponse> fixedCostResponses;
 
     private List<CostResponse> variableCostResponses;
 
-    private List<RevenueResponse> revenueResponses;
+    private List<CostResponse> revenueResponses;
 
     @ApiModelProperty(value = "총 순이익", example = "15000")
     private Integer netIncome;
@@ -42,8 +54,7 @@ public class MonthResponse
     private Boolean variableExceed;
 
     public MonthResponse() {
-        this.fixedExceed = false;
-        this.variableExceed = false;
+        fixedExceed = false;
+        variableExceed = false;
     }
-
 }
