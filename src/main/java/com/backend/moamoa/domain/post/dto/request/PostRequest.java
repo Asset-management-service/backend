@@ -30,5 +30,8 @@ public class PostRequest {
     @ApiModelProperty(value = "이미지 파일", required = false)
     private List<MultipartFile> imageFiles = new ArrayList<>();
 
+    @ApiModelProperty(value = "머니 로그 공유 이미지 파일", required = false)
+    private List<String> moneyLogImages = new ArrayList<>();
+
 }
 
