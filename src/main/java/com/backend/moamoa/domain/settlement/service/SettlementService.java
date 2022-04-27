@@ -37,6 +37,7 @@ import static java.time.temporal.TemporalAdjusters.lastDayOfYear;
 @Transactional(readOnly = true)
 public class SettlementService {
 
+    private static final String TYPE_REVENUE = "REVENUE";
     private static final String TYPE_EXPENDITURE = "EXPENDITURE";
     private static final String TYPE_NET_PROFIT = "NET_PROFIT";
     private static final String TYPE_FIXED = "FIXED";
@@ -141,9 +142,6 @@ public class SettlementService {
         TotalResponse totalResponse = new TotalResponse();
         getTotalCost(revenueExpenditure, totalResponse);
 
-        int totalFixedPercent = (int) ((double) totalResponse.getTotalFixed() / totalResponse.getTotalExp() * 100.0);
-        int totalVariablePercent = (int) ((double) totalResponse.getTotalVariable() / totalResponse.getTotalExp() * 100.0);
-
         List<AssetCategory> assetCategory = assetCategoryRepository.findByUser(user);
         List<String> fixed = new ArrayList<>();
         List<String> variable = new ArrayList<>();
@@ -159,6 +157,22 @@ public class SettlementService {
             }
         }
 
+        for (RevenueExpenditure r : revenueExpenditure) {
+            AssetCategory category = assetCategory.stream().filter(a -> a.getCategoryName().equals(r.getCategoryName())).findFirst()
+                    .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_ASSET_CATEGORY));
+
+            if (category.getAssetCategoryType().equals(AssetCategoryType.FIXED)) {
+                totalResponse.addTotalFixed(r.getCost());
+            } else if (category.getAssetCategoryType().equals(AssetCategoryType.VARIABLE)) {
+                totalResponse.addTotalVariable(r.getCost());
+            }
+        }
+        System.out.println(totalResponse.getTotalFixed());
+        System.out.println(totalResponse.getTotalVariable());
+
+        int totalFixedPercent = getRatio(totalResponse.getTotalFixed(), totalResponse.getTotalExp());
+        int totalVariablePercent = getRatio(totalResponse.getTotalVariable(), totalResponse.getTotalExp());
+
         ExpenditureRatio expenditureRatio = expenditureRatioRepository.findByUser(user).orElseThrow(
                 () -> new CustomException(ErrorCode.NOT_FOUND_RATIO));
 
@@ -173,7 +187,7 @@ public class SettlementService {
         List<CostResponse> costRes = new ArrayList<>();
         List<RevenueResponse> revenueRes = new ArrayList<>();
 
-        setCostResponse(revenueExpenditure, totalResponse.getTotalExp(), totalResponse.getTotalVariable(), totalFixedPercent, fixed, fixedRes);
+        setCostResponse(revenueExpenditure, totalResponse.getTotalExp(), totalResponse.getTotalFixed(), totalFixedPercent, fixed, fixedRes);
         setCostResponse(revenueExpenditure, totalResponse.getTotalExp(), totalResponse.getTotalVariable(), totalVariablePercent, variable, costRes);
 
         for (String revenue : revenues) {
@@ -181,7 +195,7 @@ public class SettlementService {
                     RevenueResponse.builder()
                             .CategoryName(revenue)
                             .revenue(getExpenditureByCost(revenueExpenditure, revenue))
-                            .percent((int) ((double) getExpenditureByCost(revenueExpenditure, revenue) / totalResponse.getTotalRevenue() * 100.0))
+                            .percent(getRatio(getExpenditureByCost(revenueExpenditure, revenue), totalResponse.getTotalRevenue()))
                             .build();
 
             revenueRes.add(revenueResponse);
@@ -224,7 +238,7 @@ public class SettlementService {
                             .totalPercent(0)
                             .CategoryName(categoryName)
                             .cost(getExpenditureByCost(revenueExpenditure, categoryName))
-                            .percent((int) ((double) getExpenditureByCost(revenueExpenditure, categoryName) / totalExp * 100.0))
+                            .percent(getRatio(getExpenditureByCost(revenueExpenditure, categoryName), totalExp))
                             .build()
             );
         }
@@ -267,6 +281,7 @@ public class SettlementService {
     // 달, 년 자세한 지출 내역 비교하기
     private ComparisonsResponse getComparisonRes(MonthResponse prevRes, MonthResponse presentRes) {
         ComparisonResponse totalExp = getComparisonResponse(prevRes.getTotalExp(), presentRes.getTotalExp(), TYPE_EXPENDITURE);
+        ComparisonResponse totalRev = getComparisonResponse(prevRes.getTotalRevenue(), presentRes.getTotalRevenue(), TYPE_REVENUE);
 
         List<TotalComparisonResponse> totalFixedResponses = getTotalComparisonResponses(prevRes, presentRes, TYPE_FIXED);
         List<TotalComparisonResponse> totalVarResponses = getTotalComparisonResponses(prevRes, presentRes, TYPE_VARIABLE);
@@ -274,7 +289,7 @@ public class SettlementService {
         ComparisonResponse netResponse = getComparisonResponse(prevRes.getTotalRevenue() - prevRes.getTotalExp(),
                 presentRes.getTotalRevenue() - presentRes.getTotalExp(), TYPE_NET_PROFIT);
 
-        return new ComparisonsResponse(totalExp, totalFixedResponses, totalVarResponses, netResponse);
+        return new ComparisonsResponse(totalExp, totalFixedResponses, totalVarResponses, totalRev, netResponse);
     }
 
 
@@ -365,7 +380,7 @@ public class SettlementService {
 
     private void getTotalCost(List<RevenueExpenditure> revenueExpenditureList, TotalResponse totalResponse) {
         revenueExpenditureList.stream()
-                .forEach(r -> totalResponse.setTotalResponse(r.getRevenueExpenditureType().toString(), r.getCategoryName(), r.getCost()));
+                .forEach(r -> totalResponse.setTotalResponse(r.getRevenueExpenditureType().toString(), r.getCost()));
     }
 
     private List<String> getMostAndLeastCategory(List<CostResponse> fixedRes, List<CostResponse> costRes) {
@@ -390,14 +405,14 @@ public class SettlementService {
                                  int totalExp, int totalCost, int percent, List<String> names, List<CostResponse> lists) {
         for (String name : names) {
             CostResponse costResponse = new CostResponse(totalCost, percent, name, getExpenditureByCost(revenueExpenditure, name),
-                    (int) ((double) getExpenditureByCost(revenueExpenditure, name) / (double) totalExp * 100.0));
+                    getRatio(getExpenditureByCost(revenueExpenditure, name), totalExp));
 
             lists.add(costResponse);
         }
     }
 
     private int getExpenditureByCost(List<RevenueExpenditure> revenueExpenditureList, String cost) {
-        return revenueExpenditureList.stream().filter(r -> r.getContent().equals(cost)).mapToInt(RevenueExpenditure::getCost).sum();
+        return revenueExpenditureList.stream().filter(r -> r.getCategoryName().equals(cost)).mapToInt(RevenueExpenditure::getCost).sum();
     }
 
     private int getRevenueExpenditure(List<RevenueExpenditure> revenueExpenditureList, String type) {
@@ -405,12 +420,18 @@ public class SettlementService {
     }
 
     private List<TotalComparisonResponse> getTotalComparisonResponses(MonthResponse prevRes, MonthResponse presentRes, String type) {
-        List<TotalComparisonResponse> totalFixedResponses = new ArrayList<>();
-        List<CostResponse> fixedPrev = prevRes.getFixedCostResponses();
-        List<CostResponse> fixedPresent = presentRes.getFixedCostResponses();
-        setTotalComparisonResponse(fixedPrev, fixedPresent, totalFixedResponses, TYPE_FIXED);
+        List<TotalComparisonResponse> totalResponses = new ArrayList<>();
 
-        return totalFixedResponses;
+        if (type.equals(TYPE_FIXED)) {
+            List<CostResponse> fixedPrev = prevRes.getFixedCostResponses();
+            List<CostResponse> fixedPresent = presentRes.getFixedCostResponses();
+            setTotalComparisonResponse(fixedPrev, fixedPresent, totalResponses, type);
+        } else if (type.equals(TYPE_VARIABLE)) {
+            List<CostResponse> varPrev = prevRes.getVariableCostResponses();
+            List<CostResponse> varPresent = presentRes.getVariableCostResponses();
+            setTotalComparisonResponse(varPrev, varPresent, totalResponses, type);
+        }
+        return totalResponses;
     }
 
 }

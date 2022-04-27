@@ -17,19 +17,21 @@ public class TotalResponse {
 
     int totalVariable;
 
-    public void setTotalResponse(String revenueExpenditureType, String categoryName, int cost) {
+    public void setTotalResponse(String revenueExpenditureType, int cost) {
         if (revenueExpenditureType.equals("REVENUE")) {
             this.totalRevenue += cost;
         }
         if (revenueExpenditureType.equals("EXPENDITURE")) {
             this.totalExp += cost;
         }
-        if (categoryName.equals("FIXED")) {
-            this.totalFixed += cost;
-        }
-        if (categoryName.equals("VARIABLE")) {
-            this.totalVariable += cost;
-        }
+    }
+
+    public void addTotalFixed(int totalFixed) {
+        this.totalFixed += totalFixed;
+    }
+
+    public void addTotalVariable(int totalVariable) {
+        this.totalVariable += totalVariable;
     }
 
 }

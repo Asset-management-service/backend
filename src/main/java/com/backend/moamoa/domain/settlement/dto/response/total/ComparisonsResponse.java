@@ -16,14 +16,16 @@ public class ComparisonsResponse {
 
     private List<TotalComparisonResponse> varianceResponses;
 
+    private ComparisonResponse totalRevResponses;
+
     private ComparisonResponse netProfitResponse;
 
     @Builder
-    public ComparisonsResponse(ComparisonResponse totalExpResponse, List<TotalComparisonResponse> fixedResponses, List<TotalComparisonResponse> varianceResponses, ComparisonResponse netProfitResponse) {
+    public ComparisonsResponse(ComparisonResponse totalExpResponse, List<TotalComparisonResponse> fixedResponses, List<TotalComparisonResponse> varianceResponses, ComparisonResponse totalIncomeResponse, ComparisonResponse netProfitResponse) {
         this.totalExpResponse = totalExpResponse;
         this.fixedResponses = fixedResponses;
         this.varianceResponses = varianceResponses;
+        this.totalRevResponses = totalIncomeResponse;
         this.netProfitResponse = netProfitResponse;
     }
-
 }
