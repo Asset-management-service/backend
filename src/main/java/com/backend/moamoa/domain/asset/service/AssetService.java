@@ -312,4 +312,36 @@ public class AssetService {
                 .collect(Collectors.toList());
         return new MoneyLogResponse(moneyLog.getId(), moneyLog.getContent(), imageUrl);
     }
+
+    /**
+     * 자산 관리 목표 조회
+     */
+    public AssetGoalResponse getAssetGoal(String date) {
+        User user = userUtil.findCurrentUser();
+        AssetGoal assetGoal = assetGoalRepository.findByUserAndDate(user, LocalDate.parse(date))
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_ASSET_GOAL));
+        return new AssetGoalResponse(assetGoal.getId(), assetGoal.getContent());
+    }
+
+    /**
+     * 한달 예산 금액 조회
+     */
+    public BudgetResponse getBudget() {
+        User user = userUtil.findCurrentUser();
+        Budget budget = budgetRepository.findBudgetAmountByUser(user)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_BUDGET));
+
+        return new BudgetResponse(budget.getId(), budget.getBudgetAmount());
+    }
+
+    /**
+     * 해당 회원의 지출 비율을 조회
+     */
+    public ExpenditureResponse getExpenditure() {
+        User user = userUtil.findCurrentUser();
+        ExpenditureRatio expenditureRatio = expenditureRatioRepository.findByUser(user)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_RATIO));
+
+        return new ExpenditureResponse(expenditureRatio.getId(), expenditureRatio.getFixed(), expenditureRatio.getVariable());
+    }
 }

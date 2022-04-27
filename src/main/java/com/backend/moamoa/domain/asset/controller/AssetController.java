@@ -173,4 +173,36 @@ public class AssetController {
     public ResponseEntity<MoneyLogResponse> getMoneyLog(@RequestParam String date) {
         return ResponseEntity.ok(assetService.getMoneyLog(date));
     }
+
+    @ApiOperation(value = "해당 달 자산 관리 목표 조회", notes = "날짜를 입력받아 해당 달 자산 관리 목표를 조회하는 API")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "해당 자산 관리 목표를 정상적으로 조회한 경우"),
+            @ApiResponse(responseCode = "404", description = "회원 ID OR 자산 관리 목표를 찾지 못한 경우")
+    })
+    @ApiImplicitParam(name = "date", value = "해당 날짜", example = "2022-04-01", required = true)
+    @GetMapping("/asset-goal")
+    public ResponseEntity<AssetGoalResponse> getAssetGoal(@RequestParam String date) {
+        return ResponseEntity.ok(assetService.getAssetGoal(date));
+    }
+
+    @ApiOperation(value = "해당 회원 한달 예산 금액 조회", notes = "엑세스 토큰을 받아서 해당 회원의 한달 예산 금액을 조회하는 API")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "해당 회원의 한달 예산 금액을 정상적으로 조회한 경우"),
+            @ApiResponse(responseCode = "404", description = "해당 회원의 Id로 한달 예산 금액을 조회하지 못한 경우")
+    })
+    @GetMapping("/budget")
+    public ResponseEntity<BudgetResponse> getBudget() {
+        return ResponseEntity.ok(assetService.getBudget());
+    }
+
+    @ApiOperation(value = "해당 회원 지출 비율 조회", notes = "엑세스 토큰을 받아서 해당 회원의 지출 비율을 조회하는 API")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "해당 회원의 지출 비율을 정상적으로 조회한 경우"),
+            @ApiResponse(responseCode = "404", description = "해당 회원의 Id로 지출 비율을 조회하지 못한 경우")
+    })
+    @GetMapping("/expenditure")
+    public ResponseEntity<ExpenditureResponse> getExpenditure() {
+        return ResponseEntity.ok(assetService.getExpenditure());
+    }
+
 }
