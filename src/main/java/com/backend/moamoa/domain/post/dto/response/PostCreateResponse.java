@@ -18,9 +18,6 @@ public class PostCreateResponse {
     @ApiModelProperty(value = "게시글 Id")
     private Long postId;
 
-    @ApiModelProperty(value = "응답 메세지")
-    private String message;
-
     @ApiModelProperty(value = "이미지 경로")
     private List<String> imageUrl = new ArrayList<>();
 }
