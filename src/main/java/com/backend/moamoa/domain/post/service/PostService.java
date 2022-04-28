@@ -100,7 +100,7 @@ public class PostService {
 
         post.updatePost(request.getTitle(), request.getContent());
 
-        return new PostUpdateResponse(post.getId(), "게시글 변경이 완료되었습니다.", saveImages);
+        return new PostUpdateResponse(post.getId(), saveImages);
     }
 
     /**
@@ -138,14 +138,12 @@ public class PostService {
     }
 
     @Transactional
-    public PostResponse deletePost(Long postId) {
+    public void deletePost(Long postId) {
         User user = userUtil.findCurrentUser();
         Post post = postRepository.findByIdAndUser(postId, user.getId())
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_POST));
 
         postRepository.delete(post);
-
-        return new PostResponse(postId, "게시글 삭제가 완료되었습니다.");
     }
 
     /**
@@ -169,31 +167,31 @@ public class PostService {
     }
 
     @Transactional
-    public LikeResponse likePost(Long postId) {
+    public boolean likePost(Long postId) {
         User user = userUtil.findCurrentUser();
         Post post = getPost(postId);
         Optional<PostLike> postLike = postLikeRepository.findByUserAndPost(user, post);
 
         if (postLike.isEmpty()) {
             postLikeRepository.save(PostLike.createPostLike(user, post));
-            return new LikeResponse(true);
+            return true;
         }
         postLikeRepository.delete(postLike.get());
-        return new LikeResponse(false);
+        return false;
     }
 
     @Transactional
-    public ScrapResponse scrapPost(Long postId) {
+    public boolean scrapPost(Long postId) {
         User user = userUtil.findCurrentUser();
         Post post = getPost(postId);
 
         Optional<Scrap> scrap = scrapRepository.findByUserAndPost(user, post);
         if (scrap.isEmpty()) {
             scrapRepository.save(Scrap.createScrap(user, post));
-            return new ScrapResponse(true);
+            return true;
         }
         scrapRepository.delete(scrap.get());
-        return new ScrapResponse(false);
+        return false;
     }
 
     public Page<RecentPostResponse> getRecentPost(Pageable pageable, String categoryName) {
