@@ -6,10 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 
-import static javax.persistence.FetchType.*;
-import static javax.persistence.GenerationType.*;
+import static javax.persistence.FetchType.LAZY;
+import static javax.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
 
 @Entity
@@ -22,7 +21,7 @@ public class Budget {
     @Column(name = "budget_id")
     private Long id;
 
-    @NotNull
+    @Column(nullable = false)
     private int budgetAmount;
 
     @OneToOne(fetch = LAZY)

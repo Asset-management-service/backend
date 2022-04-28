@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 
 import static javax.persistence.EnumType.STRING;
 import static javax.persistence.FetchType.LAZY;
@@ -24,16 +23,14 @@ public class AssetCategory {
     private Long id;
 
     @Enumerated(STRING)
-    @NotNull
-    @Column(name = "category_type")
+    @Column(name = "category_type", nullable = false)
     private AssetCategoryType assetCategoryType;
 
-    @NotNull
+    @Column(nullable = false)
     private String categoryName;
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "user_id")
-    @NotNull
     private User user;
 
     @Builder
