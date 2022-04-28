@@ -51,6 +51,13 @@
 - [와이어프레임](https://www.figma.com/file/mR3rO5fsSPaECuU6k7dotb/모아모아?node-id=0%3A1)
 - [Swagger API](https://moamoadev.shop/api/swagger-ui/index.html)
 
+## 맡은 역할 🧙
+이름|역할
+---|---
+`공통` | exception 처리/swagger 문서화
+김도훈 | 게시글/댓글/대댓글/좋아요/스크랩/이미지 파일 업로드/가계부 설정/수익 지출 관리/머니로그
+김민우 | JWT + OAuth2 기반 로그인 인증/이메일 인증/시큐리티 설정/배포 및 배포 자동화/가계부 통계
+
 ## 팀 문화 🤗
 
 1. 우린 남이니까! 🎲
@@ -64,3 +71,6 @@
 5. 어푸어푸 저는 무죄입니다ㅠ 🥊
 > - 서로 간에 코드 리뷰를 진행해요. 코드 리뷰를 통해 내가 담당하지 않은 부분도 학습할 수 있습니다.
 PR은 팀원 간의 `approve`를 받은 후 머지 합니다. 코드 리뷰를 진행했기에, 서비스에서 발생한 문제는 모두의 책임입니다.
+
+## FE Repository 🐷
+[모아모아 FE](https://github.com/Asset-management-service/frontend)

@@ -79,7 +79,7 @@ public class UserController {
     }
 
     /**
-     * [GET] api/users/emailCheck/{userEmail}
+     * [GET] api/users/emailCheck/?email= 이메일
      * 인증할 이메일을 받아, 이메일의 중복 여부를 확인 합니다.
      */
     @ApiOperation(value = "이메일 인증 중복 확인",
