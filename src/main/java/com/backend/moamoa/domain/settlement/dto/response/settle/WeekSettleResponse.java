@@ -25,11 +25,11 @@ public class WeekSettleResponse {
     @ApiModelProperty(value = "지출 내역", example = "15000")
     private int cost;
 
-    @ApiModelProperty(value = "시작 년 월 일", example = "15000")
+    @ApiModelProperty(value = "시작 년 월 일", example = "2022-01-04")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
     private LocalDate weekStart;
 
-    @ApiModelProperty(value = "끝 년 월 일", example = "15000")
+    @ApiModelProperty(value = "끝 년 월 일", example = "2022-01-11")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
     private LocalDate weekEnd;
 

@@ -16,6 +16,9 @@ public class WeekResponse
     @ApiModelProperty(value = "해당 날짜의 년", example = "2022")
     private Integer year;
 
+    @ApiModelProperty(value = "해당 날짜의 주", example = "3")
+    private int month;
+
     @ApiModelProperty(value = "해당 날짜의 주차", example = "3")
     private Integer weekOfMonth;
 
@@ -28,16 +31,17 @@ public class WeekResponse
     @ApiModelProperty(value = "총 지출 내역", example = "15000")
     private int totalExp;
 
-    private List<CostResponse> fixedCostResponses;
+    private List<CostResponse> costResponses;
 
     @Builder
-    public WeekResponse(Integer year, Integer weekOfMonth, String mostExpCategory, String leastExpCategory, int totalExp, List<CostResponse> fixedCostResponses) {
+    public WeekResponse(Integer year, Integer month, Integer weekOfMonth, String mostExpCategory, String leastExpCategory, int totalExp, List<CostResponse> fixedCostResponses) {
         this.year = year;
+        this.month = month;
         this.weekOfMonth = weekOfMonth;
         this.mostExpCategory = mostExpCategory;
         this.leastExpCategory = leastExpCategory;
         this.totalExp = totalExp;
-        this.fixedCostResponses = fixedCostResponses;
+        this.costResponses = fixedCostResponses;
     }
 
 }
