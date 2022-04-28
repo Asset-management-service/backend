@@ -17,7 +17,7 @@ public class WeekResponse
     private Integer year;
 
     @ApiModelProperty(value = "해당 날짜의 주", example = "3")
-    private Integer month;
+    private int month;
 
     @ApiModelProperty(value = "해당 날짜의 주차", example = "3")
     private Integer weekOfMonth;
