@@ -25,7 +25,7 @@ public class CommentController {
 
     @ApiOperation(value = "댓글 작성", notes = "parentId는 댓글인 경우 null, 답글인 경우 부모 PK를 입력해주세요.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "해당 댓글이 정상적으로 생성된 경우"),
+            @ApiResponse(responseCode = "201", description = "해당 댓글이 정상적으로 생성된 경우"),
             @ApiResponse(responseCode = "404", description = "회원 OR 게시글의 ID가 없는 경우")
     })
     @PostMapping
@@ -36,7 +36,7 @@ public class CommentController {
     @ApiOperation(value = "댓글 삭제", notes = "댓글의 Id 값을 받아 해당 댓글을 삭제하는 API")
     @ApiImplicitParam(name = "commentId", value = "댓글 PK", example = "1", required = true)
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "해당 댓글이 정상적으로 삭제된 경우"),
+            @ApiResponse(responseCode = "204", description = "해당 댓글이 정상적으로 삭제된 경우"),
             @ApiResponse(responseCode = "404", description = "회원의 Id 값을 찾지 못한 경우"),
             @ApiResponse(responseCode = "403", description = "해당 댓글을 삭제할 권한이 없는 경우")
     })

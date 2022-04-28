@@ -47,7 +47,7 @@ public class PostController {
     @ApiOperation(value = "게시글 생성", notes = "Form Data 값을 받아와서 글을 생성하는 API",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "해당 게시글이 정상적으로 생성된 경우"),
+            @ApiResponse(responseCode = "201", description = "해당 게시글이 정상적으로 생성된 경우"),
             @ApiResponse(responseCode = "404", description = "회원의 Id를 찾지 못한 경우")
     })
     @PostMapping
@@ -67,7 +67,7 @@ public class PostController {
 
     @ApiOperation(value = "게시글 삭제", notes = "게시글 PK를 받아와서 게시글을 삭제하는 API")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "해당 게시글이 정상적으로 삭제된 경우"),
+            @ApiResponse(responseCode = "204", description = "해당 게시글이 정상적으로 삭제된 경우"),
             @ApiResponse(responseCode = "404", description = "회원 OR 게시글의 Id를 찾지 못한 경우")
     })
     @ApiImplicitParam(name = "postId", value = "게시글 PK", example = "1", required = true)

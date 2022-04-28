@@ -49,7 +49,7 @@ public class AssetController {
 
     @ApiOperation(value = "가계부 설정 카테고리 생성", notes = "카테고리 타입과 카테고리 이름을 입력받아 카테고리를 생성하는 API")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "카테고리가 정상적으로 생성된 경우"),
+            @ApiResponse(responseCode = "201", description = "카테고리가 정상적으로 생성된 경우"),
             @ApiResponse(responseCode = "404", description = "회원 Id를 찾지 못한 경우")
     })
     @PostMapping("/category")
@@ -82,7 +82,7 @@ public class AssetController {
 
     @ApiOperation(value = "수익 지출 내역 추가", notes = "Request Body 값을 받아와서 수익 지출 내역을 추가하는 API")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "해당 수익 지출 내역을 정상적으로 추가한 경우"),
+            @ApiResponse(responseCode = "201", description = "해당 수익 지출 내역을 정상적으로 추가한 경우"),
             @ApiResponse(responseCode = "404", description = "회원 Id를 찾지 못한 경우")
     })
     @PostMapping("/revenueExpenditure")
