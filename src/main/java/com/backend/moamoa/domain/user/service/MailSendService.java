@@ -63,7 +63,7 @@ public class MailSendService {
             sendMail.setSubject("[모아모아 서비스 이메일 인증메일 입니다.]");
             sendMail.setText(new StringBuffer().append("<h1>[이메일 인증]</h1>")
                     .append("<p>아래 링크를 클릭하시면 이메일 인증이 완료됩니다.</p>")
-                    .append("<a href='http://localhost:8080/api/users/confirm?email=")
+                    .append("<a href='http://moamoadev.shop/api/users/confirm?email=")
                     .append(email)
                     .append("&authKey=")
                     .append(authKey)

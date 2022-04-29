@@ -24,7 +24,7 @@ public class ReissueResponse {
     @ApiModelProperty(value = "refreshToken의 만료 기간 ms(일주일)", example = "604800000")
     private Long refreshTokenExpireDate;
 
-    public static ReissueResponse toReissueResponse(TokenResponse tokenResponse) {
+    public static ReissueResponse of(TokenResponse tokenResponse) {
         return ReissueResponse.builder()
                 .grantType(tokenResponse.getGrantType())
                 .accessToken(tokenResponse.getAccessToken())

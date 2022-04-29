@@ -74,6 +74,7 @@ public class User implements Auditable {
     }
 
     public void update(UserUpdateRequest userUpdateRequest) {
+        this.email = userUpdateRequest.getEmail();
         this.nickname = userUpdateRequest.getNickname();
         this.phoneNum = userUpdateRequest.getPhoneNum();
         this.gender = userUpdateRequest.getGender();
