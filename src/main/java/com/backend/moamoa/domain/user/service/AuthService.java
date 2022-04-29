@@ -1,5 +1,6 @@
 package com.backend.moamoa.domain.user.service;
 
+import antlr.Token;
 import com.backend.moamoa.domain.user.dto.request.LogoutRequest;
 import com.backend.moamoa.domain.user.dto.response.ReissueResponse;
 import com.backend.moamoa.domain.user.dto.response.TokenResponse;
@@ -37,7 +38,7 @@ public class AuthService {
      * @return TokenResponse 토큰 반환 정보
      */
     @Transactional
-    public ReissueResponse reissue(HttpServletRequest request, HttpServletResponse response) {
+    public TokenResponse reissue(HttpServletRequest request, HttpServletResponse response) {
         String accessToken = jwtFilter.getAccessToken(request);
 
         if (!jwtProvider.ExpiredToken(accessToken)) {
@@ -64,7 +65,7 @@ public class AuthService {
         CookieUtil.deleteCookie(request, response, REFRESH_TOKEN);
         CookieUtil.addCookie(response, REFRESH_TOKEN, tokenResponse.getRefreshToken(), cookieMaxAge);
 
-        return ReissueResponse.toReissueResponse(tokenResponse);
+        return tokenResponse;
     }
 
     public Boolean logout(HttpServletRequest request) {

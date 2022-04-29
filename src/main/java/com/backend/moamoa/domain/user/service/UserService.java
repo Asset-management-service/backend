@@ -43,10 +43,8 @@ public class UserService {
      *
      * @return User 현재 유저
      */
-    public UserResponse getUser() {
-        User user = userUtil.findCurrentUser();
-        return UserResponse.toUserResponse(user);
-
+    public User getUser() {
+        return userUtil.findCurrentUser();
     }
 
     /**
@@ -56,7 +54,7 @@ public class UserService {
      * @return UserResponse
      */
     @Transactional
-    public UserResponse update(UserUpdateRequest userUpdateRequest) {
+    public User update(UserUpdateRequest userUpdateRequest) {
         User user = userUtil.findCurrentUser();
         // 닉네임 중복 확인
         if (userRepository.existsByNickname(userUpdateRequest.getNickname())) {
@@ -73,7 +71,7 @@ public class UserService {
             throw new CustomException(ErrorCode.ALREADY_EMAIL_EXISTS);
         }
         user.update(userUpdateRequest);
-        return UserResponse.toUserResponse(user);
+        return user;
     }
 
     /**

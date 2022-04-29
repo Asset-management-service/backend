@@ -11,6 +11,8 @@ import com.backend.moamoa.domain.user.service.MailSendService;
 import com.backend.moamoa.domain.user.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -39,8 +41,12 @@ public class UserController {
     @GetMapping
     @ApiOperation(value = "현재 사용자 조회",
             notes = "현재 사용자의 정보를 가져옵니다. 헤더(Bearer)에 사용자 토큰 주입을 필요로 합니다.")
-    public UserResponse getUser() {
-        return userService.getUser();
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "사용자를 정상적으로 조회한 경우"),
+            @ApiResponse(responseCode = "404", description = "해당 사용자를 찾지 못한 경우")
+    })
+    public ResponseEntity<UserResponse> getUser() {
+        return ResponseEntity.ok(UserResponse.toUserResponse(userService.getUser()));
     }
 
     /**
@@ -52,17 +58,19 @@ public class UserController {
     @PatchMapping
     @ApiOperation(value = "개인정보 수정",
             notes = "현재 사용자의 개인정보를 업데이트 합니다. 헤더(Bearer)에 사용자 토큰 주입을 필요로 합니다.")
-    public UserResponse update(@RequestBody @Valid UserUpdateRequest userUpdateRequest) {
-        return userService.update(userUpdateRequest);
+    @ApiResponse(responseCode = "200", description = "사용자의 개인정보를 정상적으로 수정한 경우")
+    public ResponseEntity<UserResponse> update(@RequestBody @Valid UserUpdateRequest userUpdateRequest) {
+        return ResponseEntity.ok(UserResponse.toUserResponse(userService.update(userUpdateRequest)));
     }
 
     /**
      * [GET] api/users/registerEmail
      * 변경할 이메일을 받아 이메일 인증 메일을 보냅니다.
      */
-    @GetMapping("/registerEmail")
+    @PostMapping("/registerEmail")
     @ApiOperation(value = "이메일 인증하기",
             notes = "변경할 이메일을 받아 인증 메일을 보내고 이메일을 인증합니다. 헤더(Bearer)에 사용자 토큰 주입을 필요로 합니다.")
+    @ApiResponse(responseCode = "200", description = "이메일 인증 메일이 정상적으로 보내진 경우")
     public void registerEmail(@RequestBody UserEmailRequest userEmailRequest) {
         userService.isDuplicateEmail(userEmailRequest.getEmail());
         String authKey = mailSendService.sendAuthMail(userEmailRequest.getEmail());
@@ -83,8 +91,9 @@ public class UserController {
      * 인증할 이메일을 받아, 이메일의 중복 여부를 확인 합니다.
      */
     @ApiOperation(value = "이메일 인증 중복 확인",
-            notes = "DB에 입력된 이메일의 중복 여부를 리턴합니다. 이미 인증된 이메일이라면 true, 존재하지 않으면 false를 반환합니다.")
+            notes = "DB에 입력된 이메일의 중복 여부를 리턴합니다. 이미 인증된 이메일이라면 예외, 존재하지 않으면 false를 반환합니다.")
     @GetMapping("/emailCheck")
+    @ApiResponse(responseCode = "200", description = "이메일이 중복되지 않은 경우")
     public ResponseEntity<Boolean> checkEmail(@RequestParam String email) {
         return ResponseEntity.ok(userService.isDuplicateEmail(email));
     }
@@ -101,8 +110,9 @@ public class UserController {
     @ApiOperation(value = "마이 페이지 내가 쓴 글 보기",
             notes = "마이 페이지의 내가 쓴 글의 리스트를 반환합니다. 헤더(Bearer)에 사용자 토큰 주입을 필요로 합니다.")
     @GetMapping("/mypage/posts")
-    public Page<MyPostResponse> findMyPosts(Pageable pageable) {
-        return userService.findMyPosts(pageable);
+    @ApiResponse(responseCode = "200", description = "내가 쓴 글이 정상적으로 조회된 경우")
+    public ResponseEntity<Page<MyPostResponse>> findMyPosts(Pageable pageable) {
+        return ResponseEntity.ok(userService.findMyPosts(pageable));
     }
 
     /**
@@ -117,8 +127,9 @@ public class UserController {
     @ApiOperation(value = "마이 페이지 내가 쓴 댓글 보기",
             notes = "마이 페이지의 내가 쓴 글의 댓글을 반환합니다. 헤더(Bearer)에 사용자 토큰 주입을 필요로 합니다.")
     @GetMapping("/mypage/comments")
-    public Page<MyCommentResponse> findMyComments(Pageable pageable) {
-        return userService.findMyComments(pageable);
+    @ApiResponse(responseCode = "200", description = "내가 쓴 댓글이 정상적으로 조회된 경우")
+    public ResponseEntity<Page<MyCommentResponse>> findMyComments(Pageable pageable) {
+        return ResponseEntity.ok(userService.findMyComments(pageable));
     }
 
     /**
@@ -133,8 +144,9 @@ public class UserController {
     @ApiOperation(value = "마이 페이지 내가 스크랩한 글 보기",
             notes = "마이 페이지의 내가 스크랩한 글을 반환합니다. 헤더(Bearer)에 사용자 토큰 주입을 필요로 합니다.")
     @GetMapping("/mypage/scraps")
-    public Page<MyScrapResponse> findMyScraps(Pageable pageable) {
-        return userService.findMyScraps(pageable);
+    @ApiResponse(responseCode = "200", description = "내가 스크랩한 글이 정상적으로 조회된 경우")
+    public ResponseEntity<Page<MyScrapResponse>> findMyScraps(Pageable pageable) {
+        return ResponseEntity.ok(userService.findMyScraps(pageable));
     }
 
 }
