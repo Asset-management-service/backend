@@ -37,16 +37,33 @@ public class PostService {
     private final PostImageRepository postImageRepository;
     private final UserUtil userUtil;
 
-
+    /**
+     * 게시글 생성
+     * TODO 카테고리 생성 로직 변경 예정
+     */
     @Transactional
     public PostCreateResponse createPost(PostRequest postRequest) {
         PostCategory postCategory = postCategoryRepository.findByCategoryName(postRequest.getCategoryName())
                 .orElseGet(() -> PostCategory.createCategory(postRequest.getCategoryName()));
         User user = userUtil.findCurrentUser();
         Post post = postRepository.save(Post.createPost(postRequest.getTitle(), postRequest.getContent(), user, postCategory));
+
         List<String> postImages = uploadPostImages(postRequest, post);
 
-        return new PostCreateResponse(post.getId(), "게시글 작성이 완료되었습니다.", postImages);
+        addMoneyLogImages(postRequest, post, postImages);
+
+        return new PostCreateResponse(post.getId(), postImages);
+
+    }
+
+    /**
+     * 머니로그 공유 시 이미지 경로를 받아와서 게시글 이미지 추가
+     */
+    private void addMoneyLogImages(PostRequest postRequest, Post post, List<String> postImages) {
+        postRequest.getMoneyLogImages().stream()
+                .map(images -> createPostImage(post, images))
+                .map(postImage -> postImage.getImageUrl())
+                .forEach(url -> postImages.add(url));
     }
 
     /**
