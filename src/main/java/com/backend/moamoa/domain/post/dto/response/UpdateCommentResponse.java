@@ -7,17 +7,14 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@ApiModel(description = "결과 응답 데이터 모델")
+@ApiModel(description = "응답 데이터 모델")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CommentUpdateResponse {
+public class UpdateCommentResponse {
 
-    @ApiModelProperty(value = "갱신된 댓글의 ID")
-    private Long commentId;
-
-    @ApiModelProperty(value = "응답 메세지")
-    private String message;
+    @ApiModelProperty(value = "댓글 PK")
+    public Long commentId;
 
 }

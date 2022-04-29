@@ -83,16 +83,12 @@ public class AssetService {
 
     /**
      * 카테고리 조회
- 회   */
+     */
     public AssetCategoryDtoResponse getCategories(String categoryType) {
         User user = userUtil.findCurrentUser();
         List<AssetCategory> assetCategories = assetCategoryRepository.findByAssetCategoryTypeAndUserId(categoryType, user.getId());
-        List<AssetCategoriesResponse> categories = assetCategories
-                .stream()
-                .map(category -> new AssetCategoriesResponse(category.getId(), category.getCategoryName()))
-                .collect(Collectors.toList());
 
-        return new AssetCategoryDtoResponse(categories);
+        return AssetCategoryDtoResponse.of(assetCategories);
     }
 
     /**
@@ -342,6 +338,6 @@ public class AssetService {
         ExpenditureRatio expenditureRatio = expenditureRatioRepository.findByUser(user)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_RATIO));
 
-        return new ExpenditureResponse(expenditureRatio.getId(), expenditureRatio.getFixed(), expenditureRatio.getVariable());
+        return ExpenditureResponse.of(expenditureRatio);
     }
 }

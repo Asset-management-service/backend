@@ -1,5 +1,6 @@
 package com.backend.moamoa.domain.asset.dto.response;
 
+import com.backend.moamoa.domain.asset.entity.ExpenditureRatio;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -22,5 +23,9 @@ public class ExpenditureResponse {
 
     @ApiModelProperty(value = "변동비")
     private int variable;
+
+    public static ExpenditureResponse of(ExpenditureRatio expenditureRatio) {
+        return new ExpenditureResponse(expenditureRatio.getId(), expenditureRatio.getFixed(), expenditureRatio.getVariable());
+    }
 
 }

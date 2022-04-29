@@ -2,9 +2,7 @@ package com.backend.moamoa.domain.post.service;
 
 import com.backend.moamoa.domain.post.dto.request.CommentRequest;
 import com.backend.moamoa.domain.post.dto.request.CommentUpdateRequest;
-import com.backend.moamoa.domain.post.dto.response.CommentDeleteResponse;
 import com.backend.moamoa.domain.post.dto.response.CommentResponse;
-import com.backend.moamoa.domain.post.dto.response.CommentUpdateResponse;
 import com.backend.moamoa.domain.post.entity.Comment;
 import com.backend.moamoa.domain.post.entity.Post;
 import com.backend.moamoa.domain.post.repository.comment.CommentRepository;
@@ -54,21 +52,19 @@ public class CommentService {
     }
 
     @Transactional
-    public CommentDeleteResponse deleteComment(Long commentId) {
+    public void deleteComment(Long commentId) {
         User user = userUtil.findCurrentUser();
 
         commentRepository.delete(getComment(commentId, user));
-
-        return new CommentDeleteResponse("댓글 삭제 완료!");
     }
 
     @Transactional
-    public CommentUpdateResponse updateComment(CommentUpdateRequest request) {
+    public Long updateComment(CommentUpdateRequest request) {
         User user = userUtil.findCurrentUser();
         Comment comment = getComment(request.getCommentId(), user);
         comment.updateContent(request.getContent());
 
-        return new CommentUpdateResponse(comment.getId(), "댓글 수정 완료!");
+        return comment.getId();
     }
 
     /**
