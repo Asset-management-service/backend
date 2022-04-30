@@ -3,10 +3,7 @@ package com.backend.moamoa.domain.user.dto.request;
 import com.backend.moamoa.domain.user.entity.enums.Gender;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
@@ -15,6 +12,7 @@ import javax.validation.constraints.Pattern;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @ApiModel(value="개인정보 수정 요청 정보")
 public class UserUpdateRequest {
 
