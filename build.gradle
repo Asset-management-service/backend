@@ -31,6 +31,17 @@ repositories {
 
 dependencies {
 
+	implementation 'junit:junit:4.13.1'
+
+	// Use JUnit Jupiter API for testing.
+	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+
+	// Mockito
+	testImplementation 'org.springframework.boot:spring-boot-starter-test:2.6.2'
+
+	// AssertJ
+	testImplementation 'org.assertj:assertj-core:3.22.0'
+
 	// AWS S3
 	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
 
