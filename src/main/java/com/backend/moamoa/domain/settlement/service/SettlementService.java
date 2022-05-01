@@ -177,10 +177,8 @@ public class SettlementService {
 
         Boolean fixedExceed = null, variableExceed = null;
 
-        if (type.equals("month")) {
-            fixedExceed = (totalFixedPercent > expenditureRatio.getFixed());
-            variableExceed = (totalVariablePercent > expenditureRatio.getVariable());
-        }
+        fixedExceed = (totalFixedPercent > expenditureRatio.getFixed());
+        variableExceed = (totalVariablePercent > expenditureRatio.getVariable());
 
         List<CostResponse> fixedRes = new ArrayList<>();
         List<CostResponse> costRes = new ArrayList<>();
