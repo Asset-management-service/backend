@@ -1,9 +1,14 @@
 package com.backend.moamoa.domain.user.controller;
 
+import com.backend.moamoa.domain.post.entity.Comment;
+import com.backend.moamoa.domain.post.entity.Post;
+import com.backend.moamoa.domain.post.entity.PostCategory;
+import com.backend.moamoa.domain.post.entity.Scrap;
 import com.backend.moamoa.domain.user.dto.request.UserEmailRequest;
 import com.backend.moamoa.domain.user.dto.request.UserUpdateRequest;
 import com.backend.moamoa.domain.user.dto.response.TokenResponse;
 import com.backend.moamoa.domain.user.entity.User;
+import com.backend.moamoa.domain.user.entity.UserMailAuth;
 import com.backend.moamoa.domain.user.entity.enums.Gender;
 import com.backend.moamoa.domain.user.entity.enums.RoleType;
 import com.backend.moamoa.domain.user.oauth.entity.CustomUserDetails;
@@ -15,6 +20,8 @@ import com.backend.moamoa.domain.user.service.MailSendService;
 import com.backend.moamoa.domain.user.service.UserService;
 import com.backend.moamoa.global.audit.TimeEntity;
 import com.backend.moamoa.global.bean.security.SecurityConfig;
+import com.backend.moamoa.global.exception.CustomException;
+import com.backend.moamoa.global.exception.ErrorCode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,6 +32,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -32,13 +41,12 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
+import java.time.LocalDateTime;
+import java.util.*;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.hamcrest.Matchers.in;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 
 
@@ -108,9 +116,54 @@ class UserControllerTest {
                             .build();
                 });
 
-        given(userService.isDuplicateEmail("kmw106933@naver.com")).willReturn(false);
+        given(userService.isDuplicateEmail("kmw106933@naver.com"))
+                .willThrow(new CustomException(ErrorCode.ALREADY_EMAIL_EXISTS));
+
+        given(userService.isDuplicateEmail("khj10693@naver.com"))
+                .willReturn(false);
 
         given(mailSendService.sendAuthMail(any(String.class))).willReturn("123456");
+
+        given(userService.findMyPosts(any(Pageable.class))).will(
+                invocation -> {
+                    Pageable pageable = invocation.getArgument(0);
+                    Post post = new Post("test", "test", 0, user, null, new PostCategory("test", null));
+                    List<Post> posts = new ArrayList<>();
+                    posts.add(post);
+                    return new PageImpl<>(posts, pageable, posts.size());
+
+                }
+        );
+
+        given(userService.findMyComments(any(Pageable.class))).will(
+                invocation -> {
+                    Pageable pageable = invocation.getArgument(0);
+                    Comment comment = new Comment("test", null, user, null);
+                    List<Comment> comments = new ArrayList<>();
+                    comments.add(comment);
+                    return new PageImpl<>(comments, pageable, comments.size());
+                }
+        );
+
+        given(userService.findMyScraps(any(Pageable.class))).will(
+                invocation -> {
+                    Pageable pageable = invocation.getArgument(0);
+                    Scrap scrap = new Scrap(null, user);
+                    List<Scrap> scraps = new ArrayList<>();
+                    scraps.add(scrap);
+                    return new PageImpl<>(scraps, pageable, scraps.size());
+                }
+        );
+
+        given(mailSendService.getAuthToken(anyMap())).will(
+                invocation -> {
+                    Map<String, String> map = invocation.getArgument(0);
+                    String email = map.get("email");
+                    String authKey = map.get("authKey");
+
+                    return new UserMailAuth(1L, 1L, email, authKey, LocalDateTime.now(), false);
+                }
+        );
 
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken("test", "1234", Collections.singletonList(new SimpleGrantedAuthority(RoleType.USER.getCode())));
         given(jwtProvider.getAuthentication(anyString())).willReturn(authentication);
@@ -184,30 +237,111 @@ class UserControllerTest {
         String json = new ObjectMapper().writeValueAsString(userUpdateRequest);
 
         mockMvc.perform(
-                patch("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json)
-                        .header("Authorization", "Bearer (accessToken)")
-        )
+                        patch("/users")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(json)
+                                .header("Authorization", "Bearer (accessToken)")
+                )
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     void 올바른_정보로_이메일을_인증하는_경우() throws Exception {
         UserEmailRequest userEmailRequest = UserEmailRequest.builder()
-                .email("kmw106933@naver.com")
+                .email("khj10693@naver.com")
                 .build();
 
         String json = new ObjectMapper().writeValueAsString(userEmailRequest);
 
         mockMvc.perform(
-                post("/users/registerEmail")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json)
-                        .header("Authorization", "Bearer (accessToken)")
-        )
+                        post("/users/registerEmail")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(json)
+                                .header("Authorization", "Bearer (accessToken)")
+                )
                 .andExpect(status().isOk());
-        verify(mailSendService).save("kmw106933@naver.com", "123456");
+        verify(mailSendService).save("khj10693@naver.com", "123456");
+    }
+
+    @Test
+    void 존재하는_이메일을_확인하려는_경우() throws Exception {
+        mockMvc.perform(
+                        get("/users/emailCheck?email=kmw106933@naver.com")
+                                .header("Authorization", "Bearer (accessToken)")
+                )
+                .andExpect(status().isAlreadyReported())
+                .andDo(print());
+        verify(userService).isDuplicateEmail("kmw106933@naver.com");
+    }
+
+    @Test
+    void 존재하지_않은_이메일을_확인하려는_경우() throws Exception {
+        mockMvc.perform(
+                        get("/users/emailCheck?email=khj10693@naver.com")
+                                .header("Authorization", "Bearer (accessToken)")
+                )
+                .andExpect(status().isOk())
+                .andExpect(content().string(
+                        containsString("false")
+                ))
+                .andDo(print());
+        verify(userService).isDuplicateEmail("khj10693@naver.com");
+    }
+
+    @Test
+    void 내가_쓴글을_정상적으로_조회한_경우() throws Exception {
+        mockMvc.perform(
+                        get("/users/mypage/posts")
+                                .header("Authorization", "Bearer (accessToken)")
+                )
+                .andExpect(status().isOk())
+                .andExpect(content().string(
+                        containsString("\"title\":\"test\"")
+                ))
+                .andExpect(content().string(
+                        containsString("\"content\":\"test\"")
+                ))
+                .andDo(print());
+
+        verify(userService).findMyPosts(any(Pageable.class));
+    }
+
+    @Test
+    void 내가_쓴_댓글을_정상적으로_조회한_경우() throws Exception {
+        mockMvc.perform(
+                        get("/users/mypage/comments")
+                                .header("Authorization", "Bearer (accessToken)")
+                )
+                .andExpect(status().isOk())
+                .andExpect(content().string(
+                        containsString("\"content\":\"test\"")
+                ))
+                .andDo(print());
+
+        verify(userService).findMyComments(any(Pageable.class));
+    }
+
+    @Test
+    void 내가_한_스크랩을_정상적으로_조회한_경우() throws Exception {
+        mockMvc.perform(
+                        get("/users/mypage/scraps")
+                                .header("Authorization", "Bearer (accessToken)")
+                )
+                .andExpect(status().isOk())
+                .andDo(print());
+
+        verify(userService).findMyScraps(any(Pageable.class));
+    }
+
+    @Test
+    void 정상적인_방법으로_이메일_인증_버튼을_누른_경우() throws Exception {
+        mockMvc.perform(
+                        get("/users/confirm?email=test.com&authkey=123456")
+                )
+                .andExpect(status().isOk())
+                .andDo(print());
+
+        verify(userService).confirmEmail(any(UserMailAuth.class));
     }
 
 }
