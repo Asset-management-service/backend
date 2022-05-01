@@ -68,8 +68,8 @@ public class SettlementService {
 
         for (int i = 0; i < 8; i++) {
             Integer cost = revenueExpenditureRepository.getExpenditure(startDate, endDate, user);
+            WeekSettleResponse weekSettleResponse = new WeekSettleResponse(startDate.getYear(), startDate.getMonthValue(), weekNumber, cost, startDate, endDate);
 
-            WeekSettleResponse weekSettleResponse = new WeekSettleResponse(standard.getYear(), standard.getMonthValue(), weekNumber, cost, startDate, endDate);
             weekSettleResponses.add(weekSettleResponse);
 
             if (type.equals("left")) {
@@ -84,7 +84,8 @@ public class SettlementService {
                 weekNumber = weekNumber + 1;
                 startDate = startDate.plusWeeks(1);
                 endDate = endDate.plusWeeks(1);
-                if (weekNumber > getWeekNumber(standard.with(TemporalAdjusters.lastDayOfMonth()))) {
+                if (weekNumber > getWeekNumber(standard.with(ChronoField.ALIGNED_WEEK_OF_YEAR, standard.get(ChronoField.ALIGNED_WEEK_OF_YEAR))
+                        .with(DayOfWeek.MONDAY).with(TemporalAdjusters.lastDayOfMonth()))) {
                     standard = standard.plusMonths(1);
                     weekNumber = 1;
                 }
