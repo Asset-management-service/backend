@@ -24,7 +24,7 @@ public class AssetCategoryDtoResponse {
 
     public static AssetCategoryDtoResponse of(List<AssetCategory> assetCategories) {
         return new AssetCategoryDtoResponse(assetCategories.stream()
-                .map(category -> new AssetCategoriesResponse(category.getId(), category.getCategoryName()))
+                .map(AssetCategoriesResponse::new)
                 .collect(Collectors.toList()));
     }
 }

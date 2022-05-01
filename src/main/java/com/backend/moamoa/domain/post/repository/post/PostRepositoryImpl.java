@@ -126,8 +126,6 @@ public class PostRepositoryImpl implements PostCustomRepository {
          return response;
     }
 
-
-
     @Override
     public Page<RecentPostResponse> findRecentPosts(Pageable pageable, String categoryName) {
         List<RecentPostResponse> content = queryFactory

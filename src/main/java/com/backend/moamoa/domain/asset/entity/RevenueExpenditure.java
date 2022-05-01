@@ -31,6 +31,10 @@ public class RevenueExpenditure implements Auditable {
     @Enumerated(STRING)
     private RevenueExpenditureType revenueExpenditureType;
 
+    @Enumerated(STRING)
+    @Column(nullable = false)
+    private AssetCategoryType assetCategoryType;
+
     @Column(nullable = false)
     private LocalDate date;
 
@@ -52,8 +56,9 @@ public class RevenueExpenditure implements Auditable {
     private User user;
 
     @Builder
-    public RevenueExpenditure(RevenueExpenditureType revenueExpenditureType, LocalDate date, String categoryName, int cost, String content, User user, String paymentMethod) {
+    public RevenueExpenditure(RevenueExpenditureType revenueExpenditureType, AssetCategoryType assetCategoryType, LocalDate date, String categoryName, int cost, String content, User user, String paymentMethod) {
         this.revenueExpenditureType = revenueExpenditureType;
+        this.assetCategoryType = assetCategoryType;
         this.date = date;
         this.categoryName = categoryName;
         this.cost = cost;
