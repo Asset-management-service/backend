@@ -40,8 +40,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
                 classes = SecurityConfig.class)})
 class AssetControllerTest {
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper().registerModule(new JavaTimeModule());
-
     @MockBean
     private JwtProvider jwtProvider;
 
@@ -56,6 +54,9 @@ class AssetControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Test
     @DisplayName("가계부 설정 카테고리 조회 테스트 - 성공")
@@ -91,7 +92,7 @@ class AssetControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.categories").exists())
                 .andExpect(jsonPath("$.categories").isArray())
-                .andExpect(content().json(OBJECT_MAPPER.writeValueAsString(response)))
+                .andExpect(content().json(objectMapper.writeValueAsString(response)))
                 .andDo(print());
 
         verify(assetService).getCategories("fixed");
