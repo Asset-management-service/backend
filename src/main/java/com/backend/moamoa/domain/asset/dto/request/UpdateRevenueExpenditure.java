@@ -1,5 +1,6 @@
 package com.backend.moamoa.domain.asset.dto.request;
 
+import com.backend.moamoa.domain.asset.entity.AssetCategoryType;
 import com.backend.moamoa.domain.asset.entity.RevenueExpenditureType;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
@@ -21,6 +22,9 @@ public class UpdateRevenueExpenditure {
 
     @ApiModelProperty(value = "수익, 지출 타입", example = "REVENUE", required = true)
     private RevenueExpenditureType revenueExpenditureType;
+
+    @ApiModelProperty(value = "해당 카테고리 타입", example = "FIXED", required = true)
+    private AssetCategoryType assetCategoryType;
 
     @ApiModelProperty(value = "해당 년월일", example = "2022-04-19", required = true)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")

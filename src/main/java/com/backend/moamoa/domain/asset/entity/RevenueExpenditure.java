@@ -72,8 +72,9 @@ public class RevenueExpenditure implements Auditable {
         this.timeEntity = timeEntity;
     }
 
-    public void updateRevenueExpenditure(RevenueExpenditureType revenueExpenditureType, String content, LocalDate date, String paymentMethod, String categoryName, int cost) {
+    public void updateRevenueExpenditure(RevenueExpenditureType revenueExpenditureType, AssetCategoryType assetCategoryType, String content, LocalDate date, String paymentMethod, String categoryName, int cost) {
         this.revenueExpenditureType = revenueExpenditureType;
+        this.assetCategoryType = assetCategoryType;
         this.content = content;
         this.date = date;
         this.paymentMethod = paymentMethod;

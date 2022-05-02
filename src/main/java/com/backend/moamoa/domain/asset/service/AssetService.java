@@ -209,7 +209,7 @@ public class AssetService {
 
         RevenueExpenditure revenueExpenditure = getRevenueExpenditure(request.getRevenueExpenditureId(), user);
 
-        revenueExpenditure.updateRevenueExpenditure(request.getRevenueExpenditureType(), request.getContent(),
+        revenueExpenditure.updateRevenueExpenditure(request.getRevenueExpenditureType(), request.getAssetCategoryType(), request.getContent(),
                 request.getDate(), request.getPaymentMethod(), request.getCategoryName(), request.getCost());
     }
 
