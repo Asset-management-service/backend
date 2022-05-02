@@ -1,5 +1,6 @@
 package com.backend.moamoa.domain.asset.dto.response;
 
+import com.backend.moamoa.domain.asset.entity.AssetCategory;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -19,5 +20,10 @@ public class AssetCategoriesResponse {
 
     @ApiModelProperty(value = "카테고리 이름")
     private String categoryName;
+
+    public AssetCategoriesResponse(AssetCategory assetCategory) {
+        this.categoryId = assetCategory.getId();
+        this.categoryName = assetCategory.getCategoryName();
+    }
 
 }

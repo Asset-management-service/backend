@@ -5,9 +5,8 @@ import com.backend.moamoa.domain.user.oauth.filter.JwtFilter;
 import com.backend.moamoa.domain.user.oauth.handler.OAuth2AuthenticationFailureHandler;
 import com.backend.moamoa.domain.user.oauth.handler.OAuth2AuthenticationSuccessHandler;
 import com.backend.moamoa.domain.user.oauth.repository.OAuth2AuthorizationRequestBasedOnCookieRepository;
-import com.backend.moamoa.domain.user.oauth.token.JwtProvider;
 import com.backend.moamoa.domain.user.oauth.service.CustomOAuth2UserService;
-import com.backend.moamoa.global.bean.cors.CorsProperties;
+import com.backend.moamoa.domain.user.oauth.token.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,11 +18,7 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsUtils;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
-import java.util.Arrays;
 
 @Configuration
 @RequiredArgsConstructor

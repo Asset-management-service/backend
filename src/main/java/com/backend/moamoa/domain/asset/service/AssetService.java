@@ -112,6 +112,7 @@ public class AssetService {
 
         return revenueExpenditureRepository.save(RevenueExpenditure.builder()
                 .revenueExpenditureType(request.getRevenueExpenditureType())
+                .assetCategoryType(request.getAssetCategoryType())
                 .content(request.getContent())
                 .cost(request.getCost())
                 .date(request.getDate())
