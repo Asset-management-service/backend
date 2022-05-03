@@ -15,6 +15,6 @@ import lombok.Setter;
 public class AssetCategoryResponse {
 
     @ApiModelProperty(value = "카테고리 Id")
-    private Long categoryName;
+    private Long categoryId;
 
 }

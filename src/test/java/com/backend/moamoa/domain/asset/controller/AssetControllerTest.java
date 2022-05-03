@@ -1,6 +1,7 @@
 package com.backend.moamoa.domain.asset.controller;
 
 import com.backend.moamoa.builder.UserBuilder;
+import com.backend.moamoa.domain.asset.dto.request.AssetCategoryRequest;
 import com.backend.moamoa.domain.asset.dto.request.BudgetRequest;
 import com.backend.moamoa.domain.asset.dto.response.AssetCategoryDtoResponse;
 import com.backend.moamoa.domain.asset.entity.AssetCategory;
@@ -12,7 +13,6 @@ import com.backend.moamoa.domain.user.oauth.token.JwtProvider;
 import com.backend.moamoa.domain.user.service.UserService;
 import com.backend.moamoa.global.bean.security.SecurityConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,13 +28,11 @@ import org.springframework.test.web.servlet.ResultActions;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -115,6 +113,29 @@ class AssetControllerTest {
                 .andExpect(jsonPath("$.budgetId").exists())
                 .andDo(print());
         verify(assetService).addBudget(any(BudgetRequest.class));
+    }
+
+    @Test
+    @DisplayName("가계부 설정 카테고리 생성 - 성공")
+    public void addCategory() throws Exception {
+        //given
+        given(assetService.addCategory(any())).willReturn(1L);
+        String json = objectMapper.writeValueAsString(new AssetCategoryRequest(AssetCategoryType.REVENUE, "월급"));
+
+        //when
+        ResultActions result = mockMvc.perform(post("/assets/category")
+                .content(json)
+                .contentType(MediaType.APPLICATION_JSON));
+
+        //then
+        result.andExpect(status().isCreated())
+                .andExpect(content().string(
+                        containsString("\"categoryId\":1")))
+                .andExpect(jsonPath("$.categoryId").exists())
+                .andExpect(jsonPath("$.categoryId").isNotEmpty())
+                .andDo(print());
+
+        verify(assetService).addCategory(any(AssetCategoryRequest.class));
     }
 
 }
