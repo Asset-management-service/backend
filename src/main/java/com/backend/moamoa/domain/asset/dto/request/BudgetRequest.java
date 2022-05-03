@@ -2,6 +2,7 @@ package com.backend.moamoa.domain.asset.dto.request;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -10,6 +11,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 public class BudgetRequest {
 
     @ApiModelProperty(value = "예산 금액", example = "1000000", required = true)

@@ -1,21 +1,17 @@
 package com.backend.moamoa.domain.asset.controller;
 
 import com.backend.moamoa.builder.UserBuilder;
+import com.backend.moamoa.domain.asset.dto.request.BudgetRequest;
 import com.backend.moamoa.domain.asset.dto.response.AssetCategoryDtoResponse;
 import com.backend.moamoa.domain.asset.entity.AssetCategory;
 import com.backend.moamoa.domain.asset.entity.AssetCategoryType;
 import com.backend.moamoa.domain.asset.service.AssetService;
 import com.backend.moamoa.domain.user.entity.User;
-import com.backend.moamoa.domain.user.entity.enums.Gender;
-import com.backend.moamoa.domain.user.oauth.entity.enums.ProviderType;
 import com.backend.moamoa.domain.user.oauth.filter.JwtFilter;
-import com.backend.moamoa.domain.user.oauth.service.CustomUserDetailsService;
 import com.backend.moamoa.domain.user.oauth.token.JwtProvider;
 import com.backend.moamoa.domain.user.service.UserService;
-import com.backend.moamoa.global.audit.TimeEntity;
 import com.backend.moamoa.global.bean.security.SecurityConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,14 +20,18 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -61,7 +61,8 @@ class AssetControllerTest {
 
     @Test
     @DisplayName("가계부 설정 카테고리 조회 테스트 - 성공")
-    void getCategory() throws Exception {
+    void getCategorySuccess() throws Exception {
+        //given
         User user = UserBuilder.dummyUser();
 
         List<AssetCategory> assetCategories = new ArrayList<>();
@@ -77,15 +78,36 @@ class AssetControllerTest {
 
         given(assetService.getCategories("fixed")).willReturn(response);
 
-        mockMvc.perform(
-                        get("/assets/category?categoryType=fixed"))
-                .andExpect(status().isOk())
+        //when
+        ResultActions result = mockMvc.perform(
+                get("/assets/category?categoryType=fixed"));
+
+        //then
+        result.andExpect(status().isOk())
                 .andExpect(jsonPath("$.categories").exists())
                 .andExpect(jsonPath("$.categories").isArray())
                 .andExpect(content().json(objectMapper.writeValueAsString(response)))
                 .andDo(print());
 
         verify(assetService).getCategories("fixed");
+    }
+
+    @Test
+    @DisplayName("한달 예산 금액 설정 - 성공")
+    void addBudget() throws Exception {
+        //given
+        given(assetService.addBudget(any())).willReturn(1L);
+        String json = objectMapper.writeValueAsString(new BudgetRequest(1000000));
+
+        //when
+        ResultActions result = mockMvc.perform(put("/assets/budget")
+                .content(json)
+                .contentType(MediaType.APPLICATION_JSON));
+
+        //then
+        result.andExpect(status().isOk())
+                .andDo(print());
+
     }
 
 }
