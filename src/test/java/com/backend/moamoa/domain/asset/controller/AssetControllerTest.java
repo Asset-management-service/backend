@@ -3,10 +3,12 @@ package com.backend.moamoa.domain.asset.controller;
 import com.backend.moamoa.builder.UserBuilder;
 import com.backend.moamoa.domain.asset.dto.request.AssetCategoryRequest;
 import com.backend.moamoa.domain.asset.dto.request.BudgetRequest;
+import com.backend.moamoa.domain.asset.dto.request.CreateRevenueExpenditureRequest;
 import com.backend.moamoa.domain.asset.dto.request.ExpenditureRequest;
 import com.backend.moamoa.domain.asset.dto.response.AssetCategoryDtoResponse;
 import com.backend.moamoa.domain.asset.entity.AssetCategory;
 import com.backend.moamoa.domain.asset.entity.AssetCategoryType;
+import com.backend.moamoa.domain.asset.entity.RevenueExpenditureType;
 import com.backend.moamoa.domain.asset.service.AssetService;
 import com.backend.moamoa.domain.user.entity.User;
 import com.backend.moamoa.domain.user.oauth.filter.JwtFilter;
@@ -15,6 +17,7 @@ import com.backend.moamoa.domain.user.service.UserService;
 import com.backend.moamoa.global.bean.security.SecurityConfig;
 import com.backend.moamoa.global.exception.CustomException;
 import com.backend.moamoa.global.exception.ErrorCode;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -29,6 +32,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -219,4 +223,31 @@ class AssetControllerTest {
         verify(assetService).addExpenditure(any(ExpenditureRequest.class));
     }
 
+    @Test
+    @DisplayName("수익 지출 내역 추가 - 성공")
+    void addRevenueExpenditure() throws Exception {
+        //given
+        given(assetService.addRevenueExpenditure(any())).willReturn(1L);
+
+        String json = objectMapper.writeValueAsString(new CreateRevenueExpenditureRequest(
+                        RevenueExpenditureType.REVENUE, AssetCategoryType.FIXED, LocalDate.parse("2022-05-04"),
+                        "월급", null, 1000000, "월급날!!"));
+
+        //when
+        ResultActions result = mockMvc.perform(post("/assets/revenueExpenditure")
+                .contentType(MediaType.APPLICATION_JSON)
+                .characterEncoding(StandardCharsets.UTF_8)
+                .content(json));
+
+        //then
+        result.andExpect(status().isCreated())
+                .andExpect(content().string(
+                        containsString("\"revenueExpenditureId\":1")))
+                .andExpect(jsonPath("$.revenueExpenditureId").isNumber())
+                .andExpect(jsonPath("$.revenueExpenditureId").hasJsonPath())
+                .andExpect(jsonPath("$.revenueExpenditureId").exists())
+                .andDo(print());
+
+        verify(assetService).addRevenueExpenditure(any(CreateRevenueExpenditureRequest.class));
+    }
 }
