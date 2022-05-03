@@ -12,6 +12,8 @@ import com.backend.moamoa.domain.user.oauth.filter.JwtFilter;
 import com.backend.moamoa.domain.user.oauth.token.JwtProvider;
 import com.backend.moamoa.domain.user.service.UserService;
 import com.backend.moamoa.global.bean.security.SecurityConfig;
+import com.backend.moamoa.global.exception.CustomException;
+import com.backend.moamoa.global.exception.ErrorCode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,12 +27,14 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -103,6 +107,7 @@ class AssetControllerTest {
         //when
         ResultActions result = mockMvc.perform(put("/assets/budget")
                 .content(json)
+                .characterEncoding(StandardCharsets.UTF_8)
                 .contentType(MediaType.APPLICATION_JSON));
 
         //then
@@ -125,6 +130,7 @@ class AssetControllerTest {
         //when
         ResultActions result = mockMvc.perform(post("/assets/category")
                 .content(json)
+                .characterEncoding(StandardCharsets.UTF_8)
                 .contentType(MediaType.APPLICATION_JSON));
 
         //then
@@ -136,6 +142,33 @@ class AssetControllerTest {
                 .andDo(print());
 
         verify(assetService).addCategory(any(AssetCategoryRequest.class));
+    }
+
+    @Test
+    @DisplayName("가계부 설정 카테고리 삭제 - 성공")
+    public void deleteCategoryName() throws Exception {
+        //when
+        ResultActions result = mockMvc.perform(delete("/assets/category/1"));
+
+        //then
+        result.andExpect(status().isNoContent());
+    }
+
+    @Test
+    @DisplayName("가계부 설정 카테고리 삭제 카테고리 ID를 찾지 못한 경우 - 실패")
+    public void deleteCategoryNameNotFountCategory() throws Exception {
+        //given
+        doThrow(new CustomException(ErrorCode.NOT_FOUND_ASSET_CATEGORY))
+                .when(assetService).deleteCategoryName(anyLong());
+
+        //when
+        ResultActions result = mockMvc.perform(delete("/assets/category/1"));
+
+        //then
+        result.andExpect(status().isNotFound())
+                .andDo(print());
+
+        verify(assetService).deleteCategoryName(anyLong());
     }
 
 }
