@@ -1,5 +1,6 @@
 package com.backend.moamoa.domain.asset.controller;
 
+import com.backend.moamoa.builder.UserBuilder;
 import com.backend.moamoa.domain.asset.dto.response.AssetCategoryDtoResponse;
 import com.backend.moamoa.domain.asset.entity.AssetCategory;
 import com.backend.moamoa.domain.asset.entity.AssetCategoryType;
@@ -61,18 +62,7 @@ class AssetControllerTest {
     @Test
     @DisplayName("가계부 설정 카테고리 조회 테스트 - 성공")
     void getCategory() throws Exception {
-        User user = User.builder()
-                .id(1L)
-                .providerType(ProviderType.GOOGLE)
-                .userId("123456L")
-                .email("ehgns5668@naver.com")
-                .nickname("Test")
-                .phoneNum("01033333333")
-                .birthday("01-03")
-                .birthYear("2001")
-                .gender(Gender.MAN)
-                .timeEntity(new TimeEntity())
-                .build();
+        User user = UserBuilder.dummyUser();
 
         List<AssetCategory> assetCategories = new ArrayList<>();
         AssetCategory assetCategory1 = AssetCategory.createCategory(AssetCategoryType.FIXED, "통신비", user);
