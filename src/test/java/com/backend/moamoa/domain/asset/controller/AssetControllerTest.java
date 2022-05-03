@@ -114,7 +114,7 @@ class AssetControllerTest {
                 ))
                 .andExpect(jsonPath("$.budgetId").exists())
                 .andDo(print());
-
+        verify(assetService).addBudget(any(BudgetRequest.class));
     }
 
 }
