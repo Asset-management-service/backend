@@ -12,6 +12,7 @@ import com.backend.moamoa.domain.user.oauth.token.JwtProvider;
 import com.backend.moamoa.domain.user.service.UserService;
 import com.backend.moamoa.global.bean.security.SecurityConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +28,9 @@ import org.springframework.test.web.servlet.ResultActions;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -106,6 +109,10 @@ class AssetControllerTest {
 
         //then
         result.andExpect(status().isOk())
+                .andExpect(content().string(
+                        containsString("\"budgetId\":1")
+                ))
+                .andExpect(jsonPath("$.budgetId").exists())
                 .andDo(print());
 
     }
