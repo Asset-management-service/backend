@@ -3,6 +3,7 @@ package com.backend.moamoa.domain.asset.controller;
 import com.backend.moamoa.builder.UserBuilder;
 import com.backend.moamoa.domain.asset.dto.request.AssetCategoryRequest;
 import com.backend.moamoa.domain.asset.dto.request.BudgetRequest;
+import com.backend.moamoa.domain.asset.dto.request.ExpenditureRequest;
 import com.backend.moamoa.domain.asset.dto.response.AssetCategoryDtoResponse;
 import com.backend.moamoa.domain.asset.entity.AssetCategory;
 import com.backend.moamoa.domain.asset.entity.AssetCategoryType;
@@ -122,7 +123,7 @@ class AssetControllerTest {
 
     @Test
     @DisplayName("가계부 설정 카테고리 생성 - 성공")
-    public void addCategory() throws Exception {
+    void addCategory() throws Exception {
         //given
         given(assetService.addCategory(any())).willReturn(1L);
         String json = objectMapper.writeValueAsString(new AssetCategoryRequest(AssetCategoryType.REVENUE, "월급"));
@@ -146,7 +147,7 @@ class AssetControllerTest {
 
     @Test
     @DisplayName("가계부 설정 카테고리 삭제 - 성공")
-    public void deleteCategoryName() throws Exception {
+    void deleteCategoryName() throws Exception {
         //when
         ResultActions result = mockMvc.perform(delete("/assets/category/1"));
 
@@ -155,8 +156,8 @@ class AssetControllerTest {
     }
 
     @Test
-    @DisplayName("가계부 설정 카테고리 삭제 카테고리 ID를 찾지 못한 경우 - 실패")
-    public void deleteCategoryNameNotFountCategory() throws Exception {
+    @DisplayName("가계부 설정 카테고리 삭제 - 카테고리 ID를 찾지 못한 경우 실패")
+    void deleteCategoryNameNotFountCategory() throws Exception {
         //given
         doThrow(new CustomException(ErrorCode.NOT_FOUND_ASSET_CATEGORY))
                 .when(assetService).deleteCategoryName(anyLong());
@@ -169,6 +170,53 @@ class AssetControllerTest {
                 .andDo(print());
 
         verify(assetService).deleteCategoryName(anyLong());
+    }
+
+    @Test
+    @DisplayName("지출 비율 설정 - 성공")
+    void addExpenditure() throws Exception {
+        //given
+        given(assetService.addExpenditure(any())).willReturn(1L);
+        String json = objectMapper.writeValueAsString(new ExpenditureRequest(40, 60));
+
+        //when
+        ResultActions result = mockMvc.perform(put("/assets/expenditure")
+                .contentType(MediaType.APPLICATION_JSON)
+                .characterEncoding(StandardCharsets.UTF_8)
+                .content(json));
+
+        //then
+        result.andExpect(status().isOk())
+                .andExpect(content().string(
+                        containsString("\"expenditureId\":1")))
+                .andExpect(jsonPath("$.expenditureId").exists())
+                .andExpect(jsonPath("$.expenditureId").hasJsonPath())
+                .andExpect(jsonPath("$.expenditureId").isNumber())
+                .andDo(print());
+
+        verify(assetService).addExpenditure(any(ExpenditureRequest.class));
+    }
+
+    @Test
+    @DisplayName("지출 비율 설정 - 합이 100% 가 아닌 경우")
+    void addExpenditureBadRequest() throws Exception {
+        //given
+        doThrow(new CustomException(ErrorCode.BAD_REQUEST_EXPENDITURE))
+                .when(assetService).addExpenditure(any());
+
+        String json = objectMapper.writeValueAsString(new ExpenditureRequest(40, 50));
+
+        //when
+        ResultActions result = mockMvc.perform(put("/assets/expenditure")
+                .contentType(MediaType.APPLICATION_JSON)
+                .characterEncoding(StandardCharsets.UTF_8)
+                .content(json));
+
+        //then
+        result.andExpect(status().isBadRequest())
+                .andDo(print());
+
+        verify(assetService).addExpenditure(any(ExpenditureRequest.class));
     }
 
 }
