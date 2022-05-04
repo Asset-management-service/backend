@@ -5,6 +5,7 @@ import com.backend.moamoa.domain.asset.entity.RevenueExpenditureType;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -15,6 +16,7 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 public class UpdateRevenueExpenditure {
 
     @ApiModelProperty(value = "수익 지출 PK", example = "1", required = true)

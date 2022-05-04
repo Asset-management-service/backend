@@ -1,10 +1,7 @@
 package com.backend.moamoa.domain.asset.controller;
 
 import com.backend.moamoa.builder.UserBuilder;
-import com.backend.moamoa.domain.asset.dto.request.AssetCategoryRequest;
-import com.backend.moamoa.domain.asset.dto.request.BudgetRequest;
-import com.backend.moamoa.domain.asset.dto.request.CreateRevenueExpenditureRequest;
-import com.backend.moamoa.domain.asset.dto.request.ExpenditureRequest;
+import com.backend.moamoa.domain.asset.dto.request.*;
 import com.backend.moamoa.domain.asset.dto.response.AssetCategoryDtoResponse;
 import com.backend.moamoa.domain.asset.entity.AssetCategory;
 import com.backend.moamoa.domain.asset.entity.AssetCategoryType;
@@ -202,7 +199,7 @@ class AssetControllerTest {
     }
 
     @Test
-    @DisplayName("지출 비율 설정 - 합이 100% 가 아닌 경우")
+    @DisplayName("지출 비율 설정 - 합이 100% 가 아닌 경우 실패")
     void addExpenditureBadRequest() throws Exception {
         //given
         doThrow(new CustomException(ErrorCode.BAD_REQUEST_EXPENDITURE))
@@ -249,5 +246,49 @@ class AssetControllerTest {
                 .andDo(print());
 
         verify(assetService).addRevenueExpenditure(any(CreateRevenueExpenditureRequest.class));
+    }
+
+    @Test
+    @DisplayName("수익 지출 내역 수정 - 성공")
+    void updateRevenueExpenditure() throws Exception {
+        //given
+        UpdateRevenueExpenditure updateRevenueExpenditure = new UpdateRevenueExpenditure(
+                1L, RevenueExpenditureType.REVENUE, AssetCategoryType.FIXED, LocalDate.parse("2022-05-04"),
+                "월급", null, 1000000, "월급날!!");
+        //when
+        ResultActions result = mockMvc.perform(patch("/assets/revenueExpenditure")
+                .content(objectMapper.writeValueAsString(updateRevenueExpenditure))
+                .characterEncoding(StandardCharsets.UTF_8)
+                .contentType(MediaType.APPLICATION_JSON));
+
+        //then
+        result.andExpect(status().isNoContent())
+                .andDo(print());
+
+        verify(assetService).updateRevenueExpenditure(any(UpdateRevenueExpenditure.class));
+    }
+
+    @Test
+    @DisplayName("수익 지출 내역 수정 - 수익 지출 내역 PK를 찾지 못한 경우 실패")
+    void updateRevenueExpenditureFail() throws Exception {
+        //given
+        doThrow(new CustomException(ErrorCode.NOT_FOUND_REVENUE_EXPENDITURE))
+                .when(assetService).updateRevenueExpenditure(any());
+
+        UpdateRevenueExpenditure updateRevenueExpenditure = new UpdateRevenueExpenditure(
+                2L, RevenueExpenditureType.REVENUE, AssetCategoryType.FIXED, LocalDate.parse("2022-05-04"),
+                "월급", null, 1000000, "월급날!!");
+
+        //when
+        ResultActions result = mockMvc.perform(patch("/assets/revenueExpenditure")
+                .content(objectMapper.writeValueAsString(updateRevenueExpenditure))
+                .characterEncoding(StandardCharsets.UTF_8)
+                .contentType(MediaType.APPLICATION_JSON));
+
+        //then
+        result.andExpect(status().isNotFound())
+                .andDo(print());
+
+        verify(assetService).updateRevenueExpenditure(any(UpdateRevenueExpenditure.class));
     }
 }
