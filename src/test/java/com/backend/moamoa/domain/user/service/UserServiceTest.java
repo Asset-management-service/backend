@@ -37,6 +37,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
@@ -66,28 +69,17 @@ class UserServiceTest {
     @Test
     @DisplayName("유저 불러오기")
     void getUser() throws Exception {
-        User user = User.builder()
-                .id(1L)
-                .providerType(ProviderType.GOOGLE)
-                .userId("123456L")
-                .email("kmw106933@naver.com")
-                .nickname("asd")
-                .phoneNum("01022222222")
-                .birthday("01-03")
-                .birthYear("2001")
-                .gender(Gender.WOMAN)
-                .timeEntity(new TimeEntity())
-                .build();
+        User user = dummyUser();
 
         given(userUtil.findCurrentUser()).willReturn(user);
 
         User testUser = userService.getUser();
 
-        Assertions.assertEquals(testUser.getId(), 1L);
-        Assertions.assertEquals(testUser.getUserId(), "123456L");
-        Assertions.assertEquals(testUser.getEmail(), "kmw106933@naver.com");
-        Assertions.assertEquals(testUser.getNickname(), "asd");
-        Assertions.assertEquals(testUser.getPhoneNum(), "01022222222");
+        assertThat(testUser.getId(), is(equalTo(1L)));
+        assertThat(testUser.getUserId(), is(equalTo("123456L")));
+        assertThat(testUser.getEmail(), is(equalTo("kmw106933@naver.com")));
+        assertThat(testUser.getNickname(), is(equalTo("asd")));
+        assertThat(testUser.getPhoneNum(), is(equalTo("01022222222")));
 
         verify(userUtil).findCurrentUser();
     }
@@ -95,18 +87,7 @@ class UserServiceTest {
     @Test
     @DisplayName("유저 수정하기")
     void update() throws Exception {
-        User user = User.builder()
-                .id(1L)
-                .providerType(ProviderType.GOOGLE)
-                .userId("123456L")
-                .email("kmw106933@naver.com")
-                .nickname("asd")
-                .phoneNum("01022222222")
-                .birthday("01-03")
-                .birthYear("2001")
-                .gender(Gender.WOMAN)
-                .timeEntity(new TimeEntity())
-                .build();
+        User user = dummyUser();
 
         given(userUtil.findCurrentUser()).willReturn(user);
         given(userRepository.existsByNickname(anyString())).willReturn(false);
@@ -135,18 +116,7 @@ class UserServiceTest {
     @Test
     @DisplayName("중복된 정보로 유저 수정하기")
     void invalidUpdate() throws Exception {
-        User user = User.builder()
-                .id(1L)
-                .providerType(ProviderType.GOOGLE)
-                .userId("123456L")
-                .email("kmw106933@naver.com")
-                .nickname("asd")
-                .phoneNum("01022222222")
-                .birthday("01-03")
-                .birthYear("2001")
-                .gender(Gender.WOMAN)
-                .timeEntity(new TimeEntity())
-                .build();
+        User user = dummyUser();
 
         given(userUtil.findCurrentUser()).willReturn(user);
         given(userRepository.existsByNickname("test")).willThrow(new CustomException(ErrorCode.ALREADY_NICKNAME_EXISTS));
@@ -185,18 +155,7 @@ class UserServiceTest {
     @Test
     @DisplayName("이메일 변경하기")
     void confirmEmail() throws Exception {
-        User user = User.builder()
-                .id(1L)
-                .providerType(ProviderType.GOOGLE)
-                .userId("123456L")
-                .email("kmw106933@naver.com")
-                .nickname("asd")
-                .phoneNum("01022222222")
-                .birthday("01-03")
-                .birthYear("2001")
-                .gender(Gender.WOMAN)
-                .timeEntity(new TimeEntity())
-                .build();
+        User user = dummyUser();
 
         given(userRepository.findByIdAndDeletedIsFalse(1L)).willReturn(Optional.ofNullable(user));
 
@@ -211,7 +170,7 @@ class UserServiceTest {
 
         userService.confirmEmail(authToken);
 
-        Assertions.assertEquals(user.getEmail(), "moa@moa.com");
+        assertThat(user.getEmail(), is(equalTo("moa@moa.com")));
         verify(userRepository).findByIdAndDeletedIsFalse(1L);
     }
 
@@ -237,7 +196,7 @@ class UserServiceTest {
 
         Boolean duplicateEmail = userService.isDuplicateEmail(VALID_EMAIL);
 
-        Assertions.assertEquals(duplicateEmail, false);
+        assertThat(duplicateEmail, is(equalTo(false)));
         verify(userRepository).existsByEmailAndEmailCheckIsTrue(VALID_EMAIL);
     }
 
@@ -245,18 +204,7 @@ class UserServiceTest {
     @DisplayName("마이페이지의 내가 쓴 글 정상적으로 조회")
     void findMyPosts() throws Exception {
         Pageable pageable = PageRequest.of(0, 8);
-        User user = User.builder()
-                .id(1L)
-                .providerType(ProviderType.GOOGLE)
-                .userId("123456L")
-                .email("kmw106933@naver.com")
-                .nickname("asd")
-                .phoneNum("01022222222")
-                .birthday("01-03")
-                .birthYear("2001")
-                .gender(Gender.WOMAN)
-                .timeEntity(new TimeEntity())
-                .build();
+        User user = dummyUser();
 
         given(userUtil.findCurrentUser()).willReturn(user);
         given(postRepository.findByUserOrderByIdDesc(user, pageable)).will(
@@ -279,10 +227,10 @@ class UserServiceTest {
         );
         Page<MyPostResponse> posts = userService.findMyPosts(pageable);
 
-        Assertions.assertEquals(posts.getContent().get(0).getTitle(), "test");
-        Assertions.assertEquals(posts.getContent().get(0).getCategoryName(), "test");
-        Assertions.assertEquals(posts.getContent().get(1).getTitle(), "test2");
-        Assertions.assertEquals(posts.getContent().get(1).getCategoryName(), "test");
+        assertThat(posts.getContent().get(0).getTitle(), is(equalTo("test")));
+        assertThat(posts.getContent().get(0).getCategoryName(), is(equalTo("test")));
+        assertThat(posts.getContent().get(1).getTitle(), is(equalTo("test2")));
+        assertThat(posts.getContent().get(1).getCategoryName(), is(equalTo("test")));
 
         verify(postRepository).findByUserOrderByIdDesc(user, pageable);
     }
@@ -291,18 +239,7 @@ class UserServiceTest {
     @DisplayName("마이페이지의 내가 쓴 댓글 정상적으로 조회")
     void findMyComments() throws Exception {
         Pageable pageable = PageRequest.of(0, 8);
-        User user = User.builder()
-                .id(1L)
-                .providerType(ProviderType.GOOGLE)
-                .userId("123456L")
-                .email("kmw106933@naver.com")
-                .nickname("asd")
-                .phoneNum("01022222222")
-                .birthday("01-03")
-                .birthYear("2001")
-                .gender(Gender.WOMAN)
-                .timeEntity(new TimeEntity())
-                .build();
+        User user = dummyUser();
 
         given(userUtil.findCurrentUser()).willReturn(user);
         given(commentRepository.findByUserOrderByIdDesc(user, pageable)).will(
@@ -327,8 +264,8 @@ class UserServiceTest {
 
         Page<MyCommentResponse> comments = userService.findMyComments(pageable);
 
-        Assertions.assertEquals(comments.getContent().get(0).getContent(), "test");
-        Assertions.assertEquals(comments.getContent().get(1).getContent(), "test2");
+        assertThat(comments.getContent().get(0).getContent(), is(equalTo("test")));
+        assertThat(comments.getContent().get(1).getContent(), is(equalTo("test2")));
 
         verify(commentRepository).findByUserOrderByIdDesc(user, pageable);
     }
@@ -337,18 +274,7 @@ class UserServiceTest {
     @DisplayName("마이페이지의 내 스크랩 정상적으로 조회")
     void findMyScraps() throws Exception {
         Pageable pageable = PageRequest.of(0, 8);
-        User user = User.builder()
-                .id(1L)
-                .providerType(ProviderType.GOOGLE)
-                .userId("123456L")
-                .email("kmw106933@naver.com")
-                .nickname("asd")
-                .phoneNum("01022222222")
-                .birthday("01-03")
-                .birthYear("2001")
-                .gender(Gender.WOMAN)
-                .timeEntity(new TimeEntity())
-                .build();
+        User user = dummyUser();
 
         given(userUtil.findCurrentUser()).willReturn(user);
         given(scrapRepository.findByUserOrderByIdDesc(user, pageable)).will(
@@ -371,13 +297,28 @@ class UserServiceTest {
         );
         Page<MyScrapResponse> myScraps = userService.findMyScraps(pageable);
 
-        Assertions.assertEquals(myScraps.getContent().get(0).getTitle(), "test");
-        Assertions.assertEquals(myScraps.getContent().get(0).getCategoryName(), "test");
+        assertThat(myScraps.getContent().get(0).getTitle(), is(equalTo("test")));
+        assertThat(myScraps.getContent().get(0).getCategoryName(), is(equalTo("test")));
 
-        Assertions.assertEquals(myScraps.getContent().get(1).getTitle(), "test");
-        Assertions.assertEquals(myScraps.getContent().get(1).getCategoryName(), "test");
+        assertThat(myScraps.getContent().get(1).getTitle(), is(equalTo("test")));
+        assertThat(myScraps.getContent().get(1).getCategoryName(), is(equalTo("test")));
 
         verify(scrapRepository).findByUserOrderByIdDesc(user, pageable);
+    }
+
+    private User dummyUser() {
+        return User.builder()
+                .id(1L)
+                .providerType(ProviderType.GOOGLE)
+                .userId("123456L")
+                .email("kmw106933@naver.com")
+                .nickname("asd")
+                .phoneNum("01022222222")
+                .birthday("01-03")
+                .birthYear("2001")
+                .gender(Gender.WOMAN)
+                .timeEntity(new TimeEntity())
+                .build();
     }
 
 }
