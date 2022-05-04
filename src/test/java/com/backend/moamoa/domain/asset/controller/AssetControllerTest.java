@@ -291,4 +291,32 @@ class AssetControllerTest {
 
         verify(assetService).updateRevenueExpenditure(any(UpdateRevenueExpenditure.class));
     }
+
+    @Test
+    @DisplayName("수익 지출 내역 삭제 - 성공")
+    void deleteRevenueExpenditure() throws Exception {
+        //when
+        ResultActions result = mockMvc.perform(delete("/assets/revenueExpenditure/1"));
+
+        //then
+        result.andExpect(status().isNoContent());
+    }
+
+    @Test
+    @DisplayName("수익 지출 내역 삭제 - 수익 지출 내역 PK를 찾지 못한 경우 실패")
+    void deleteRevenueExpenditureFail() throws Exception {
+        //given
+        doThrow(new CustomException(ErrorCode.NOT_FOUND_REVENUE_EXPENDITURE))
+                .when(assetService).deleteRevenueExpenditure(anyLong());
+
+        //when
+        ResultActions result = mockMvc.perform(delete("/assets/revenueExpenditure/1"));
+
+        //then
+        result.andExpect(status().isNotFound())
+                .andDo(print());
+
+        verify(assetService).deleteRevenueExpenditure(anyLong());
+    }
+
 }
