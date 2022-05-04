@@ -2,6 +2,7 @@ package com.backend.moamoa.domain.asset.dto.request;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -17,6 +18,7 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 public class CreateMoneyLogRequest {
 
     @ApiModelProperty(value = "해당 년, 월, 일", example = "2022-04-23", required = true)

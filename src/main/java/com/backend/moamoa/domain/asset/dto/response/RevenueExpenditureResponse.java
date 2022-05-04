@@ -1,5 +1,6 @@
 package com.backend.moamoa.domain.asset.dto.response;
 
+import com.backend.moamoa.domain.asset.entity.AssetCategoryType;
 import com.backend.moamoa.domain.asset.entity.RevenueExpenditureType;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.querydsl.core.annotations.QueryProjection;
@@ -21,6 +22,9 @@ public class RevenueExpenditureResponse {
     @ApiModelProperty(value = "수익 지출 타입")
     private RevenueExpenditureType revenueExpenditureType;
 
+    @ApiModelProperty(value = "카테고리 타입")
+    private AssetCategoryType assetCategoryType;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
     private LocalDate date;
 
@@ -37,9 +41,10 @@ public class RevenueExpenditureResponse {
     private int cost;
 
     @QueryProjection
-    public RevenueExpenditureResponse(Long revenueExpenditureId, RevenueExpenditureType revenueExpenditureType, LocalDate date, String categoryName, String content, String paymentMethod, int cost) {
+    public RevenueExpenditureResponse(Long revenueExpenditureId, RevenueExpenditureType revenueExpenditureType, AssetCategoryType assetCategoryType, LocalDate date, String categoryName, String content, String paymentMethod, int cost) {
         this.revenueExpenditureId = revenueExpenditureId;
         this.revenueExpenditureType = revenueExpenditureType;
+        this.assetCategoryType = assetCategoryType;
         this.date = date;
         this.categoryName = categoryName;
         this.content = content;

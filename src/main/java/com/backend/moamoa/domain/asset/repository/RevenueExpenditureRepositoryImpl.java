@@ -31,6 +31,7 @@ public class RevenueExpenditureRepositoryImpl implements RevenueExpenditureRepos
                 .select(new QRevenueExpenditureResponse(
                         revenueExpenditure.id,
                         revenueExpenditure.revenueExpenditureType,
+                        revenueExpenditure.assetCategoryType,
                         revenueExpenditure.date,
                         revenueExpenditure.categoryName,
                         revenueExpenditure.content,
@@ -106,6 +107,7 @@ public class RevenueExpenditureRepositoryImpl implements RevenueExpenditureRepos
                 .select(new QRevenueExpenditureResponse(
                         revenueExpenditure.id,
                         revenueExpenditure.revenueExpenditureType,
+                        revenueExpenditure.assetCategoryType,
                         revenueExpenditure.date,
                         revenueExpenditure.categoryName,
                         revenueExpenditure.content,

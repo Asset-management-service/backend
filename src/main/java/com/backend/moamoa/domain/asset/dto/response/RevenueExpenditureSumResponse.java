@@ -1,5 +1,6 @@
 package com.backend.moamoa.domain.asset.dto.response;
 
+import com.backend.moamoa.domain.asset.entity.AssetCategoryType;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;

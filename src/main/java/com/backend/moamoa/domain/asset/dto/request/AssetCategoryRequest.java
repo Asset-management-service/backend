@@ -3,6 +3,7 @@ package com.backend.moamoa.domain.asset.dto.request;
 import com.backend.moamoa.domain.asset.entity.AssetCategoryType;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -11,6 +12,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 public class AssetCategoryRequest {
 
     @ApiModelProperty(value = "카테고리 타입", example = "REVENUE", required = true)
