@@ -3,6 +3,8 @@ package com.backend.moamoa.domain.asset.controller;
 import com.backend.moamoa.builder.UserBuilder;
 import com.backend.moamoa.domain.asset.dto.request.*;
 import com.backend.moamoa.domain.asset.dto.response.AssetCategoryDtoResponse;
+import com.backend.moamoa.domain.asset.dto.response.RevenueExpenditureResponse;
+import com.backend.moamoa.domain.asset.dto.response.RevenueExpenditureSumResponse;
 import com.backend.moamoa.domain.asset.entity.AssetCategory;
 import com.backend.moamoa.domain.asset.entity.AssetCategoryType;
 import com.backend.moamoa.domain.asset.entity.RevenueExpenditureType;
@@ -14,7 +16,6 @@ import com.backend.moamoa.domain.user.service.UserService;
 import com.backend.moamoa.global.bean.security.SecurityConfig;
 import com.backend.moamoa.global.exception.CustomException;
 import com.backend.moamoa.global.exception.ErrorCode;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,6 +25,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -34,6 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
@@ -317,6 +322,46 @@ class AssetControllerTest {
                 .andDo(print());
 
         verify(assetService).deleteRevenueExpenditure(anyLong());
+    }
+
+    @Test
+    @DisplayName("수익 지출 내역 조회 - 성공")
+    void getRevenueExpenditure() throws Exception {
+        //given
+        List<RevenueExpenditureResponse> revenueExpenditure = new ArrayList<>();
+
+        RevenueExpenditureResponse revenue1 = new RevenueExpenditureResponse(1L, RevenueExpenditureType.REVENUE, AssetCategoryType.FIXED,
+                LocalDate.parse("2022-04-04"), "월급", "월급날!!", null, 2000000);
+
+        RevenueExpenditureResponse revenue2 = new RevenueExpenditureResponse(2L, RevenueExpenditureType.EXPENDITURE, AssetCategoryType.FIXED,
+                LocalDate.parse("2022-04-01"), "통신비", "휴대폰 요금", "계좌 이체", 100000);
+
+        RevenueExpenditureResponse revenue3 = new RevenueExpenditureResponse(3L, RevenueExpenditureType.EXPENDITURE, AssetCategoryType.VARIABLE,
+                LocalDate.parse("2022-04-05"), "식비", "오마카세 먹었어요!", "신용 카드", 150000);
+
+        revenueExpenditure.add(revenue1);
+        revenueExpenditure.add(revenue2);
+        revenueExpenditure.add(revenue3);
+
+        RevenueExpenditureSumResponse response = RevenueExpenditureSumResponse.of(2000000, 250000, 100000, new PageImpl<>(revenueExpenditure, Pageable.ofSize(1), 3));
+
+        given(assetService.findRevenueExpenditureByMonth(anyString(), any(Pageable.class))).willReturn(response);
+
+        //when
+        ResultActions result = mockMvc.perform(get("/assets/revenueExpenditure?month=2022-04&page=0&size=3"));
+
+        //then
+        result.andExpect(status().isOk())
+                .andExpect(content().string(
+                        containsString("\"totalRevenue\":2000000")))
+                .andExpect(content().string(
+                        containsString("\"totalExpenditure\":250000")))
+                .andExpect(content().string(
+                        containsString("\"remainingBudget\":100000")))
+                .andExpect(content().json(objectMapper.writeValueAsString(response)))
+                .andDo(print());
+
+        verify(assetService).findRevenueExpenditureByMonth(anyString(), any(Pageable.class));
     }
 
 }
