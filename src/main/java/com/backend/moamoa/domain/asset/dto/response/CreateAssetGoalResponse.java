@@ -17,5 +17,4 @@ public class CreateAssetGoalResponse {
     @ApiModelProperty(value = "자산 관리 목표 생성 ID")
     private Long assetGoalId;
 
-
 }

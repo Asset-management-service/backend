@@ -381,4 +381,29 @@ class AssetControllerTest {
         verify(assetService).findRevenueExpenditureByMonth(anyString(), any(Pageable.class));
     }
 
+    @Test
+    @DisplayName("자산 관리 목표 작성 - 성공")
+    void addAssetGoal() throws Exception {
+        //given
+        given(assetService.addAssetGoal(any())).willReturn(1L);
+        String json = objectMapper.writeValueAsString(new CreateAssetGoalRequest(LocalDate.parse("2022-05-04"), "이번달 목표 최대한 배달 지양하기"));
+
+        //when
+        ResultActions result = mockMvc.perform(put("/assets/asset-goal")
+                .contentType(MediaType.APPLICATION_JSON)
+                .characterEncoding(StandardCharsets.UTF_8)
+                .content(json));
+
+        //then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.assetGoalId").value(1))
+                .andExpect(jsonPath("$.assetGoalId").hasJsonPath())
+                .andExpect(jsonPath("$.assetGoalId").exists())
+                .andExpect(jsonPath("$.assetGoalId").isNotEmpty())
+                .andExpect(jsonPath("$.assetGoalId").isNumber())
+                .andDo(print());
+
+        verify(assetService).addAssetGoal(any(CreateAssetGoalRequest.class));
+    }
+
 }
