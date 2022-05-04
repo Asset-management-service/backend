@@ -1,10 +1,18 @@
 package com.backend.moamoa.domain.user.service;
 
+import com.backend.moamoa.domain.post.entity.Comment;
+import com.backend.moamoa.domain.post.entity.Post;
+import com.backend.moamoa.domain.post.entity.PostCategory;
+import com.backend.moamoa.domain.post.entity.Scrap;
 import com.backend.moamoa.domain.post.repository.comment.CommentRepository;
 import com.backend.moamoa.domain.post.repository.post.PostRepository;
 import com.backend.moamoa.domain.post.repository.post.ScrapRepository;
 import com.backend.moamoa.domain.user.dto.request.UserUpdateRequest;
+import com.backend.moamoa.domain.user.dto.response.MyCommentResponse;
+import com.backend.moamoa.domain.user.dto.response.MyPostResponse;
+import com.backend.moamoa.domain.user.dto.response.MyScrapResponse;
 import com.backend.moamoa.domain.user.entity.User;
+import com.backend.moamoa.domain.user.entity.UserMailAuth;
 import com.backend.moamoa.domain.user.entity.enums.Gender;
 import com.backend.moamoa.domain.user.oauth.entity.enums.ProviderType;
 import com.backend.moamoa.domain.user.repository.UserRepository;
@@ -13,16 +21,27 @@ import com.backend.moamoa.global.exception.CustomException;
 import com.backend.moamoa.global.exception.ErrorCode;
 import com.backend.moamoa.global.utils.UserUtil;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
@@ -36,36 +55,31 @@ class UserServiceTest {
     private UserUtil userUtil;
 
     @Mock
+    private PostRepository postRepository;
+
+    @Mock
+    private CommentRepository commentRepository;
+
+    @Mock
+    private ScrapRepository scrapRepository;
+
+    @Mock
     private UserRepository userRepository;
-
-    @BeforeEach
-    void setup() {
-        User user = User.builder()
-                .id(1L)
-                .providerType(ProviderType.GOOGLE)
-                .userId("123456L")
-                .email("kmw106933@naver.com")
-                .nickname("asd")
-                .phoneNum("01022222222")
-                .birthday("01-03")
-                .birthYear("2001")
-                .gender(Gender.WOMAN)
-                .timeEntity(new TimeEntity())
-                .build();
-
-        given(userUtil.findCurrentUser()).willReturn(user);
-    }
 
     @Test
     @DisplayName("유저 불러오기")
     void getUser() throws Exception {
+        User user = dummyUser();
+
+        given(userUtil.findCurrentUser()).willReturn(user);
+
         User testUser = userService.getUser();
 
-        Assertions.assertEquals(testUser.getId(), 1L);
-        Assertions.assertEquals(testUser.getUserId(), "123456L");
-        Assertions.assertEquals(testUser.getEmail(), "kmw106933@naver.com");
-        Assertions.assertEquals(testUser.getNickname(), "asd");
-        Assertions.assertEquals(testUser.getPhoneNum(), "01022222222");
+        assertThat(testUser.getId(), is(equalTo(1L)));
+        assertThat(testUser.getUserId(), is(equalTo("123456L")));
+        assertThat(testUser.getEmail(), is(equalTo("kmw106933@naver.com")));
+        assertThat(testUser.getNickname(), is(equalTo("asd")));
+        assertThat(testUser.getPhoneNum(), is(equalTo("01022222222")));
 
         verify(userUtil).findCurrentUser();
     }
@@ -73,7 +87,9 @@ class UserServiceTest {
     @Test
     @DisplayName("유저 수정하기")
     void update() throws Exception {
-        //given
+        User user = dummyUser();
+
+        given(userUtil.findCurrentUser()).willReturn(user);
         given(userRepository.existsByNickname(anyString())).willReturn(false);
         given(userRepository.existsByPhoneNum(anyString())).willReturn(false);
         given(userRepository.existsByEmail(anyString())).willReturn(false);
@@ -85,12 +101,12 @@ class UserServiceTest {
                 .gender(Gender.MAN)
                 .build();
 
-        User user = userService.update(userUpdateRequest);
+        User updateUser = userService.update(userUpdateRequest);
 
-        Assertions.assertEquals(user.getEmail(), "test@test.com");
-        Assertions.assertEquals(user.getNickname(), "test");
-        Assertions.assertEquals(user.getPhoneNum(), "01033333333");
-        Assertions.assertEquals(user.getGender(), Gender.MAN);
+        Assertions.assertEquals(updateUser.getEmail(), "test@test.com");
+        Assertions.assertEquals(updateUser.getNickname(), "test");
+        Assertions.assertEquals(updateUser.getPhoneNum(), "01033333333");
+        Assertions.assertEquals(updateUser.getGender(), Gender.MAN);
 
         verify(userRepository).existsByNickname(anyString());
         verify(userRepository).existsByPhoneNum(anyString());
@@ -100,7 +116,9 @@ class UserServiceTest {
     @Test
     @DisplayName("중복된 정보로 유저 수정하기")
     void invalidUpdate() throws Exception {
-        //given
+        User user = dummyUser();
+
+        given(userUtil.findCurrentUser()).willReturn(user);
         given(userRepository.existsByNickname("test")).willThrow(new CustomException(ErrorCode.ALREADY_NICKNAME_EXISTS));
         given(userRepository.existsByPhoneNum("010")).willThrow(new CustomException(ErrorCode.ALREADY_PHONE_NUM_EXISTS));
         given(userRepository.existsByEmail("moa@moa.com")).willThrow(new CustomException(ErrorCode.ALREADY_EMAIL_EXISTS));
@@ -132,6 +150,175 @@ class UserServiceTest {
                 .isInstanceOf(CustomException.class);
 
         verify(userRepository).existsByEmail("moa@moa.com");
+    }
+
+    @Test
+    @DisplayName("이메일 변경하기")
+    void confirmEmail() throws Exception {
+        User user = dummyUser();
+
+        given(userRepository.findByIdAndDeletedIsFalse(1L)).willReturn(Optional.ofNullable(user));
+
+        UserMailAuth authToken = UserMailAuth.builder()
+                .id(1L)
+                .userId(1L)
+                .mail("moa@moa.com")
+                .authKey("123456")
+                .expirationDate(LocalDateTime.now())
+                .expired(false)
+                .build();
+
+        userService.confirmEmail(authToken);
+
+        assertThat(user.getEmail(), is(equalTo("moa@moa.com")));
+        verify(userRepository).findByIdAndDeletedIsFalse(1L);
+    }
+
+    @Test
+    @DisplayName("중복된 이메일로 중복 확인을 할 경우")
+    void isDuplicateEmail() throws Exception {
+        final String EXISTED_EMAIL = "exist@email.com";
+        given(userRepository.existsByEmailAndEmailCheckIsTrue(EXISTED_EMAIL))
+                .willThrow(new CustomException(ErrorCode.ALREADY_EMAIL_EXISTS));
+
+        assertThatThrownBy(() -> userService.isDuplicateEmail(EXISTED_EMAIL))
+                .isInstanceOf(CustomException.class);
+
+        verify(userRepository).existsByEmailAndEmailCheckIsTrue(EXISTED_EMAIL);
+    }
+
+    @Test
+    @DisplayName("중복되지 않은 이메일로 중복 확인을 할 경우")
+    void isDuplicateByValidEmail() throws Exception {
+        final String VALID_EMAIL = "moamoa@email.com";
+        given(userRepository.existsByEmailAndEmailCheckIsTrue(VALID_EMAIL))
+                .willReturn(false);
+
+        Boolean duplicateEmail = userService.isDuplicateEmail(VALID_EMAIL);
+
+        assertThat(duplicateEmail, is(equalTo(false)));
+        verify(userRepository).existsByEmailAndEmailCheckIsTrue(VALID_EMAIL);
+    }
+
+    @Test
+    @DisplayName("마이페이지의 내가 쓴 글 정상적으로 조회")
+    void findMyPosts() throws Exception {
+        Pageable pageable = PageRequest.of(0, 8);
+        User user = dummyUser();
+
+        given(userUtil.findCurrentUser()).willReturn(user);
+        given(postRepository.findByUserOrderByIdDesc(user, pageable)).will(
+                invocation -> {
+                    User testUser = invocation.getArgument(0);
+                    Pageable page = invocation.getArgument(1);
+
+                    Post post = new Post("test", "test", 0, testUser, new ArrayList<>(), new PostCategory("test", null));
+                    Post secondPost = new Post("test2", "test2", 0, testUser, new ArrayList<>(), new PostCategory("test", null));
+
+                    post.setTimeEntity(new TimeEntity());
+                    secondPost.setTimeEntity(new TimeEntity());
+
+                    List<Post> posts = new ArrayList<>();
+                    posts.add(post);
+                    posts.add(secondPost);
+
+                    return new PageImpl<>(posts, page, posts.size());
+                }
+        );
+        Page<MyPostResponse> posts = userService.findMyPosts(pageable);
+
+        assertThat(posts.getContent().get(0).getTitle(), is(equalTo("test")));
+        assertThat(posts.getContent().get(0).getCategoryName(), is(equalTo("test")));
+        assertThat(posts.getContent().get(1).getTitle(), is(equalTo("test2")));
+        assertThat(posts.getContent().get(1).getCategoryName(), is(equalTo("test")));
+
+        verify(postRepository).findByUserOrderByIdDesc(user, pageable);
+    }
+
+    @Test
+    @DisplayName("마이페이지의 내가 쓴 댓글 정상적으로 조회")
+    void findMyComments() throws Exception {
+        Pageable pageable = PageRequest.of(0, 8);
+        User user = dummyUser();
+
+        given(userUtil.findCurrentUser()).willReturn(user);
+        given(commentRepository.findByUserOrderByIdDesc(user, pageable)).will(
+                invocation -> {
+                    User testUser = invocation.getArgument(0);
+                    Pageable page = invocation.getArgument(1);
+                    Post post = new Post("test", "test", 0, testUser, new ArrayList<>(), new PostCategory("test", null));
+
+                    Comment comment = new Comment("test", null, user, post);
+                    Comment secondComment = new Comment("test2", null, user, post);
+
+                    comment.setTimeEntity(new TimeEntity());
+                    secondComment.setTimeEntity(new TimeEntity());
+
+                    List<Comment> comments = new ArrayList<>();
+                    comments.add(comment);
+                    comments.add(secondComment);
+
+                    return new PageImpl<>(comments, pageable, comments.size());
+                }
+        );
+
+        Page<MyCommentResponse> comments = userService.findMyComments(pageable);
+
+        assertThat(comments.getContent().get(0).getContent(), is(equalTo("test")));
+        assertThat(comments.getContent().get(1).getContent(), is(equalTo("test2")));
+
+        verify(commentRepository).findByUserOrderByIdDesc(user, pageable);
+    }
+
+    @Test
+    @DisplayName("마이페이지의 내 스크랩 정상적으로 조회")
+    void findMyScraps() throws Exception {
+        Pageable pageable = PageRequest.of(0, 8);
+        User user = dummyUser();
+
+        given(userUtil.findCurrentUser()).willReturn(user);
+        given(scrapRepository.findByUserOrderByIdDesc(user, pageable)).will(
+                invocation -> {
+                    User testUser = invocation.getArgument(0);
+                    Pageable page = invocation.getArgument(1);
+
+                    Post post = new Post("test", "test", 0, testUser, new ArrayList<>(), new PostCategory("test", null));
+                    post.setTimeEntity(new TimeEntity());
+
+                    Scrap scrap = new Scrap(post, user);
+                    Scrap secondScrap = new Scrap(post, user);
+
+                    List<Scrap> scraps = new ArrayList<>();
+                    scraps.add(scrap);
+                    scraps.add(secondScrap);
+
+                    return new PageImpl<>(scraps, pageable, scraps.size());
+                }
+        );
+        Page<MyScrapResponse> myScraps = userService.findMyScraps(pageable);
+
+        assertThat(myScraps.getContent().get(0).getTitle(), is(equalTo("test")));
+        assertThat(myScraps.getContent().get(0).getCategoryName(), is(equalTo("test")));
+
+        assertThat(myScraps.getContent().get(1).getTitle(), is(equalTo("test")));
+        assertThat(myScraps.getContent().get(1).getCategoryName(), is(equalTo("test")));
+
+        verify(scrapRepository).findByUserOrderByIdDesc(user, pageable);
+    }
+
+    private User dummyUser() {
+        return User.builder()
+                .id(1L)
+                .providerType(ProviderType.GOOGLE)
+                .userId("123456L")
+                .email("kmw106933@naver.com")
+                .nickname("asd")
+                .phoneNum("01022222222")
+                .birthday("01-03")
+                .birthYear("2001")
+                .gender(Gender.WOMAN)
+                .timeEntity(new TimeEntity())
+                .build();
     }
 
 }
