@@ -3,6 +3,7 @@ package com.backend.moamoa.domain.asset.controller;
 import com.backend.moamoa.builder.UserBuilder;
 import com.backend.moamoa.domain.asset.dto.request.*;
 import com.backend.moamoa.domain.asset.dto.response.AssetCategoryDtoResponse;
+import com.backend.moamoa.domain.asset.dto.response.CreateMoneyLogResponse;
 import com.backend.moamoa.domain.asset.dto.response.RevenueExpenditureResponse;
 import com.backend.moamoa.domain.asset.dto.response.RevenueExpenditureSumResponse;
 import com.backend.moamoa.domain.asset.entity.AssetCategory;
@@ -29,6 +30,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
@@ -404,6 +406,37 @@ class AssetControllerTest {
                 .andDo(print());
 
         verify(assetService).addAssetGoal(any(CreateAssetGoalRequest.class));
+    }
+
+    @Test
+    @DisplayName("머니 로그 작성 - 성공")
+    void createMoneyLog() throws Exception {
+        //given
+        List<String> imageUrl = new ArrayList<>();
+        imageUrl.add("https://s3uploadImages.landom/alzkmzlmqwedsaklxzlncwepoamskzmx.mcsad;dkjsaljdklasdjlajsdklajdalsdjkla");
+        imageUrl.add("https://s3uploadImages.landom/dkqieoopoamskzmx.mcsadaslkjqpad;dkjsaljdklasdjlajsdklajdalsdjkla");
+        imageUrl.add("https://s3uploadImages.landom/doqpowiepepoamskzmx.mcsad;ddsaasddwqesaljdklasdjlajsdklajdalsdjkla");
+
+        CreateMoneyLogResponse response = new CreateMoneyLogResponse(1L, imageUrl);
+        String json = objectMapper.writeValueAsString(response);
+
+        MockMultipartFile mockMultipartFile = new MockMultipartFile("온라인 도장.jpg", "모아모아.jpg", "multipart/form-data", "온라인 도장.jpg".getBytes());
+
+        given(assetService.createMoneyLog(any())).willReturn(response);
+
+        //when
+        ResultActions result = mockMvc.perform(multipart("/assets/money-log")
+                .file(mockMultipartFile)
+                .param("date", "2022-05-04")
+                .param("content", "치킨 -19000")
+                .characterEncoding(StandardCharsets.UTF_8));
+
+        //then
+        result.andExpect(status().isCreated())
+                .andExpect(content().json(json))
+                .andDo(print());
+
+        verify(assetService).createMoneyLog(any(CreateMoneyLogRequest.class));
     }
 
 }
