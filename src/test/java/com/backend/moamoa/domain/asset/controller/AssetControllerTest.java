@@ -364,4 +364,21 @@ class AssetControllerTest {
         verify(assetService).findRevenueExpenditureByMonth(anyString(), any(Pageable.class));
     }
 
+    @Test
+    @DisplayName("수익 지출 내역 조회 - 예산 설정 PK를 찾지 못한 경우 실패")
+    void getRevenueExpenditureFail() throws Exception {
+        //given
+        doThrow(new CustomException(ErrorCode.NOT_FOUND_BUDGET))
+                .when(assetService).findRevenueExpenditureByMonth(anyString(), any(Pageable.class));
+
+        //when
+        ResultActions result = mockMvc.perform(get("/assets/revenueExpenditure?month=2022-04&page=0&size=3"));
+
+        //then
+        result.andExpect(status().isNotFound())
+                .andDo(print());
+
+        verify(assetService).findRevenueExpenditureByMonth(anyString(), any(Pageable.class));
+    }
+
 }
