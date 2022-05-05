@@ -7,7 +7,6 @@ import com.backend.moamoa.domain.settlement.dto.response.settle.MonthSettleRespo
 import com.backend.moamoa.domain.settlement.dto.response.settle.WeekSettleResponse;
 import com.backend.moamoa.domain.settlement.dto.response.settle.YearSettleResponse;
 import com.backend.moamoa.domain.settlement.dto.response.total.ComparisonsResponse;
-import com.backend.moamoa.domain.settlement.dto.response.total.TotalComparisonResponse;
 import com.backend.moamoa.domain.settlement.dto.response.total.ComparisonResponse;
 import com.backend.moamoa.domain.asset.entity.ExpenditureRatio;
 import com.backend.moamoa.domain.asset.entity.RevenueExpenditure;
@@ -159,7 +158,10 @@ public class SettlementService {
         }
 
         for (RevenueExpenditure r : revenueExpenditure) {
-            AssetCategory category = assetCategory.stream().filter(a -> a.getCategoryName().equals(r.getCategoryName())).findFirst()
+            AssetCategory category = assetCategory.stream()
+                    .filter(a -> a.getCategoryName().equals(r.getCategoryName()))
+                    .filter(a -> a.getAssetCategoryType().equals(r.getAssetCategoryType()))
+                    .findFirst()
                     .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_ASSET_CATEGORY));
 
             if (category.getAssetCategoryType().equals(AssetCategoryType.FIXED)) {
@@ -184,18 +186,18 @@ public class SettlementService {
         List<CostResponse> costRes = new ArrayList<>();
         List<CostResponse> revenueRes = new ArrayList<>();
 
-        setCostResponse(revenueExpenditure, totalResponse.getTotalExp(), fixed, fixedRes);
-        setCostResponse(revenueExpenditure, totalResponse.getTotalExp(), variable, costRes);
+        setCostResponse(revenueExpenditure, totalResponse.getTotalExp(), fixed, fixedRes, TYPE_FIXED);
+        setCostResponse(revenueExpenditure, totalResponse.getTotalExp(), variable, costRes, TYPE_VARIABLE);
 
         for (String revenue : revenues) {
             CostResponse costResponse =
                     CostResponse.builder()
                             .categoryName(revenue)
-                            .cost(getExpenditureByCost(revenueExpenditure, revenue))
-                            .percent(getRatio(getExpenditureByCost(revenueExpenditure, revenue), totalResponse.getTotalRevenue()))
+                            .cost(getExpenditureByCost(revenueExpenditure, revenue, TYPE_REVENUE))
+                            .percent(getRatio(getExpenditureByCost(revenueExpenditure, revenue, TYPE_REVENUE), totalResponse.getTotalRevenue()))
                             .build();
 
-            if (getExpenditureByCost(revenueExpenditure, revenue) > 0)
+            if (getExpenditureByCost(revenueExpenditure, revenue, TYPE_REVENUE) > 0)
                 revenueRes.add(costResponse);
         }
 
@@ -231,16 +233,20 @@ public class SettlementService {
         List<RevenueExpenditure> revenueExpenditure = revenueExpenditureRepository.findRevenueWeekExpenditure(standard, user.getId());
         int totalExp = getRevenueExpenditure(revenueExpenditure, TYPE_EXPENDITURE);
 
-        List<String> categoryNames = assetCategoryRepository.findByTwoAssetCategoriesAndUserId(TYPE_FIXED, TYPE_VARIABLE, user.getId());
+        List<AssetCategory> fixed = assetCategoryRepository.findByAssetCategoryTypeAndUserId(TYPE_FIXED, user.getId());
+        List<AssetCategory> variable = assetCategoryRepository.findByAssetCategoryTypeAndUserId(TYPE_VARIABLE, user.getId());
+
+        variable.stream().forEach(r -> fixed.add(r));
+
         List<CostResponse> costResponses = new ArrayList<>();
 
-        for (String categoryName : categoryNames) {
-            if (getExpenditureByCost(revenueExpenditure, categoryName) > 0) {
+        for (AssetCategory assetCategory : fixed) {
+            if (getExpenditureByCost(revenueExpenditure, assetCategory.getCategoryName(), assetCategory.getAssetCategoryType().name()) > 0) {
                 costResponses.add(
                         CostResponse.builder()
-                                .categoryName(categoryName)
-                                .cost(getExpenditureByCost(revenueExpenditure, categoryName))
-                                .percent(getRatio(getExpenditureByCost(revenueExpenditure, categoryName), totalExp))
+                                .categoryName(assetCategory.getCategoryName())
+                                .cost(getExpenditureByCost(revenueExpenditure, assetCategory.getCategoryName(), assetCategory.getAssetCategoryType().name()))
+                                .percent(getRatio(getExpenditureByCost(revenueExpenditure, assetCategory.getCategoryName(), assetCategory.getAssetCategoryType().name()), totalExp))
                                 .build()
                 );
             }
@@ -445,18 +451,21 @@ public class SettlementService {
     }
 
     private void setCostResponse(List<RevenueExpenditure> revenueExpenditure,
-                                 int totalExp, List<String> names, List<CostResponse> lists) {
+                                 int totalExp, List<String> names, List<CostResponse> lists, String type) {
         for (String name : names) {
-            CostResponse costResponse = new CostResponse(name, getExpenditureByCost(revenueExpenditure, name),
-                    getRatio(getExpenditureByCost(revenueExpenditure, name), totalExp));
+            CostResponse costResponse = new CostResponse(name, getExpenditureByCost(revenueExpenditure, name, type),
+                    getRatio(getExpenditureByCost(revenueExpenditure, name, type), totalExp));
 
-            if (getExpenditureByCost(revenueExpenditure, name) > 0)
+            if (getExpenditureByCost(revenueExpenditure, name, type) > 0)
                 lists.add(costResponse);
         }
     }
 
-    private int getExpenditureByCost(List<RevenueExpenditure> revenueExpenditureList, String cost) {
-        return revenueExpenditureList.stream().filter(r -> r.getCategoryName().equals(cost)).mapToInt(RevenueExpenditure::getCost).sum();
+    private int getExpenditureByCost(List<RevenueExpenditure> revenueExpenditureList, String cost, String type) {
+        return revenueExpenditureList.stream()
+                .filter(r -> r.getCategoryName().equals(cost))
+                .filter(r -> r.getAssetCategoryType().name().equals(type))
+                .mapToInt(RevenueExpenditure::getCost).sum();
     }
 
     private int getRevenueExpenditure(List<RevenueExpenditure> revenueExpenditureList, String type) {
