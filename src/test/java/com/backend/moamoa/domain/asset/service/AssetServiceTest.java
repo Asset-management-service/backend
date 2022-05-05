@@ -3,15 +3,14 @@ package com.backend.moamoa.domain.asset.service;
 import com.backend.moamoa.builder.UserBuilder;
 import com.backend.moamoa.domain.asset.dto.request.AssetCategoryRequest;
 import com.backend.moamoa.domain.asset.dto.request.BudgetRequest;
+import com.backend.moamoa.domain.asset.dto.request.CreateRevenueExpenditureRequest;
 import com.backend.moamoa.domain.asset.dto.request.ExpenditureRequest;
 import com.backend.moamoa.domain.asset.dto.response.AssetCategoryDtoResponse;
-import com.backend.moamoa.domain.asset.entity.AssetCategory;
-import com.backend.moamoa.domain.asset.entity.AssetCategoryType;
-import com.backend.moamoa.domain.asset.entity.Budget;
-import com.backend.moamoa.domain.asset.entity.ExpenditureRatio;
+import com.backend.moamoa.domain.asset.entity.*;
 import com.backend.moamoa.domain.asset.repository.AssetCategoryRepository;
 import com.backend.moamoa.domain.asset.repository.BudgetRepository;
 import com.backend.moamoa.domain.asset.repository.ExpenditureRatioRepository;
+import com.backend.moamoa.domain.asset.repository.RevenueExpenditureRepository;
 import com.backend.moamoa.domain.user.entity.User;
 import com.backend.moamoa.global.exception.CustomException;
 import com.backend.moamoa.global.utils.UserUtil;
@@ -22,6 +21,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -44,6 +44,9 @@ class AssetServiceTest {
 
     @Mock
     private ExpenditureRatioRepository expenditureRatioRepository;
+
+    @Mock
+    private RevenueExpenditureRepository revenueExpenditureRepository;
 
     @InjectMocks
     private AssetService assetService;
@@ -211,6 +214,40 @@ class AssetServiceTest {
 
         verify(userUtil).findCurrentUser();
         verify(assetCategoryRepository).findByIdAndUserId(anyLong(), anyLong());
+    }
+
+    @Test
+    @DisplayName("수익 지출 설정 - 성공")
+    void addRevenueExpenditure() {
+        //given
+        User user = UserBuilder.dummyUser();
+
+        CreateRevenueExpenditureRequest request = new CreateRevenueExpenditureRequest(
+                RevenueExpenditureType.REVENUE, AssetCategoryType.FIXED, LocalDate.parse("2022-05-05"),
+                "월급", null, 3000000, "월급날!!");
+
+        RevenueExpenditure revenueExpenditure = RevenueExpenditure.builder()
+                .id(1L)
+                .assetCategoryType(AssetCategoryType.FIXED)
+                .revenueExpenditureType(RevenueExpenditureType.REVENUE)
+                .user(user)
+                .content("월급날!!")
+                .categoryName("월급")
+                .cost(3000000)
+                .date(LocalDate.parse("2022-05-05"))
+                .build();
+
+        given(userUtil.findCurrentUser()).willReturn(user);
+        given(revenueExpenditureRepository.save(any(RevenueExpenditure.class))).willReturn(revenueExpenditure);
+
+        //when
+        Long revenueExpenditureId = assetService.addRevenueExpenditure(request);
+
+        //then
+        assertThat(revenueExpenditureId).isEqualTo(revenueExpenditure.getId());
+
+        verify(userUtil).findCurrentUser();
+        verify(revenueExpenditureRepository).save(any(RevenueExpenditure.class));
     }
 
     /**
