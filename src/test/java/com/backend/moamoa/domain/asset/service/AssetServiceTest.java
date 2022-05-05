@@ -6,6 +6,8 @@ import com.backend.moamoa.domain.asset.dto.request.BudgetRequest;
 import com.backend.moamoa.domain.asset.dto.request.CreateRevenueExpenditureRequest;
 import com.backend.moamoa.domain.asset.dto.request.ExpenditureRequest;
 import com.backend.moamoa.domain.asset.dto.response.AssetCategoryDtoResponse;
+import com.backend.moamoa.domain.asset.dto.response.RevenueExpenditureResponse;
+import com.backend.moamoa.domain.asset.dto.response.RevenueExpenditureSumResponse;
 import com.backend.moamoa.domain.asset.entity.*;
 import com.backend.moamoa.domain.asset.repository.AssetCategoryRepository;
 import com.backend.moamoa.domain.asset.repository.BudgetRepository;
@@ -20,6 +22,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -226,16 +230,8 @@ class AssetServiceTest {
                 RevenueExpenditureType.REVENUE, AssetCategoryType.FIXED, LocalDate.parse("2022-05-05"),
                 "월급", null, 3000000, "월급날!!");
 
-        RevenueExpenditure revenueExpenditure = RevenueExpenditure.builder()
-                .id(1L)
-                .assetCategoryType(AssetCategoryType.FIXED)
-                .revenueExpenditureType(RevenueExpenditureType.REVENUE)
-                .user(user)
-                .content("월급날!!")
-                .categoryName("월급")
-                .cost(3000000)
-                .date(LocalDate.parse("2022-05-05"))
-                .build();
+        RevenueExpenditure revenueExpenditure = dummyRevenueExpenditure(1L, AssetCategoryType.FIXED,
+                RevenueExpenditureType.REVENUE, user, "월급날!!", "월급", 10000000, LocalDate.parse("2022-05-05"));
 
         given(userUtil.findCurrentUser()).willReturn(user);
         given(revenueExpenditureRepository.save(any(RevenueExpenditure.class))).willReturn(revenueExpenditure);
@@ -250,6 +246,74 @@ class AssetServiceTest {
         verify(revenueExpenditureRepository).save(any(RevenueExpenditure.class));
     }
 
+
+    @Test
+    @DisplayName("가계부 수익 지출 조회 - 성공")
+    void findRevenueExpenditureByMonth() {
+        //given
+        User user = UserBuilder.dummyUser();
+        List<RevenueExpenditureResponse> revenueExpenditureResponses = new ArrayList<>();
+        Budget budget = Budget.builder().id(1L).user(user).budgetAmount(1000000).build();
+
+        List<RevenueExpenditure> revenueExpenditures = List.of(dummyRevenueExpenditure(1L, AssetCategoryType.FIXED,
+                        RevenueExpenditureType.REVENUE, user, "월급날!!", "월급", 10000000, LocalDate.parse("2022-05-05")),
+                dummyRevenueExpenditure(2L, AssetCategoryType.VARIABLE,
+                        RevenueExpenditureType.EXPENDITURE, user, "식비!!", "식비", 10000, LocalDate.parse("2022-05-05")),
+                dummyRevenueExpenditure(3L, AssetCategoryType.VARIABLE,
+                        RevenueExpenditureType.REVENUE, user, "적금이자", "적금", 10000, LocalDate.parse("2022-05-05")),
+                dummyRevenueExpenditure(4L, AssetCategoryType.VARIABLE,
+                        RevenueExpenditureType.EXPENDITURE, user, "교통비!!", "교통비", 30000, LocalDate.parse("2022-05-05")));
+
+        int revenue = getRevenueExpenditure(revenueExpenditures, "REVENUE");
+        int expenditure = getRevenueExpenditure(revenueExpenditures, "EXPENDITURE");
+        int remainingBudget = budget.getBudgetAmount() - expenditure;
+
+        given(userUtil.findCurrentUser()).willReturn(user);
+        given(revenueExpenditureRepository.findRevenueAndExpenditureByMonth(any(LocalDate.class), any(Pageable.class), anyLong()))
+                .will(invocation -> {
+                    Pageable pageable = invocation.getArgument(1);
+                    revenueExpenditureResponses.add(new RevenueExpenditureResponse(1L, RevenueExpenditureType.REVENUE, AssetCategoryType.FIXED,
+                            LocalDate.parse("2022-05-05"), "월급", "월급날!", null, 3000000));
+                    revenueExpenditureResponses.add(new RevenueExpenditureResponse(2L, RevenueExpenditureType.EXPENDITURE, AssetCategoryType.FIXED,
+                            LocalDate.parse("2022-05-05"), "통신비", "통신비!!", "자동 이체", 100000));
+                    revenueExpenditureResponses.add(new RevenueExpenditureResponse(3L, RevenueExpenditureType.EXPENDITURE, AssetCategoryType.VARIABLE,
+                            LocalDate.parse("2022-05-05"), "식비", "치킨", "신용 카드", 30000));
+                    return new PageImpl<>(revenueExpenditureResponses, pageable, revenueExpenditureResponses.size());
+                });
+        given(budgetRepository.findBudgetAmountByUser(any(User.class))).willReturn(Optional.of(budget));
+        given(revenueExpenditureRepository.findRevenueExpenditure(any(LocalDate.class), anyLong()))
+                .willReturn(revenueExpenditures);
+
+        //when
+        RevenueExpenditureSumResponse response = assetService.findRevenueExpenditureByMonth("2022-05", Pageable.ofSize(1));
+
+        //then
+        assertThat(response.getTotalRevenue()).isEqualTo(revenue);
+        assertThat(response.getTotalExpenditure()).isEqualTo(expenditure);
+        assertThat(response.getRemainingBudget()).isEqualTo(remainingBudget);
+        assertThat(response.getRevenueExpenditureResponses().getTotalElements()).isEqualTo(3);
+        assertThat(response.getRevenueExpenditureResponses()).extracting("categoryName")
+                .containsExactly("월급", "통신비", "식비");
+        assertThat(response.getRevenueExpenditureResponses()).extracting("revenueExpenditureId")
+                .containsExactly(1L, 2L, 3L);
+
+        verify(userUtil).findCurrentUser();
+        verify(revenueExpenditureRepository).findRevenueAndExpenditureByMonth(any(LocalDate.class), any(Pageable.class), anyLong());
+        verify(budgetRepository).findBudgetAmountByUser(any(User.class));
+        verify(revenueExpenditureRepository).findRevenueExpenditure(any(LocalDate.class), anyLong());
+    }
+
+    /**
+     * 수익 지출 타입을 받아서 합을 반환해주는 메소드
+     */
+    private int getRevenueExpenditure(List<RevenueExpenditure> revenueExpenditureList, String type) {
+        return revenueExpenditureList
+                .stream()
+                .filter(r -> r.getRevenueExpenditureType().toString().equals(type))
+                .mapToInt(RevenueExpenditure::getCost)
+                .sum();
+    }
+
     /**
      * 더미 데이터 - 카테고리
      */
@@ -261,6 +325,24 @@ class AssetServiceTest {
                 .user(user)
                 .build();
     }
+
+    /**
+     * 더미 데이터 - 수익 지출
+     */
+    private RevenueExpenditure dummyRevenueExpenditure(Long id, AssetCategoryType assetCategoryType, RevenueExpenditureType revenueExpenditureType,  User user,
+                                                       String content, String categoryName, int cost, LocalDate date) {
+        return RevenueExpenditure.builder()
+                .id(id)
+                .assetCategoryType(assetCategoryType)
+                .revenueExpenditureType(revenueExpenditureType)
+                .user(user)
+                .content(content)
+                .categoryName(categoryName)
+                .cost(cost)
+                .date(date)
+                .build();
+    }
+
 
 
 }
