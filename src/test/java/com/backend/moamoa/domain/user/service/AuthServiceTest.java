@@ -48,13 +48,14 @@ class AuthServiceTest {
     @Mock
     private ValueOperations valueOperations;
 
-    private final String REFRESH_TOKEN = "eyKjsaGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjF9.KiNUK70RDCTWeRMqfN6YY_SAkkb8opFsAh_fwAntt4";
+    private final String TOKEN = "eyKjsaGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjF9.KiNUK70RDCTWeRMqfN6YY_SAkkb8opFsAh_fwAntt4";
+
     private final String NEW_ACCESS_TOKEN = "ksJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjF9.KiNUK70RDCTWeRMqfN6YY_SAkkb8opFsAh_fwAntt4";
     private final String NEW_REFRESH_TOKEN = "ksJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjF9.KiNUK70RDCTWeRMqfN6YY_SAkkb8opFsAh_fwAntt4";
 
     private final String GRANT_TYPE = "Bearer";
-    private final Long ValidTokenExpiry = 0L;
-    private final Long InvalidTokenExpiry = 30 * 60 * 1000L;
+    private final Long expiredTokenExpiry = 0L;
+    private final Long validTokenExpiry = 30 * 60 * 1000L;
 
     private String secretKey = "eyJhbGciOiJIUzI1NiJ9.eyJSb2xlIjoiQWRtaW4iLCJJc3N1ZXIiOiJJc3N1ZXIiLCJVc2VybmFtZSI6IkphdmFJblVzZSIsImV4cCI6MTY1MTY3OTg2NywiaWF0IjoxNjUxNjc5ODY3fQ.gU21HEnUdJCN6EW3Lc5gfpu4nsqnDcs321shbtuyI8s";
 
@@ -66,17 +67,17 @@ class AuthServiceTest {
                 .setSubject("123456L")
                 .claim("role", "ROLE_USER")
                 .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()), SignatureAlgorithm.HS256)
-                .setExpiration(new Date(now.getTime() + ValidTokenExpiry))
+                .setExpiration(new Date(now.getTime() + expiredTokenExpiry))
                 .compact();
 
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
 
-        Cookie[] testCookies = new Cookie[]{new Cookie("refresh_token", REFRESH_TOKEN)};
-        when(request.getCookies()).thenReturn(testCookies);
+        Cookie[] testCookies = new Cookie[]{new Cookie("refresh_token", TOKEN)};
+        given(request.getCookies()).willReturn(testCookies);
 
-        when(JwtFilter.getAccessToken(request)).thenReturn(validToken);
-        when(jwtProvider.ExpiredToken(any())).thenReturn(true);
+        given(JwtFilter.getAccessToken(request)).willReturn(validToken);
+        given(jwtProvider.ExpiredToken(any())).willReturn(true);
 
         given(jwtProvider.parseClaims(any())).will(
                 invocation -> {
@@ -99,7 +100,7 @@ class AuthServiceTest {
         );
 
         given(redisTemplate.opsForValue()).willReturn(valueOperations);
-        given(redisTemplate.opsForValue().get("RT:" + "123456L")).willReturn(REFRESH_TOKEN);
+        given(redisTemplate.opsForValue().get("RT:" + "123456L")).willReturn(TOKEN);
 
         TokenResponse reissue = authService.reissue(request, response);
 
@@ -111,24 +112,119 @@ class AuthServiceTest {
     }
 
     @Test
-    @DisplayName("만료되지_않은_토큰_정보로_재발급_요청한_경우")
-    void invalid_reissue() {
+    @DisplayName("만료되지_않은_엑세스_토큰으로_재발급_요청한_경우")
+    void valid_accessToken_reissue() {
         Date now = new Date();
-        String InvalidToken = Jwts.builder()
+        String InvalidToken = TOKEN;
+
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
+
+        given(JwtFilter.getAccessToken(request)).willReturn(InvalidToken);
+        given(jwtProvider.ExpiredToken(any())).willReturn(false);
+
+        assertThatThrownBy(() -> authService.reissue(request, response))
+                .isInstanceOf(CustomException.class);
+    }
+
+    @Test
+    @DisplayName("정상적이지_않은_엑세스_토큰으로_재발급_요청한_경우")
+    void invalid_accessToken_reissue() {
+        String InvalidToken = TOKEN;
+
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
+
+        given(JwtFilter.getAccessToken(request)).willReturn(InvalidToken);
+        given(jwtProvider.ExpiredToken(any())).willReturn(false);
+
+        assertThatThrownBy(() -> authService.reissue(request, response))
+                .isInstanceOf(CustomException.class);
+    }
+
+    @Test
+    @DisplayName("만료된_리프레쉬_토큰으로_재발급_요청한_경우")
+    void expired_refreshToken_reissue() {
+        Date now = new Date();
+        String validToken = Jwts.builder()
                 .setSubject("123456L")
                 .claim("role", "ROLE_USER")
                 .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()), SignatureAlgorithm.HS256)
-                .setExpiration(new Date(now.getTime() + InvalidTokenExpiry))
+                .setExpiration(new Date(now.getTime() + expiredTokenExpiry))
                 .compact();
 
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
 
-        when(JwtFilter.getAccessToken(request)).thenReturn(InvalidToken);
-        when(jwtProvider.ExpiredToken(any())).thenReturn(false);
+        Cookie[] testCookies = new Cookie[]{new Cookie("refresh_token", TOKEN)};
+        given(request.getCookies()).willReturn(testCookies);
+        given(JwtFilter.getAccessToken(request)).willReturn(validToken);
+        given(jwtProvider.ExpiredToken(any())).willReturn(true);
+
+        given(jwtProvider.parseClaims(any())).will(
+                invocation -> {
+                    try {
+                        return Jwts.parserBuilder().setSigningKey(Keys.hmacShaKeyFor(secretKey.getBytes())).build().parseClaimsJws(validToken).getBody();
+                    } catch (ExpiredJwtException e) {
+                        return e.getClaims();
+                    }
+                }
+        );
+
+        given(redisTemplate.opsForValue()).willReturn(valueOperations);
+        given(redisTemplate.opsForValue().get("RT:" + "123456L")).willReturn(null);
 
         assertThatThrownBy(() -> authService.reissue(request, response))
                 .isInstanceOf(CustomException.class);
+    }
+
+    @Test
+    @DisplayName("만료된_엑세스_토큰으로_로그아웃한_경우")
+    void expired_accessToken_logout() {
+        Date now = new Date();
+        String expiredToken = TOKEN;
+
+        HttpServletRequest request = mock(HttpServletRequest.class);
+
+        given(jwtFilter.getAccessToken(request)).willReturn(expiredToken);
+        given(jwtProvider.validationToken(any())).willReturn(false);
+
+        assertThatThrownBy(() -> authService.logout(request))
+                .isInstanceOf(CustomException.class);
+    }
+
+    @Test
+    @DisplayName("만료되지_않은_엑세스_토큰으로_로그아웃한_경우")
+    void non_expired_accessToken_logout() {
+        Date now = new Date();
+        String expiredToken = Jwts.builder()
+                .setSubject("123456L")
+                .claim("role", "ROLE_USER")
+                .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()), SignatureAlgorithm.HS256)
+                .setExpiration(new Date(now.getTime() + validTokenExpiry))
+                .compact();
+
+        HttpServletRequest request = mock(HttpServletRequest.class);
+
+        given(jwtFilter.getAccessToken(request)).willReturn(expiredToken);
+        given(jwtProvider.validationToken(any())).willReturn(true);
+
+        given(jwtProvider.parseClaims(any())).will(
+                invocation -> {
+                    try {
+                        return Jwts.parserBuilder().setSigningKey(Keys.hmacShaKeyFor(secretKey.getBytes())).build().parseClaimsJws(expiredToken).getBody();
+                    } catch (ExpiredJwtException e) {
+                        return e.getClaims();
+                    }
+                }
+        );
+
+        given(redisTemplate.opsForValue()).willReturn(valueOperations);
+        given(redisTemplate.opsForValue().get("RT:" + "123456L")).willReturn(null);
+        given(jwtProvider.getExpiration(any())).willReturn(validTokenExpiry);
+
+        Boolean logout = authService.logout(request);
+        assertThat(logout, is(equalTo(true)));
     }
 
 }
