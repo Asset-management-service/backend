@@ -14,7 +14,6 @@ import com.backend.moamoa.domain.asset.repository.BudgetRepository;
 import com.backend.moamoa.domain.asset.repository.ExpenditureRatioRepository;
 import com.backend.moamoa.domain.user.entity.User;
 import com.backend.moamoa.global.exception.CustomException;
-import com.backend.moamoa.global.exception.ErrorCode;
 import com.backend.moamoa.global.utils.UserUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -171,10 +170,51 @@ class AssetServiceTest {
                 .containsExactly(1L, 2L, 3L);
         assertThat(response.getCategories()).extracting("categoryName")
                 .containsExactly("월급", "월세", "통신비");
+
+        verify(userUtil).findCurrentUser();
+        verify(assetCategoryRepository).findByAssetCategoryTypeAndUserId(anyString(), anyLong());
+    }
+
+    @Test
+    @DisplayName("가계부 설정 카테고리 삭제 - 성공")
+    void deleteCategoryName() {
+        //given
+        Long categoryId = 1L;
+        User user = UserBuilder.dummyUser();
+        AssetCategory assetCategory = dummyAssetCategory(1L, "월급", AssetCategoryType.FIXED, user);
+
+        given(userUtil.findCurrentUser()).willReturn(user);
+        given(assetCategoryRepository.findByIdAndUserId(anyLong(), anyLong())).willReturn(Optional.of(assetCategory));
+
+        //when
+        assetService.deleteCategoryName(categoryId);
+
+        //then
+        verify(userUtil).findCurrentUser();
+        verify(assetCategoryRepository).findByIdAndUserId(anyLong(), anyLong());
+    }
+
+    @Test
+    @DisplayName("가계부 설정 카테고리 삭제 - 카테고리 OR 회원 PK를 찾지 못한 경우 실패")
+    void deleteCategoryNameFail() {
+        //given
+        Long categoryId = 1L;
+        User user = UserBuilder.dummyUser();
+        given(userUtil.findCurrentUser()).willReturn(user);
+        given(assetCategoryRepository.findByIdAndUserId(anyLong(), anyLong()))
+                .willReturn(Optional.empty());
+
+        //when
+        //then
+        assertThatThrownBy(() -> assetService.deleteCategoryName(categoryId))
+                .isInstanceOf(CustomException.class);
+
+        verify(userUtil).findCurrentUser();
+        verify(assetCategoryRepository).findByIdAndUserId(anyLong(), anyLong());
     }
 
     /**
-     * 더미 데이터
+     * 더미 데이터 - 카테고리
      */
     private AssetCategory dummyAssetCategory(Long id, String categoryName, AssetCategoryType assetCategoryType, User user) {
         return AssetCategory.builder()
