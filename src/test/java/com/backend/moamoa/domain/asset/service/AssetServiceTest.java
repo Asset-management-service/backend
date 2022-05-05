@@ -3,12 +3,17 @@ package com.backend.moamoa.domain.asset.service;
 import com.backend.moamoa.builder.UserBuilder;
 import com.backend.moamoa.domain.asset.dto.request.AssetCategoryRequest;
 import com.backend.moamoa.domain.asset.dto.request.BudgetRequest;
+import com.backend.moamoa.domain.asset.dto.request.ExpenditureRequest;
 import com.backend.moamoa.domain.asset.entity.AssetCategory;
 import com.backend.moamoa.domain.asset.entity.AssetCategoryType;
 import com.backend.moamoa.domain.asset.entity.Budget;
+import com.backend.moamoa.domain.asset.entity.ExpenditureRatio;
 import com.backend.moamoa.domain.asset.repository.AssetCategoryRepository;
 import com.backend.moamoa.domain.asset.repository.BudgetRepository;
+import com.backend.moamoa.domain.asset.repository.ExpenditureRatioRepository;
 import com.backend.moamoa.domain.user.entity.User;
+import com.backend.moamoa.global.exception.CustomException;
+import com.backend.moamoa.global.exception.ErrorCode;
 import com.backend.moamoa.global.utils.UserUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,6 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -33,6 +39,9 @@ class AssetServiceTest {
 
     @Mock
     private BudgetRepository budgetRepository;
+
+    @Mock
+    private ExpenditureRatioRepository expenditureRatioRepository;
 
     @InjectMocks
     private AssetService assetService;
@@ -96,7 +105,43 @@ class AssetServiceTest {
         verify(userUtil).findCurrentUser();
         verify(budgetRepository).findBudgetAmountByUser(any(User.class));
         verify(budgetRepository).save(any(Budget.class));
+    }
 
+    @Test
+    @DisplayName("가계부 지출 비율 설정 - 성공")
+    void addExpenditure() {
+        //given
+        User user = UserBuilder.dummyUser();
+        ExpenditureRatio expenditureRatio = ExpenditureRatio.builder().id(1L).fixed(40).variable(60).user(user).build();
+
+        given(userUtil.findCurrentUser()).willReturn(user);
+        given(expenditureRatioRepository.findByUser(any(User.class)))
+                .willReturn(Optional.empty());
+        given(expenditureRatioRepository.save(any(ExpenditureRatio.class)))
+                .willReturn(expenditureRatio);
+
+        //when
+        Long expenditureRatioId = assetService.addExpenditure(new ExpenditureRequest(40, 60));
+
+        //then
+        assertThat(expenditureRatioId).isEqualTo(expenditureRatio.getId());
+        verify(userUtil).findCurrentUser();
+        verify(expenditureRatioRepository).findByUser(any(User.class));
+        verify(expenditureRatioRepository).save(any(ExpenditureRatio.class));
+    }
+
+    @Test
+    @DisplayName("가계부 지출 비율 설정 - 합이 100% 가 아닌 경우 실패")
+    void addExpenditureFail() {
+        //given
+        int fixed = 40;
+        int variable = 50;
+        ExpenditureRequest expenditureRequest = new ExpenditureRequest(fixed, variable);
+
+        //when
+        //then
+        assertThatThrownBy(() -> assetService.addExpenditure(expenditureRequest))
+                .isInstanceOf(CustomException.class);
     }
 
 

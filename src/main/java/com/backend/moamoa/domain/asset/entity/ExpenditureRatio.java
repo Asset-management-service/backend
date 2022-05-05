@@ -32,7 +32,8 @@ public class ExpenditureRatio {
     private User user;
 
     @Builder
-    public ExpenditureRatio(int fixed, int variable, User user) {
+    public ExpenditureRatio(Long id, int fixed, int variable, User user) {
+        this.id = id;
         this.fixed = fixed;
         this.variable = variable;
         this.user = user;
