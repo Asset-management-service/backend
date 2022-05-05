@@ -26,13 +26,13 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
@@ -40,7 +40,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
@@ -418,22 +417,27 @@ class AssetControllerTest {
         imageUrl.add("https://s3uploadImages.landom/doqpowiepepoamskzmx.mcsad;ddsaasddwqesaljdklasdjlajsdklajdalsdjkla");
 
         CreateMoneyLogResponse response = new CreateMoneyLogResponse(1L, imageUrl);
-        String json = objectMapper.writeValueAsString(response);
 
-        MockMultipartFile mockMultipartFile = new MockMultipartFile("온라인 도장.jpg", "모아모아.jpg", "multipart/form-data", "온라인 도장.jpg".getBytes());
+        List<MultipartFile> imageFiles = List.of(new MockMultipartFile("test1", "모아모아1.jpg", MediaType.IMAGE_PNG_VALUE, "test1".getBytes()),
+                new MockMultipartFile("test2", "모아모아2.jpg", MediaType.IMAGE_PNG_VALUE, "test2".getBytes()));
 
         given(assetService.createMoneyLog(any())).willReturn(response);
 
         //when
         ResultActions result = mockMvc.perform(multipart("/assets/money-log")
-                .file(mockMultipartFile)
+                .file("imageFiles", imageFiles.get(0).getBytes())
+                .file("imageFiles", imageFiles.get(1).getBytes())
                 .param("date", "2022-05-04")
-                .param("content", "치킨 -19000")
-                .characterEncoding(StandardCharsets.UTF_8));
+                .param("content", "치킨 배달 -19000")
+                .with(requestPostProcessor -> {
+                    requestPostProcessor.setMethod("POST");
+                    return requestPostProcessor;
+                })
+                .contentType(MediaType.MULTIPART_FORM_DATA));
 
         //then
         result.andExpect(status().isCreated())
-                .andExpect(content().json(json))
+                .andExpect(content().json(objectMapper.writeValueAsString(response)))
                 .andDo(print());
 
         verify(assetService).createMoneyLog(any(CreateMoneyLogRequest.class));

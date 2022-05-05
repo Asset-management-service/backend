@@ -29,7 +29,8 @@ public class Budget {
     private User user;
 
     @Builder
-    public Budget(int budgetAmount, User user) {
+    public Budget(Long id, int budgetAmount, User user) {
+        this.id = id;
         this.budgetAmount = budgetAmount;
         this.user = user;
     }

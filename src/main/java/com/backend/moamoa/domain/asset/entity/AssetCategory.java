@@ -34,7 +34,8 @@ public class AssetCategory {
     private User user;
 
     @Builder
-    public AssetCategory(AssetCategoryType assetCategoryType, String categoryName, User user) {
+    public AssetCategory(Long id, AssetCategoryType assetCategoryType, String categoryName, User user) {
+        this.id = id;
         this.assetCategoryType = assetCategoryType;
         this.categoryName = categoryName;
         this.user = user;

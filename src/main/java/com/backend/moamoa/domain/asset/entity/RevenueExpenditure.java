@@ -56,7 +56,8 @@ public class RevenueExpenditure implements Auditable {
     private User user;
 
     @Builder
-    public RevenueExpenditure(RevenueExpenditureType revenueExpenditureType, AssetCategoryType assetCategoryType, LocalDate date, String categoryName, int cost, String content, User user, String paymentMethod) {
+    public RevenueExpenditure(Long id, RevenueExpenditureType revenueExpenditureType, AssetCategoryType assetCategoryType, LocalDate date, String categoryName, int cost, String content, User user, String paymentMethod) {
+        this.id = id;
         this.revenueExpenditureType = revenueExpenditureType;
         this.assetCategoryType = assetCategoryType;
         this.date = date;
