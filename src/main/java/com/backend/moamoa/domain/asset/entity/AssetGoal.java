@@ -2,6 +2,7 @@ package com.backend.moamoa.domain.asset.entity;
 
 import com.backend.moamoa.domain.user.entity.User;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -33,14 +34,20 @@ public class AssetGoal {
     @JoinColumn(name = "user_id")
     private User user;
 
-    public AssetGoal(String content, User user, LocalDate date) {
+    @Builder
+    public AssetGoal(Long id, String content, User user, LocalDate date) {
+        this.id = id;
         this.content = content;
         this.user = user;
         this.date = date;
     }
 
     public static AssetGoal createAssetGoal(String content, User user, LocalDate date) {
-        return new AssetGoal(content, user, date);
+        return AssetGoal.builder()
+                .content(content)
+                .user(user)
+                .date(date)
+                .build();
     }
 
     public void updateAssetGoal(String content) {

@@ -1,18 +1,12 @@
 package com.backend.moamoa.domain.asset.service;
 
 import com.backend.moamoa.builder.UserBuilder;
-import com.backend.moamoa.domain.asset.dto.request.AssetCategoryRequest;
-import com.backend.moamoa.domain.asset.dto.request.BudgetRequest;
-import com.backend.moamoa.domain.asset.dto.request.CreateRevenueExpenditureRequest;
-import com.backend.moamoa.domain.asset.dto.request.ExpenditureRequest;
+import com.backend.moamoa.domain.asset.dto.request.*;
 import com.backend.moamoa.domain.asset.dto.response.AssetCategoryDtoResponse;
 import com.backend.moamoa.domain.asset.dto.response.RevenueExpenditureResponse;
 import com.backend.moamoa.domain.asset.dto.response.RevenueExpenditureSumResponse;
 import com.backend.moamoa.domain.asset.entity.*;
-import com.backend.moamoa.domain.asset.repository.AssetCategoryRepository;
-import com.backend.moamoa.domain.asset.repository.BudgetRepository;
-import com.backend.moamoa.domain.asset.repository.ExpenditureRatioRepository;
-import com.backend.moamoa.domain.asset.repository.RevenueExpenditureRepository;
+import com.backend.moamoa.domain.asset.repository.*;
 import com.backend.moamoa.domain.user.entity.User;
 import com.backend.moamoa.global.exception.CustomException;
 import com.backend.moamoa.global.utils.UserUtil;
@@ -23,6 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
@@ -51,6 +46,9 @@ class AssetServiceTest {
 
     @Mock
     private RevenueExpenditureRepository revenueExpenditureRepository;
+
+    @Mock
+    private AssetGoalRepository assetGoalRepository;
 
     @InjectMocks
     private AssetService assetService;
@@ -134,9 +132,31 @@ class AssetServiceTest {
 
         //then
         assertThat(expenditureRatioId).isEqualTo(expenditureRatio.getId());
-        verify(userUtil).findCurrentUser();
-        verify(expenditureRatioRepository).findByUser(any(User.class));
-        verify(expenditureRatioRepository).save(any(ExpenditureRatio.class));
+        verify(userUtil, times(1)).findCurrentUser();
+        verify(expenditureRatioRepository, times(1)).findByUser(any(User.class));
+        verify(expenditureRatioRepository, times(1)).save(any(ExpenditureRatio.class));
+    }
+
+    @Test
+    @DisplayName("가계부 지출 비율 설정 - 기존 수익 지출 내역을 업데이트 성공")
+    void addExpenditureUpdate() {
+        //given
+        User user = UserBuilder.dummyUser();
+        ExpenditureRatio expenditureRatio = ExpenditureRatio.builder().id(1L).fixed(40).variable(60).user(user).build();
+
+        given(userUtil.findCurrentUser()).willReturn(user);
+        given(expenditureRatioRepository.findByUser(any(User.class)))
+                .willReturn(Optional.of(expenditureRatio));
+
+        //when
+        Long expenditureRatioId = assetService.addExpenditure(new ExpenditureRequest(50, 50));
+
+        //then
+        assertThat(expenditureRatioId).isEqualTo(expenditureRatio.getId());
+        assertThat(expenditureRatio.getFixed()).isEqualTo(50);
+        assertThat(expenditureRatio.getVariable()).isEqualTo(50);
+        verify(userUtil, times(1)).findCurrentUser();
+        verify(expenditureRatioRepository, times(1)).findByUser(any(User.class));
     }
 
     @Test
@@ -255,14 +275,7 @@ class AssetServiceTest {
         List<RevenueExpenditureResponse> revenueExpenditureResponses = new ArrayList<>();
         Budget budget = Budget.builder().id(1L).user(user).budgetAmount(1000000).build();
 
-        List<RevenueExpenditure> revenueExpenditures = List.of(dummyRevenueExpenditure(1L, AssetCategoryType.FIXED,
-                        RevenueExpenditureType.REVENUE, user, "월급날!!", "월급", 10000000, LocalDate.parse("2022-05-05")),
-                dummyRevenueExpenditure(2L, AssetCategoryType.VARIABLE,
-                        RevenueExpenditureType.EXPENDITURE, user, "식비!!", "식비", 10000, LocalDate.parse("2022-05-05")),
-                dummyRevenueExpenditure(3L, AssetCategoryType.VARIABLE,
-                        RevenueExpenditureType.REVENUE, user, "적금이자", "적금", 10000, LocalDate.parse("2022-05-05")),
-                dummyRevenueExpenditure(4L, AssetCategoryType.VARIABLE,
-                        RevenueExpenditureType.EXPENDITURE, user, "교통비!!", "교통비", 30000, LocalDate.parse("2022-05-05")));
+        List<RevenueExpenditure> revenueExpenditures = getDummyRevenueExpenditures(user);
 
         int revenue = getRevenueExpenditure(revenueExpenditures, "REVENUE");
         int expenditure = getRevenueExpenditure(revenueExpenditures, "EXPENDITURE");
@@ -303,6 +316,58 @@ class AssetServiceTest {
         verify(revenueExpenditureRepository).findRevenueExpenditure(any(LocalDate.class), anyLong());
     }
 
+
+
+    @Test
+    @DisplayName("가계부 수익 지출 조회 - 예산 설정이 되어있지 않은 경우 실패")
+    void findRevenueExpenditureByMonthFail() {
+        //given
+        User user = UserBuilder.dummyUser();
+        List<RevenueExpenditureResponse> revenueExpenditureResponses = new ArrayList<>();
+
+        given(userUtil.findCurrentUser()).willReturn(user);
+        given(revenueExpenditureRepository.findRevenueAndExpenditureByMonth(any(LocalDate.class), any(Pageable.class), anyLong()))
+                .will(invocation -> {
+                    Pageable pageable = invocation.getArgument(1);
+                    revenueExpenditureResponses.add(new RevenueExpenditureResponse(1L, RevenueExpenditureType.REVENUE, AssetCategoryType.FIXED,
+                            LocalDate.parse("2022-05-05"), "월급", "월급날!", null, 3000000));
+                    revenueExpenditureResponses.add(new RevenueExpenditureResponse(2L, RevenueExpenditureType.EXPENDITURE, AssetCategoryType.FIXED,
+                            LocalDate.parse("2022-05-05"), "통신비", "통신비!!", "자동 이체", 100000));
+                    revenueExpenditureResponses.add(new RevenueExpenditureResponse(3L, RevenueExpenditureType.EXPENDITURE, AssetCategoryType.VARIABLE,
+                            LocalDate.parse("2022-05-05"), "식비", "치킨", "신용 카드", 30000));
+                    return new PageImpl<>(revenueExpenditureResponses, pageable, revenueExpenditureResponses.size());
+                });
+
+        //when
+        //then
+        assertThatThrownBy(() -> assetService.findRevenueExpenditureByMonth("2022-05", PageRequest.of(0, 3)))
+                .isInstanceOf(CustomException.class);
+
+        verify(userUtil, times(1)).findCurrentUser();
+        verify(revenueExpenditureRepository, times(1)).findRevenueAndExpenditureByMonth(any(LocalDate.class), any(Pageable.class), anyLong());
+    }
+
+    @Test
+    @DisplayName("자산 관리 목표 설정 - 자산 관리 설정이 안 되어있다면 새로 만들어서 저장 성공")
+    void addAssetGoal() {
+        //given
+        User user = UserBuilder.dummyUser();
+        AssetGoal assetGoal = AssetGoal.builder().id(1L).user(user).date(LocalDate.parse("2022-05-01")).content("월 100 만원 저축하기").build();
+        given(userUtil.findCurrentUser()).willReturn(user);
+        given(assetGoalRepository.findByUserAndDate(any(User.class), any(LocalDate.class))).willReturn(Optional.empty());
+        given(assetGoalRepository.save(any(AssetGoal.class))).willReturn(assetGoal);
+
+        //when
+        Long assetGoalId = assetService.addAssetGoal(new CreateAssetGoalRequest(LocalDate.parse("2022-05-01"), "월 100 만원 저축하기"));
+
+        //then
+        assertThat(assetGoalId).isEqualTo(1L);
+
+        verify(userUtil, times(1)).findCurrentUser();
+        verify(assetGoalRepository, times(1)).findByUserAndDate(any(User.class), any(LocalDate.class));
+        verify(assetGoalRepository, times(1)).save(any(AssetGoal.class));
+    }
+
     /**
      * 수익 지출 타입을 받아서 합을 반환해주는 메소드
      */
@@ -341,6 +406,18 @@ class AssetServiceTest {
                 .cost(cost)
                 .date(date)
                 .build();
+    }
+
+    private List<RevenueExpenditure> getDummyRevenueExpenditures(User user) {
+        List<RevenueExpenditure> revenueExpenditures = List.of(dummyRevenueExpenditure(1L, AssetCategoryType.FIXED,
+                        RevenueExpenditureType.REVENUE, user, "월급날!!", "월급", 10000000, LocalDate.parse("2022-05-05")),
+                dummyRevenueExpenditure(2L, AssetCategoryType.VARIABLE,
+                        RevenueExpenditureType.EXPENDITURE, user, "식비!!", "식비", 10000, LocalDate.parse("2022-05-05")),
+                dummyRevenueExpenditure(3L, AssetCategoryType.VARIABLE,
+                        RevenueExpenditureType.REVENUE, user, "적금이자", "적금", 10000, LocalDate.parse("2022-05-05")),
+                dummyRevenueExpenditure(4L, AssetCategoryType.VARIABLE,
+                        RevenueExpenditureType.EXPENDITURE, user, "교통비!!", "교통비", 30000, LocalDate.parse("2022-05-05")));
+        return revenueExpenditures;
     }
 
 
