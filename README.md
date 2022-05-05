@@ -23,7 +23,7 @@
 
 ## 프로젝트 기술스택 🕹
 
-![moamoa기술스택 drawio](https://user-images.githubusercontent.com/87658765/165188665-f96497da-ff9f-4ef5-8b58-a0b02e517124.png)
+![moamoa기술스택 drawio](https://user-images.githubusercontent.com/87658765/167040067-377c8b9c-e4f7-4478-a9ab-d71a1eae088d.png)
 
 ## 사용자 요청 흐름도 🐳
 
