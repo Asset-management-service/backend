@@ -27,17 +27,17 @@
 
 ## 사용자 요청 흐름도 🐳
 
-![사용자요청흐름도](https://user-images.githubusercontent.com/60867950/166871007-42403d2d-fcf9-4169-83c2-47e1fa06172d.png)
+<img width="594" src="https://user-images.githubusercontent.com/87658765/165499453-6a747dd3-d951-4d79-95bb-36992b01a499.png">
 
 
 ## 백엔드 🐳
 
-![모아모아_백엔드_아키텍처_수정본](https://user-images.githubusercontent.com/60867950/166870725-5dd790b1-610d-4668-9769-febf5c7e60db.png)
+<img width="600" src="https://user-images.githubusercontent.com/87658765/167037506-a055195c-3ab6-4ffe-acac-afd815c8800d.png">
 
 
 ## CI/CD 🐳
 
-![CICD](https://user-images.githubusercontent.com/60867950/166870949-c6287f59-21b3-4451-9c8f-83070df34d36.png)
+<img width="601" src="https://user-images.githubusercontent.com/87658765/165499975-d3931fb9-e2d2-4b0d-827d-fc2a0e95e273.png">
 
 
 
@@ -57,7 +57,7 @@
 ## 맡은 역할 🧙
 이름|역할
 ---|---
-`공통` | exception 처리/swagger 문서화
+`공통` | exception 처리/swagger 문서화/테스트 코드 작성
 김도훈 | 게시글/댓글/대댓글/좋아요/스크랩/이미지 파일 업로드/가계부 설정/수익 지출 관리/머니로그
 김민우 | JWT + OAuth2 기반 로그인 인증/이메일 인증/시큐리티 설정/배포 및 배포 자동화/가계부 통계
 
