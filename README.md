@@ -27,15 +27,18 @@
 
 ## 사용자 요청 흐름도 🐳
 
-<img width="594" alt="스크린샷 2022-04-27 오후 7 33 07" src="https://user-images.githubusercontent.com/87658765/165499453-6a747dd3-d951-4d79-95bb-36992b01a499.png">
+![사용자요청흐름도](https://user-images.githubusercontent.com/60867950/166871007-42403d2d-fcf9-4169-83c2-47e1fa06172d.png)
+
 
 ## 백엔드 🐳
 
-<img width="602" alt="스크린샷 2022-04-27 오후 7 33 51" src="https://user-images.githubusercontent.com/87658765/165499733-2abd4d98-370d-49fd-8c05-97e2f8fc8da6.png">
+![모아모아_백엔드_아키텍처_수정본](https://user-images.githubusercontent.com/60867950/166870725-5dd790b1-610d-4668-9769-febf5c7e60db.png)
+
 
 ## CI/CD 🐳
 
-<img width="601" alt="스크린샷 2022-04-27 오후 7 35 39" src="https://user-images.githubusercontent.com/87658765/165499975-d3931fb9-e2d2-4b0d-827d-fc2a0e95e273.png">
+![CICD](https://user-images.githubusercontent.com/60867950/166870949-c6287f59-21b3-4451-9c8f-83070df34d36.png)
+
 
 
 ## 프로젝트 아키텍쳐 🏘
