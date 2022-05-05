@@ -4,6 +4,7 @@ import com.backend.moamoa.builder.UserBuilder;
 import com.backend.moamoa.domain.asset.dto.request.AssetCategoryRequest;
 import com.backend.moamoa.domain.asset.dto.request.BudgetRequest;
 import com.backend.moamoa.domain.asset.dto.request.ExpenditureRequest;
+import com.backend.moamoa.domain.asset.dto.response.AssetCategoryDtoResponse;
 import com.backend.moamoa.domain.asset.entity.AssetCategory;
 import com.backend.moamoa.domain.asset.entity.AssetCategoryType;
 import com.backend.moamoa.domain.asset.entity.Budget;
@@ -22,6 +23,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -142,6 +145,44 @@ class AssetServiceTest {
         //then
         assertThatThrownBy(() -> assetService.addExpenditure(expenditureRequest))
                 .isInstanceOf(CustomException.class);
+    }
+
+    @Test
+    @DisplayName("가계부 설정 카테고리 조회 - 성공")
+    void getCategories() {
+        //given
+        User user = UserBuilder.dummyUser();
+
+        List<AssetCategory> assetCategories = new ArrayList<>();
+        assetCategories.add(dummyAssetCategory(1L, "월급", AssetCategoryType.FIXED, user));
+        assetCategories.add(dummyAssetCategory(2L, "월세", AssetCategoryType.FIXED, user));
+        assetCategories.add(dummyAssetCategory(3L, "통신비", AssetCategoryType.FIXED, user));
+
+        given(userUtil.findCurrentUser()).willReturn(user);
+        given(assetCategoryRepository.findByAssetCategoryTypeAndUserId(anyString(), anyLong()))
+                .willReturn(assetCategories);
+
+        //when
+        AssetCategoryDtoResponse response = assetService.getCategories("fixed");
+
+        //then
+        assertThat(response.getCategories()).hasSize(3);
+        assertThat(response.getCategories()).extracting("categoryId")
+                .containsExactly(1L, 2L, 3L);
+        assertThat(response.getCategories()).extracting("categoryName")
+                .containsExactly("월급", "월세", "통신비");
+    }
+
+    /**
+     * 더미 데이터
+     */
+    private AssetCategory dummyAssetCategory(Long id, String categoryName, AssetCategoryType assetCategoryType, User user) {
+        return AssetCategory.builder()
+                .id(id)
+                .categoryName(categoryName)
+                .assetCategoryType(assetCategoryType)
+                .user(user)
+                .build();
     }
 
 
