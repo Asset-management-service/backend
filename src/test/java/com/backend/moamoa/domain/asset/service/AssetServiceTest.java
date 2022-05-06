@@ -522,6 +522,26 @@ class AssetServiceTest {
         verify(postImageRepository, times(2)).save(any(PostImage.class));
     }
 
+    @Test
+    @DisplayName("머니 로그 수정 - 머니 로그 PK를 찾지 못한 경우 실패")
+    void updateMoneyLogFail() {
+        //given
+        String savedImage1 = "https://s3uploader.Moamoa1/eyjcnlzkam1aznaklmcmz.xccakljlkjljll1zeqwjeqwjkdnsajkcjksahdkjakjcsashc";
+        String savedImage2 = "https://s3uploader.moamoa2/ezzzyjcnlzkam1aznaklmcmz.xccakljlkjljll1zeqwjeqwjkdndsalkdjsalkmcxz,as";
+
+        List<MultipartFile> imageFiles = List.of(new MockMultipartFile("test1", "모아모아1.jpg", MediaType.IMAGE_PNG_VALUE, "test1".getBytes()),
+                new MockMultipartFile("test2", "모아모아2.jpg", MediaType.IMAGE_PNG_VALUE, "test2".getBytes()));
+        given(userUtil.findCurrentUser()).willReturn(UserBuilder.dummyUser());
+        given(moneyLogRepository.findByUserAndId(any(User.class), anyLong())).willReturn(Optional.empty());
+
+        //when
+        //then
+        assertThatThrownBy(() -> assetService.updateMoneyLog(new UpdateMoneyLogRequest(1L, LocalDate.parse("2022-05-05"), "머니로그 수정!!",
+                List.of(savedImage1, savedImage2), imageFiles))).isInstanceOf(CustomException.class);
+
+        verify(userUtil, times(1)).findCurrentUser();
+    }
+
     /**
      * 수익 지출 타입을 받아서 합을 반환해주는 메소드
      */
