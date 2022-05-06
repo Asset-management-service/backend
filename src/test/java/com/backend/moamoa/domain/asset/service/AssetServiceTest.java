@@ -464,6 +464,24 @@ class AssetServiceTest {
         verify(revenueExpenditureRepository, times(1)).findByUserAndId(any(User.class), anyLong());
     }
 
+    @Test
+    @DisplayName("수익 지출 내역 삭제 - 성공")
+    void deleteRevenueExpenditure() {
+        //given
+        User user = UserBuilder.dummyUser();
+        RevenueExpenditure revenueExpenditure = dummyRevenueExpenditure(1L, AssetCategoryType.FIXED, RevenueExpenditureType.REVENUE, user, "월급날!!", "월급", 10000000, LocalDate.parse("2022-05-05"));
+
+        given(userUtil.findCurrentUser()).willReturn(user);
+        given(revenueExpenditureRepository.findByUserAndId(any(User.class), anyLong())).willReturn(Optional.of(revenueExpenditure));
+
+        //when
+        assetService.deleteRevenueExpenditure(1L);
+
+        //then
+        verify(userUtil, times(1)).findCurrentUser();
+        verify(revenueExpenditureRepository, times(1)).findByUserAndId(any(User.class), anyLong());
+    }
+
     /**
      * 수익 지출 타입을 받아서 합을 반환해주는 메소드
      */
