@@ -630,6 +630,22 @@ class AssetServiceTest {
         verify(assetGoalRepository, times(1)).findByUserAndDate(any(User.class), any(LocalDate.class));
     }
 
+    @Test
+    @DisplayName("자산 관리 목표 조회 - AssetGoal PK를 찾지 못한 경우 실패")
+    void getAssetGoalFail() {
+        //given
+        given(userUtil.findCurrentUser()).willReturn(UserBuilder.dummyUser());
+        given(assetGoalRepository.findByUserAndDate(any(User.class), any(LocalDate.class))).willReturn(Optional.empty());
+
+        //when
+        //then
+        assertThatThrownBy(() -> assetService.getAssetGoal("2022-05-01"))
+                .isInstanceOf(CustomException.class);
+
+        verify(userUtil, times(1)).findCurrentUser();
+        verify(assetGoalRepository, times(1)).findByUserAndDate(any(User.class), any(LocalDate.class));
+    }
+
     /**
      * 더미 데이터 - 수익 지출 response 객체
      */
