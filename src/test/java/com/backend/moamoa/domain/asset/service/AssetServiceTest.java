@@ -646,6 +646,80 @@ class AssetServiceTest {
         verify(assetGoalRepository, times(1)).findByUserAndDate(any(User.class), any(LocalDate.class));
     }
 
+    @Test
+    @DisplayName("한달 예산 금액 조회 - 성공")
+    void getBudget() {
+        //given
+        User user = UserBuilder.dummyUser();
+        Budget budget = Budget.builder().id(1L).user(user).budgetAmount(10000000).build();
+        given(userUtil.findCurrentUser()).willReturn(user);
+        given(budgetRepository.findBudgetAmountByUser(any(User.class))).willReturn(Optional.of(budget));
+
+        //when
+        BudgetResponse response = assetService.getBudget();
+
+        //then
+        assertThat(response.getBudgetId()).isEqualTo(budget.getId());
+        assertThat(response.getBudgetAmount()).isEqualTo(budget.getBudgetAmount());
+
+        verify(userUtil, times(1)).findCurrentUser();
+        verify(budgetRepository, times(1)).findBudgetAmountByUser(any(User.class));
+    }
+
+    @Test
+    @DisplayName("한달 예산 금액 조회 - Budget PK를 찾지 못한 경우 실패")
+    void getBudgetFail() {
+        //given
+        given(userUtil.findCurrentUser()).willReturn(UserBuilder.dummyUser());
+        given(budgetRepository.findBudgetAmountByUser(any(User.class))).willReturn(Optional.empty());
+
+        //when
+        //then
+        assertThatThrownBy(() -> assetService.getBudget())
+                .isInstanceOf(CustomException.class);
+
+        verify(userUtil, times(1)).findCurrentUser();
+        verify(budgetRepository, times(1)).findBudgetAmountByUser(any(User.class));
+    }
+
+    @Test
+    @DisplayName("해당 회원의 지출 비율을 조회 - 성공")
+    void getExpenditure() {
+        //given
+        User user = UserBuilder.dummyUser();
+        ExpenditureRatio expenditureRatio = ExpenditureRatio.builder().id(1L).user(user).fixed(40).variable(60).build();
+        given(userUtil.findCurrentUser()).willReturn(user);
+        given(expenditureRatioRepository.findByUser(any(User.class))).willReturn(Optional.of(expenditureRatio));
+
+        //when
+        ExpenditureResponse response = assetService.getExpenditure();
+
+        //then
+        assertThat(response.getExpenditureRatioId()).isEqualTo(expenditureRatio.getId());
+        assertThat(response.getFixed()).isEqualTo(expenditureRatio.getFixed());
+        assertThat(response.getVariable()).isEqualTo(expenditureRatio.getVariable());
+
+        verify(userUtil, times(1)).findCurrentUser();
+        verify(expenditureRatioRepository, times(1)).findByUser(any(User.class));
+    }
+
+    @Test
+    @DisplayName("해당 회원의 지출 비율을 조회 - ExpenditureRatio PK를 찾지 못한 경우 실패")
+    void getExpenditureFail() {
+        //given
+        given(userUtil.findCurrentUser()).willReturn(UserBuilder.dummyUser());
+        given(expenditureRatioRepository.findByUser(any(User.class))).willReturn(Optional.empty());
+
+        //when
+        //then
+        assertThatThrownBy(() -> assetService.getExpenditure())
+                .isInstanceOf(CustomException.class);
+
+        verify(userUtil, times(1)).findCurrentUser();
+        verify(expenditureRatioRepository, times(1)).findByUser(any(User.class));
+    }
+
+
     /**
      * 더미 데이터 - 수익 지출 response 객체
      */
@@ -720,7 +794,4 @@ class AssetServiceTest {
                         RevenueExpenditureType.EXPENDITURE, user, "교통비!!", "교통비", 30000, LocalDate.parse("2022-05-05")));
         return revenueExpenditures;
     }
-
-
-
 }
