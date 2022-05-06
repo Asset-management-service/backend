@@ -3,12 +3,16 @@ package com.backend.moamoa.domain.asset.service;
 import com.backend.moamoa.builder.UserBuilder;
 import com.backend.moamoa.domain.asset.dto.request.*;
 import com.backend.moamoa.domain.asset.dto.response.AssetCategoryDtoResponse;
+import com.backend.moamoa.domain.asset.dto.response.CreateMoneyLogResponse;
 import com.backend.moamoa.domain.asset.dto.response.RevenueExpenditureResponse;
 import com.backend.moamoa.domain.asset.dto.response.RevenueExpenditureSumResponse;
 import com.backend.moamoa.domain.asset.entity.*;
 import com.backend.moamoa.domain.asset.repository.*;
+import com.backend.moamoa.domain.post.entity.PostImage;
+import com.backend.moamoa.domain.post.repository.post.PostImageRepository;
 import com.backend.moamoa.domain.user.entity.User;
 import com.backend.moamoa.global.exception.CustomException;
+import com.backend.moamoa.global.s3.S3Uploader;
 import com.backend.moamoa.global.utils.UserUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,6 +23,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -49,6 +56,15 @@ class AssetServiceTest {
 
     @Mock
     private AssetGoalRepository assetGoalRepository;
+
+    @Mock
+    private MoneyLogRepository moneyLogRepository;
+
+    @Mock
+    private S3Uploader s3Uploader;
+
+    @Mock
+    private PostImageRepository postImageRepository;
 
     @InjectMocks
     private AssetService assetService;
@@ -366,6 +382,41 @@ class AssetServiceTest {
         verify(userUtil, times(1)).findCurrentUser();
         verify(assetGoalRepository, times(1)).findByUserAndDate(any(User.class), any(LocalDate.class));
         verify(assetGoalRepository, times(1)).save(any(AssetGoal.class));
+    }
+
+    @Test
+    @DisplayName("머니 로그 생성 - 성공")
+    void createMoneyLog() {
+        //given
+        String imageUrl1 = "https://s3uploader.Moamoa/eyjcnlzkam1aznaklmcmz.xccakljlkjljll1zeqwjeqwjkdnsajkcjksahdkjakjcsashc";
+        String imageUrl2 = "https://s3uploader.moamoa/eyjcnlzkam1aznaklmcmz.xccakljlkjljll1zeqwjeqwjkdndsalkdjsalkmcxz,as";
+
+        User user = UserBuilder.dummyUser();
+
+        MoneyLog moneyLog = MoneyLog.builder().id(1L).user(user).content("머니로그 작성!!").date(LocalDate.parse("2022-05-06")).build();
+
+        PostImage postImage1 = PostImage.builder().imageUrl(imageUrl1).moneyLog(moneyLog).build();
+        PostImage postImage2 = PostImage.builder().imageUrl(imageUrl2).moneyLog(moneyLog).build();
+
+        List<MultipartFile> imageFiles = List.of(new MockMultipartFile("test1", "모아모아1.jpg", MediaType.IMAGE_PNG_VALUE, "test1".getBytes()),
+                new MockMultipartFile("test2", "모아모아2.jpg", MediaType.IMAGE_PNG_VALUE, "test2".getBytes()));
+
+        given(userUtil.findCurrentUser()).willReturn(user);
+        given(moneyLogRepository.save(any(MoneyLog.class))).willReturn(moneyLog);
+        given(s3Uploader.upload(any(MultipartFile.class), anyString())).willReturn(imageUrl1, imageUrl2);
+        given(postImageRepository.save(any(PostImage.class))).willReturn(postImage1, postImage2);
+
+        //when
+        CreateMoneyLogResponse response = assetService.createMoneyLog(new CreateMoneyLogRequest(LocalDate.parse("2022-05-06"), "치킨을 시켜 먹었다!..", imageFiles));
+
+        //then
+        assertThat(response.getMoneyLogId()).isEqualTo(1L);
+        assertThat(response.getImageUrl()).isEqualTo(List.of(imageUrl1, imageUrl2));
+
+        verify(userUtil, times(1)).findCurrentUser();
+        verify(moneyLogRepository, times(1)).save(any(MoneyLog.class));
+        verify(s3Uploader, times(2)).upload(any(MultipartFile.class), anyString());
+        verify(postImageRepository, times(2)).save(any(PostImage.class));
     }
 
     /**
