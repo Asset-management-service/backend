@@ -216,6 +216,26 @@ class AssetServiceTest {
     }
 
     @Test
+    @DisplayName("가계부 설정 카테고리 수정 - 성공")
+    void updateCategory() {
+        //given
+        User user = UserBuilder.dummyUser();
+        AssetCategory assetCategory = AssetCategory.builder().id(1L).assetCategoryType(AssetCategoryType.VARIABLE).categoryName("월급").user(user).build();
+        given(userUtil.findCurrentUser()).willReturn(user);
+        given(assetCategoryRepository.findByIdAndUserId(anyLong(), anyLong())).willReturn(Optional.of(assetCategory));
+
+        //when
+        assetService.updateCategory(new UpdateAssetCategoryRequest(1L, AssetCategoryType.FIXED, "변동비"));
+
+        //then
+        assertThat(assetCategory.getAssetCategoryType()).isEqualTo(AssetCategoryType.FIXED);
+        assertThat(assetCategory.getCategoryName()).isEqualTo("변동비");
+
+        verify(userUtil, times(1)).findCurrentUser();
+        verify(assetCategoryRepository, times(1)).findByIdAndUserId(anyLong(), anyLong());
+    }
+
+    @Test
     @DisplayName("가계부 설정 카테고리 삭제 - 성공")
     void deleteCategoryName() {
         //given

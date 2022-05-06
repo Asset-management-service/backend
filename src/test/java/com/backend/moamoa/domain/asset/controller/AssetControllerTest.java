@@ -458,7 +458,7 @@ class AssetControllerTest {
                 .param("moneyLogId", "1")
                 .param("date", "2022-05-04")
                 .param("content", "치킨 배달 -19000")
-                .param("saveImageUrl", String.valueOf(saveImageUrl))
+                .param("saveImageUrl", saveImageUrl.get(0), saveImageUrl.get(1))
                 .with(requestPostProcessor -> {
                     requestPostProcessor.setMethod("PATCH");
                     return requestPostProcessor;

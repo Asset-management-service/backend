@@ -92,6 +92,18 @@ public class AssetService {
     }
 
     /**
+     * 카테고리 수정
+     */
+    @Transactional
+    public void updateCategory(UpdateAssetCategoryRequest request) {
+        User user = userUtil.findCurrentUser();
+        AssetCategory assetCategory = assetCategoryRepository.findByIdAndUserId(request.getCategoryId(), user.getId())
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_ASSET_CATEGORY));
+
+        assetCategory.updateCategory(request.getCategoryType(), request.getCategoryName());
+    }
+
+    /**
      * 카테고리 삭제
      */
     @Transactional
@@ -341,4 +353,6 @@ public class AssetService {
 
         return ExpenditureResponse.of(expenditureRatio);
     }
+
+
 }

@@ -57,6 +57,17 @@ public class AssetController {
         return ResponseEntity.status(HttpStatus.CREATED).body(new AssetCategoryResponse(assetService.addCategory(request)));
     }
 
+    @ApiOperation(value = "가계부 설정 카테고리 수정", notes = "해당 카테고리 PK를 입력받아 카테고리를 수정하는 API")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "카테고리가 정상적으로 수정된 경우"),
+            @ApiResponse(responseCode = "404", description = "회원 OR 해당 카테고리 PK를 찾지 못한 경우")
+    })
+    @PatchMapping("/category")
+    public ResponseEntity<Void> updateCategory(@Validated @RequestBody UpdateAssetCategoryRequest request) {
+        assetService.updateCategory(request);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
     @ApiOperation(value = "가계부 설정 카테고리 삭제", notes = "카테고리 Id를 입력받아 삭제하는 API")
     @ApiImplicitParam(name = "categoryId", value = "카테고리 Id", example = "1", required = true)
     @ApiResponses({
