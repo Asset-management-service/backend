@@ -2,10 +2,7 @@ package com.backend.moamoa.domain.asset.service;
 
 import com.backend.moamoa.builder.UserBuilder;
 import com.backend.moamoa.domain.asset.dto.request.*;
-import com.backend.moamoa.domain.asset.dto.response.AssetCategoryDtoResponse;
-import com.backend.moamoa.domain.asset.dto.response.CreateMoneyLogResponse;
-import com.backend.moamoa.domain.asset.dto.response.RevenueExpenditureResponse;
-import com.backend.moamoa.domain.asset.dto.response.RevenueExpenditureSumResponse;
+import com.backend.moamoa.domain.asset.dto.response.*;
 import com.backend.moamoa.domain.asset.entity.*;
 import com.backend.moamoa.domain.asset.repository.*;
 import com.backend.moamoa.domain.post.entity.PostImage;
@@ -480,6 +477,49 @@ class AssetServiceTest {
         //then
         verify(userUtil, times(1)).findCurrentUser();
         verify(revenueExpenditureRepository, times(1)).findByUserAndId(any(User.class), anyLong());
+    }
+
+    @Test
+    @DisplayName("머니 로그 수정 - 성공")
+    void updateMoneyLog() {
+        //given
+        String savedImage1 = "https://s3uploader.Moamoa1/eyjcnlzkam1aznaklmcmz.xccakljlkjljll1zeqwjeqwjkdnsajkcjksahdkjakjcsashc";
+        String savedImage2 = "https://s3uploader.moamoa2/ezzzyjcnlzkam1aznaklmcmz.xccakljlkjljll1zeqwjeqwjkdndsalkdjsalkmcxz,as";
+        String newImage1 = "https://s3uploader.moamoa3/exxxyjcnlzkam1aznaklmcmz.xccakljlkjljll1zeqwjeqwjkdndsalkdjsalkmcxz,as";
+        String newImage2 = "https://s3uploader.moamoa4/ecccyjcnlzkam1aznaklmcmz.xccakljlkjljll1zeqwjeqwjkdndsalkdjsalkmcxz,as";
+
+        User user = UserBuilder.dummyUser();
+        MoneyLog moneyLog = MoneyLog.builder().id(1L).user(user).content("머니로그 작성!!").date(LocalDate.parse("2022-05-06")).build();
+
+        PostImage postImage1 = PostImage.builder().imageUrl(savedImage1).moneyLog(moneyLog).build();
+        PostImage postImage2 = PostImage.builder().imageUrl(savedImage2).moneyLog(moneyLog).build();
+        PostImage postImage3 = PostImage.builder().imageUrl(newImage1).moneyLog(moneyLog).build();
+        PostImage postImage4 = PostImage.builder().imageUrl(newImage2).moneyLog(moneyLog).build();
+
+        List<MultipartFile> imageFiles = List.of(new MockMultipartFile("test1", "모아모아1.jpg", MediaType.IMAGE_PNG_VALUE, "test1".getBytes()),
+                new MockMultipartFile("test2", "모아모아2.jpg", MediaType.IMAGE_PNG_VALUE, "test2".getBytes()));
+
+        given(userUtil.findCurrentUser()).willReturn(user);
+        given(moneyLogRepository.findByUserAndId(any(User.class), anyLong())).willReturn(Optional.of(moneyLog));
+        given(postImageRepository.findBySavedMoneyLogImageUrl(anyLong())).willReturn(List.of(postImage1, postImage2, postImage3, postImage4));
+        given(s3Uploader.upload(any(MultipartFile.class), anyString())).willReturn(newImage1, newImage2);
+        given(postImageRepository.save(any(PostImage.class))).willReturn(postImage3, postImage4);
+
+        //when
+        UpdateMoneyLogResponse response = assetService.updateMoneyLog(new UpdateMoneyLogRequest(1L, LocalDate.parse("2022-05-05"), "머니로그 수정!!",
+                List.of(savedImage1, savedImage2), imageFiles));
+
+        //then
+        assertThat(response.getMoneyLogId()).isEqualTo(1L);
+        assertThat(response.getImageUrl()).hasSize(4);
+        assertThat(moneyLog.getContent()).isEqualTo("머니로그 수정!!");
+        assertThat(moneyLog.getDate()).isEqualTo(LocalDate.parse("2022-05-05"));
+
+        verify(userUtil, times(1)).findCurrentUser();
+        verify(moneyLogRepository, times(1)).findByUserAndId(any(User.class), anyLong());
+        verify(postImageRepository, times(2)).findBySavedMoneyLogImageUrl(anyLong());
+        verify(s3Uploader, times(2)).upload(any(MultipartFile.class), anyString());
+        verify(postImageRepository, times(2)).save(any(PostImage.class));
     }
 
     /**
