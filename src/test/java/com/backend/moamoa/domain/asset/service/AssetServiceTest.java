@@ -385,7 +385,7 @@ class AssetServiceTest {
     }
 
     @Test
-    @DisplayName("머니 로그 생성 - 성공")
+    @DisplayName("머니 로그 생성 - 이미지 파일을 2개 받아서 생성 성공")
     void createMoneyLog() {
         //given
         String imageUrl1 = "https://s3uploader.Moamoa/eyjcnlzkam1aznaklmcmz.xccakljlkjljll1zeqwjeqwjkdnsajkcjksahdkjakjcsashc";
@@ -417,6 +417,31 @@ class AssetServiceTest {
         verify(moneyLogRepository, times(1)).save(any(MoneyLog.class));
         verify(s3Uploader, times(2)).upload(any(MultipartFile.class), anyString());
         verify(postImageRepository, times(2)).save(any(PostImage.class));
+    }
+
+    @Test
+    @DisplayName("수익 지출 내역 수정 - 성공")
+    void updateRevenueExpenditure() {
+        //given
+        User user = UserBuilder.dummyUser();
+        RevenueExpenditure revenueExpenditure = dummyRevenueExpenditure(1L, AssetCategoryType.FIXED, RevenueExpenditureType.REVENUE, user, "월급날!!", "월급", 10000000, LocalDate.parse("2022-05-05"));
+
+        given(userUtil.findCurrentUser()).willReturn(user);
+        given(revenueExpenditureRepository.findByUserAndId(any(User.class), anyLong())).willReturn(Optional.of(revenueExpenditure));
+
+        //when
+        assetService.updateRevenueExpenditure(new UpdateRevenueExpenditure(
+                1L, RevenueExpenditureType.EXPENDITURE, AssetCategoryType.VARIABLE,
+                LocalDate.parse("2022-05-07"), "식비", "신용 카드", 20000, "치킨 배달"));
+
+        //then
+        assertThat(revenueExpenditure.getId()).isEqualTo(1L);
+        assertThat(revenueExpenditure.getRevenueExpenditureType()).isEqualTo(RevenueExpenditureType.EXPENDITURE);
+        assertThat(revenueExpenditure.getPaymentMethod()).isEqualTo("신용 카드");
+        assertThat(revenueExpenditure.getAssetCategoryType()).isEqualTo(AssetCategoryType.VARIABLE);
+
+        verify(userUtil, times(1)).findCurrentUser();
+        verify(revenueExpenditureRepository, times(1)).findByUserAndId(any(User.class), anyLong());
     }
 
     /**
