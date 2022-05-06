@@ -53,7 +53,8 @@ public class MoneyLog implements Auditable {
     }
 
     @Builder
-    public MoneyLog(LocalDate date, String content, List<PostImage> postImages, User user) {
+    public MoneyLog(Long id, LocalDate date, String content, List<PostImage> postImages, User user) {
+        this.id = id;
         this.date = date;
         this.content = content;
         this.postImages = postImages;
