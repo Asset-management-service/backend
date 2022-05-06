@@ -2,10 +2,7 @@ package com.backend.moamoa.domain.asset.controller;
 
 import com.backend.moamoa.builder.UserBuilder;
 import com.backend.moamoa.domain.asset.dto.request.*;
-import com.backend.moamoa.domain.asset.dto.response.AssetCategoryDtoResponse;
-import com.backend.moamoa.domain.asset.dto.response.CreateMoneyLogResponse;
-import com.backend.moamoa.domain.asset.dto.response.RevenueExpenditureResponse;
-import com.backend.moamoa.domain.asset.dto.response.RevenueExpenditureSumResponse;
+import com.backend.moamoa.domain.asset.dto.response.*;
 import com.backend.moamoa.domain.asset.entity.AssetCategory;
 import com.backend.moamoa.domain.asset.entity.AssetCategoryType;
 import com.backend.moamoa.domain.asset.entity.RevenueExpenditureType;
@@ -42,8 +39,7 @@ import java.util.List;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -441,6 +437,40 @@ class AssetControllerTest {
                 .andDo(print());
 
         verify(assetService).createMoneyLog(any(CreateMoneyLogRequest.class));
+    }
+
+    @Test
+    @DisplayName("머니 로그 수정 - 성공")
+    void updateMoneyLog() throws Exception{
+        //given
+        List<String> saveImageUrl = List.of("https://s3uploadImages.landom/dkqieoopoamskzmx.mcsadaslkjqpad;dkjsaljdklasdjlajsdklajdalsdjkla",
+                "https://s3uploadImages.landom/doqpowiepepoamskzmx.mcsad;ddsaasddwqesaljdklasdjlajsdklajdalsdjkla");
+        List<MultipartFile> imageFiles = List.of(new MockMultipartFile("test1", "모아모아1.jpg", MediaType.IMAGE_PNG_VALUE, "test1".getBytes()),
+                new MockMultipartFile("test2", "모아모아2.jpg", MediaType.IMAGE_PNG_VALUE, "test2".getBytes()));
+
+        UpdateMoneyLogResponse response = new UpdateMoneyLogResponse(1L, saveImageUrl);
+        given(assetService.updateMoneyLog(any(UpdateMoneyLogRequest.class))).willReturn(response);
+
+        //when
+        ResultActions result = mockMvc.perform(multipart("/assets/money-log")
+                .file("imageFiles", imageFiles.get(0).getBytes())
+                .file("imageFiles", imageFiles.get(1).getBytes())
+                .param("moneyLogId", "1")
+                .param("date", "2022-05-04")
+                .param("content", "치킨 배달 -19000")
+                .param("saveImageUrl", String.valueOf(saveImageUrl))
+                .with(requestPostProcessor -> {
+                    requestPostProcessor.setMethod("PATCH");
+                    return requestPostProcessor;
+                })
+                .contentType(MediaType.MULTIPART_FORM_DATA));
+
+        //then
+        result.andExpect(status().isOk())
+                .andExpect(content().json(objectMapper.writeValueAsString(response)))
+                .andDo(print());
+
+        verify(assetService, times(1)).updateMoneyLog(any(UpdateMoneyLogRequest.class));
     }
 
 }
