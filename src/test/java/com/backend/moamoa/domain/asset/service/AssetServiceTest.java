@@ -594,6 +594,22 @@ class AssetServiceTest {
         verify(postImageRepository, times(1)).findBySavedMoneyLogImageUrl(anyLong());
     }
 
+    @Test
+    @DisplayName("머니 로그 조회 - 머니 로그 PK를 찾지 못한 경우 실패")
+    void getMoneyLogFail() {
+        //given
+        given(userUtil.findCurrentUser()).willReturn(UserBuilder.dummyUser());
+        given(moneyLogRepository.findByUserAndDate(any(User.class), any(LocalDate.class))).willReturn(Optional.empty());
+
+        //when
+        //then
+        assertThatThrownBy(() -> assetService.getMoneyLog("2022-05-05"))
+                .isInstanceOf(CustomException.class);
+
+        verify(userUtil, times(1)).findCurrentUser();
+        verify(moneyLogRepository, times(1)).findByUserAndDate(any(User.class), any(LocalDate.class));
+    }
+
     /**
      * 더미 데이터 - 수익 지출 response 객체
      */
