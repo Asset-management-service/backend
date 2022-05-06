@@ -562,6 +562,38 @@ class AssetServiceTest {
         verify(revenueExpenditureRepository, times(1)).findMoneyLogRevenueExpenditure(anyLong(), any(LocalDate.class));
     }
 
+    @Test
+    @DisplayName("머니 로그 조회 - 성공")
+    void getMoneyLog() {
+        //given
+        String savedImage1 = "https://s3uploader.Moamoa1/eyjcnlzkam1aznaklmcmz.xccakljlkjljll1zeqwjeqwjkdnsajkcjksahdkjakjcsashc";
+        String savedImage2 = "https://s3uploader.moamoa2/ezzzyjcnlzkam1aznaklmcmz.xccakljlkjljll1zeqwjeqwjkdndsalkdjsalkmcxz,as";
+
+        User user = UserBuilder.dummyUser();
+
+        MoneyLog moneyLog = MoneyLog.builder().id(1L).user(user).content("머니로그 작성!!").date(LocalDate.parse("2022-05-06")).build();
+
+        PostImage postImage1 = PostImage.builder().imageUrl(savedImage1).moneyLog(moneyLog).build();
+        PostImage postImage2 = PostImage.builder().imageUrl(savedImage2).moneyLog(moneyLog).build();
+
+        given(userUtil.findCurrentUser()).willReturn(user);
+        given(moneyLogRepository.findByUserAndDate(any(User.class), any(LocalDate.class))).willReturn(Optional.of(moneyLog));
+        given(postImageRepository.findBySavedMoneyLogImageUrl(anyLong())).willReturn(List.of(postImage1, postImage2));
+
+        //when
+        MoneyLogResponse response = assetService.getMoneyLog("2022-05-05");
+
+        //then
+        assertThat(response.getMoneyLogId()).isEqualTo(1L);
+        assertThat(response.getContent()).isEqualTo(moneyLog.getContent());
+        assertThat(response.getImageUrl()).hasSize(2);
+        assertThat(response.getImageUrl()).isEqualTo(List.of(savedImage1, savedImage2));
+
+        verify(userUtil, times(1)).findCurrentUser();
+        verify(moneyLogRepository, times(1)).findByUserAndDate(any(User.class), any(LocalDate.class));
+        verify(postImageRepository, times(1)).findBySavedMoneyLogImageUrl(anyLong());
+    }
+
     /**
      * 더미 데이터 - 수익 지출 response 객체
      */
