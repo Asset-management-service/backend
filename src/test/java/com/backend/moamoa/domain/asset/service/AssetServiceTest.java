@@ -444,6 +444,26 @@ class AssetServiceTest {
         verify(revenueExpenditureRepository, times(1)).findByUserAndId(any(User.class), anyLong());
     }
 
+    @Test
+    @DisplayName("수익 지출 내역 수정 - PK를 찾지 못한 경우 실패")
+    void updateRevenueExpenditureFail() {
+        //given
+        User user = UserBuilder.dummyUser();
+
+        given(userUtil.findCurrentUser()).willReturn(user);
+        given(revenueExpenditureRepository.findByUserAndId(any(User.class), anyLong())).willReturn(Optional.empty());
+
+        //when
+        //then
+        assertThatThrownBy(() -> assetService.updateRevenueExpenditure(new UpdateRevenueExpenditure(
+                1L, RevenueExpenditureType.EXPENDITURE, AssetCategoryType.VARIABLE,
+                LocalDate.parse("2022-05-07"), "식비", "신용 카드", 20000, "치킨 배달")))
+                .isInstanceOf(CustomException.class);
+
+        verify(userUtil, times(1)).findCurrentUser();
+        verify(revenueExpenditureRepository, times(1)).findByUserAndId(any(User.class), anyLong());
+    }
+
     /**
      * 수익 지출 타입을 받아서 합을 반환해주는 메소드
      */
