@@ -610,6 +610,26 @@ class AssetServiceTest {
         verify(moneyLogRepository, times(1)).findByUserAndDate(any(User.class), any(LocalDate.class));
     }
 
+    @Test
+    @DisplayName("자산 관리 목표 조회 - 성공")
+    void getAssetGoal() {
+        //given
+        User user = UserBuilder.dummyUser();
+        AssetGoal assetGoal = AssetGoal.builder().id(1L).user(user).date(LocalDate.parse("2022-05-01")).content("월 적금 100만원 넣기").build();
+        given(userUtil.findCurrentUser()).willReturn(user);
+        given(assetGoalRepository.findByUserAndDate(any(User.class), any(LocalDate.class))).willReturn(Optional.of(assetGoal));
+
+        //when
+        AssetGoalResponse response = assetService.getAssetGoal("2022-05-01");
+
+        //then
+        assertThat(response.getAssetGoalId()).isEqualTo(1L);
+        assertThat(response.getContent()).isEqualTo(assetGoal.getContent());
+
+        verify(userUtil, times(1)).findCurrentUser();
+        verify(assetGoalRepository, times(1)).findByUserAndDate(any(User.class), any(LocalDate.class));
+    }
+
     /**
      * 더미 데이터 - 수익 지출 response 객체
      */
