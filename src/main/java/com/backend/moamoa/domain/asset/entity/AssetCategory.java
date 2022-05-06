@@ -48,4 +48,9 @@ public class AssetCategory {
                 .user(user)
                 .build();
     }
+
+    public void updateCategory(AssetCategoryType categoryType, String categoryName) {
+        this. assetCategoryType = categoryType;
+        this.categoryName = categoryName;
+    }
 }
