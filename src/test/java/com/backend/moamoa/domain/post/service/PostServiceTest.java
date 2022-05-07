@@ -12,6 +12,8 @@ import com.backend.moamoa.domain.post.repository.post.PostCategoryRepository;
 import com.backend.moamoa.domain.post.repository.post.PostImageRepository;
 import com.backend.moamoa.domain.post.repository.post.PostRepository;
 import com.backend.moamoa.domain.user.entity.User;
+import com.backend.moamoa.global.exception.CustomException;
+import com.backend.moamoa.global.exception.ErrorCode;
 import com.backend.moamoa.global.s3.S3Uploader;
 import com.backend.moamoa.global.utils.UserUtil;
 import org.assertj.core.api.Assertions;
@@ -123,6 +125,24 @@ class PostServiceTest {
         verify(userUtil, times(1)).findCurrentUser();
         verify(postRepository, times(1)).findByIdAndUser(anyLong(), anyLong());
         verify(postImageRepository, times(2)).findBySavedImageUrl(anyLong());
+    }
+
+    @Test
+    @DisplayName("게시글 수정 - Post PK를 찾지 못한 경우")
+    void updatePostFail() {
+        //given
+        User user = UserBuilder.dummyUser();
+        given(userUtil.findCurrentUser()).willReturn(user);
+        given(postRepository.findByIdAndUser(anyLong(), anyLong())).willReturn(Optional.empty());
+
+        //when
+        assertThatThrownBy(() -> postService.updatePost(new PostUpdateRequest(1L, "test1", "test1", null, null)))
+                .isInstanceOf(CustomException.class);
+
+        //then
+
+        verify(userUtil, times(1)).findCurrentUser();
+        verify(postRepository, times(1)).findByIdAndUser(anyLong(), anyLong());
     }
 
 }
