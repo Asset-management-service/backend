@@ -6,22 +6,15 @@ import com.backend.moamoa.domain.post.dto.request.PostUpdateRequest;
 import com.backend.moamoa.domain.post.dto.response.PostCreateResponse;
 import com.backend.moamoa.domain.post.dto.response.PostOneResponse;
 import com.backend.moamoa.domain.post.dto.response.PostUpdateResponse;
-import com.backend.moamoa.domain.post.entity.Post;
-import com.backend.moamoa.domain.post.entity.PostCategory;
-import com.backend.moamoa.domain.post.entity.PostImage;
-import com.backend.moamoa.domain.post.repository.post.PostCategoryRepository;
-import com.backend.moamoa.domain.post.repository.post.PostImageRepository;
-import com.backend.moamoa.domain.post.repository.post.PostRepository;
+import com.backend.moamoa.domain.post.entity.*;
+import com.backend.moamoa.domain.post.repository.post.*;
 import com.backend.moamoa.domain.user.entity.User;
 import com.backend.moamoa.global.exception.CustomException;
-import com.backend.moamoa.global.exception.ErrorCode;
 import com.backend.moamoa.global.s3.S3Uploader;
 import com.backend.moamoa.global.utils.UserUtil;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -34,8 +27,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -55,6 +48,12 @@ class PostServiceTest {
 
     @Mock
     private S3Uploader s3Uploader;
+
+    @Mock
+    private PostLikeRepository postLikeRepository;
+
+    @Mock
+    private ScrapRepository scrapRepository;
 
     @InjectMocks
     private PostService postService;
@@ -214,5 +213,68 @@ class PostServiceTest {
         verify(userUtil, times(1)).findCurrentUser();
     }
 
+    @Test
+    @DisplayName("게시글 좋아요 - 성공")
+    void likePost() {
+        //given
+        User user = UserBuilder.dummyUser();
+        Post post = Post.builder().title("test").content("test1").user(user).build();
+        PostLike postLike = PostLike.createPostLike(user, post);
+
+        given(userUtil.findCurrentUser()).willReturn(user);
+        given(postRepository.findById(anyLong())).willReturn(Optional.of(post));
+        given(postLikeRepository.findByUserAndPost(any(User.class), any(Post.class))).willReturn(Optional.empty());
+        given(postLikeRepository.save(any(PostLike.class))).willReturn(postLike);
+
+        //when
+        boolean response = postService.likePost(1L);
+
+        //then
+        assertThat(response).isEqualTo(true);
+
+        verify(userUtil, times(1)).findCurrentUser();
+        verify(postRepository, times(1)).findById(anyLong());
+        verify(postLikeRepository, times(1)).save(any(PostLike.class));
+        verify(postLikeRepository, times(1)).save(any(PostLike.class));
+    }
+
+    @Test
+    @DisplayName("게시글 좋아요 - Post PK를 찾지 못한 경우 실패")
+    void likePostfail() {
+        //given
+        given(userUtil.findCurrentUser()).willReturn(UserBuilder.dummyUser());
+
+        //when
+        //then
+        assertThatThrownBy(() -> postService.likePost(1L))
+                .isInstanceOf(CustomException.class);
+
+        verify(userUtil, times(1)).findCurrentUser();
+    }
+
+    @Test
+    @DisplayName("게시글 스크랩 - 성공")
+    void scrapPost() {
+        //given
+        User user = UserBuilder.dummyUser();
+        Post post = Post.builder().title("test").content("test1").user(user).build();
+        Scrap scrap = Scrap.createScrap(user, post);
+
+        given(userUtil.findCurrentUser()).willReturn(user);
+        given(postRepository.findById(anyLong())).willReturn(Optional.of(post));
+        given(scrapRepository.findByUserAndPost(any(User.class), any(Post.class))).willReturn(Optional.empty());
+        given(scrapRepository.save(any(Scrap.class))).willReturn(scrap);
+
+        //when
+        boolean response = postService.scrapPost(1L);
+
+        //then
+        assertThat(response).isEqualTo(true);
+
+        verify(userUtil, times(1)).findCurrentUser();
+        verify(postRepository, times(1)).findById(anyLong());
+        verify(scrapRepository, times(1)).findByUserAndPost(any(User.class), any(Post.class));
+        verify(scrapRepository, times(1)).save(any(Scrap.class));
+    }
 
 }
