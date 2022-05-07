@@ -4,6 +4,7 @@ import com.backend.moamoa.builder.UserBuilder;
 import com.backend.moamoa.domain.post.dto.request.PostRequest;
 import com.backend.moamoa.domain.post.dto.request.PostUpdateRequest;
 import com.backend.moamoa.domain.post.dto.response.PostCreateResponse;
+import com.backend.moamoa.domain.post.dto.response.PostOneResponse;
 import com.backend.moamoa.domain.post.dto.response.PostUpdateResponse;
 import com.backend.moamoa.domain.post.entity.Post;
 import com.backend.moamoa.domain.post.entity.PostCategory;
@@ -29,6 +30,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -144,5 +146,73 @@ class PostServiceTest {
         verify(userUtil, times(1)).findCurrentUser();
         verify(postRepository, times(1)).findByIdAndUser(anyLong(), anyLong());
     }
+
+    @Test
+    @DisplayName("게시글 삭제 - 성공")
+    void deletePost() {
+        //given
+        User user = UserBuilder.dummyUser();
+        Post post = Post.builder().title("test1").content("test1").user(user).build();
+        given(userUtil.findCurrentUser()).willReturn(user);
+        given(postRepository.findByIdAndUser(anyLong(), anyLong())).willReturn(Optional.of(post));
+
+        //when
+        postService.deletePost(1L);
+
+        //then
+        verify(userUtil, times(1)).findCurrentUser();
+        verify(postRepository, times(1)).findByIdAndUser(anyLong(), anyLong());
+    }
+
+    @Test
+    @DisplayName("게시글 삭제 - Post PK를 찾지 못한 경우 실패")
+    void deletePostFail() {
+        //given
+        given(userUtil.findCurrentUser()).willReturn(UserBuilder.dummyUser());
+
+        //when
+        //then
+        assertThatThrownBy(() -> postService.deletePost(1L))
+                .isInstanceOf(CustomException.class);
+
+        verify(userUtil, times(1)).findCurrentUser();
+    }
+
+    @Test
+    @DisplayName("게시글 단건 조회 - 성공")
+    void getOnePost() {
+        //given
+        User user = UserBuilder.dummyUser();
+        PostOneResponse postOneResponse = new PostOneResponse(1L, "test", "test1", 5, 5, 5, LocalDateTime.now(), null,
+                60, "ehgns5668", true, true, false);
+        given(userUtil.findCurrentUser()).willReturn(user);
+        given(postRepository.findOnePostById(anyLong(), anyLong())).willReturn(Optional.of(postOneResponse));
+
+        //when
+        PostOneResponse response = postService.getOnePost(1L);
+
+        //then
+        assertThat(response.getTitle()).isEqualTo(postOneResponse.getTitle());
+        assertThat(response.getContent()).isEqualTo(postOneResponse.getContent());
+        assertThat(response.getLikeCount()).isEqualTo(5);
+
+        verify(userUtil, times(1)).findCurrentUser();
+        verify(postRepository, times(1)).findOnePostById(anyLong(), anyLong());
+    }
+
+    @Test
+    @DisplayName("게시글 단건 조회 - Post PK를 찾지 못한 경우 실패")
+    void getOnePostFail() {
+        //given
+        given(userUtil.findCurrentUser()).willReturn(UserBuilder.dummyUser());
+
+        //when
+        //then
+        assertThatThrownBy(() -> postService.getOnePost(1L))
+                .isInstanceOf(CustomException.class);
+
+        verify(userUtil, times(1)).findCurrentUser();
+    }
+
 
 }
