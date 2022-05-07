@@ -511,4 +511,26 @@ class AssetControllerTest {
         verify(assetService, times(1)).getRevenueExpenditure(anyString());
     }
 
+    @Test
+    @DisplayName("머니 로그 조회 - 성공")
+    void getMoneyLog() throws Exception {
+        //given
+        List<String> imageUrl = List.of("https://s3uploader.Moamoa1/eyjcnlzkam1aznaklmcmz.xccakljlkjljll1zeqwjeqwjkdnsajkcjksahdkjakjcsashc",
+                "https://s3uploader.moamoa2/ezzzyjcnlzkam1aznaklmcmz.xccakljlkjljll1zeqwjeqwjkdndsalkdjsalkmcxz,as");
+
+        MoneyLogResponse response = new MoneyLogResponse(1L, "오늘은 초밥을 먹었다.", imageUrl);
+
+        given(assetService.getMoneyLog(anyString())).willReturn(response);
+
+        //when
+        ResultActions result = mockMvc.perform(get("/assets/money-log?date=2022-05-05"));
+
+        //then
+        result.andExpect(status().isOk())
+                .andExpect(content().json(objectMapper.writeValueAsString(response)))
+                .andDo(print());
+
+        verify(assetService, times(1)).getMoneyLog(anyString());
+    }
+
 }
