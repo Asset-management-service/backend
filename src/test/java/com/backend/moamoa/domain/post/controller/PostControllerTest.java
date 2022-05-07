@@ -211,4 +211,30 @@ class PostControllerTest {
         verify(postService, times(1)).updatePost(any(PostUpdateRequest.class));
     }
 
+    @Test
+    @DisplayName("게시글 삭제 - 성공")
+    void deletePost() throws Exception {
+        //when
+        ResultActions result = mockMvc.perform(delete("/posts/1"));
+
+        //then
+        result.andExpect(status().isNoContent());
+    }
+
+    @Test
+    @DisplayName("게시글 삭제 - Post PK를 찾지 못한 경우 실패")
+    void deletePostFail() throws Exception {
+        //given
+        doThrow(new CustomException(ErrorCode.NOT_FOUND_POST))
+                .when(postService).deletePost(anyLong());
+
+        //when
+        ResultActions result = mockMvc.perform(delete("/posts/1"));
+
+        //then
+        result.andExpect(status().isNotFound());
+
+        verify(postService, times(1)).deletePost(anyLong());
+    }
+
 }
