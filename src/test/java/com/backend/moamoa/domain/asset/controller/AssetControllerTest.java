@@ -69,7 +69,7 @@ class AssetControllerTest {
     private ObjectMapper objectMapper;
 
     @Test
-    @DisplayName("가계부 설정 카테고리 조회 테스트 - 성공")
+    @DisplayName("가계부 설정 카테고리 조회 - 성공")
     void getCategorySuccess() throws Exception {
         //given
         User user = UserBuilder.dummyUser();
@@ -146,6 +146,19 @@ class AssetControllerTest {
                 .andDo(print());
 
         verify(assetService).addCategory(any(AssetCategoryRequest.class));
+    }
+
+    @Test
+    @DisplayName("가계부 설정 카테고리 수정 - 성공")
+    void updateCategory() throws Exception {
+        //when
+        ResultActions result = mockMvc.perform(patch("/assets/category")
+                .content(objectMapper.writeValueAsString(new UpdateAssetCategoryRequest(1L, AssetCategoryType.FIXED, "월급")))
+                .characterEncoding(StandardCharsets.UTF_8)
+                .contentType(MediaType.APPLICATION_JSON));
+
+        //then
+        result.andExpect(status().isNoContent());
     }
 
     @Test
