@@ -88,8 +88,7 @@ class AssetControllerTest {
         given(assetService.getCategories("fixed")).willReturn(response);
 
         //when
-        ResultActions result = mockMvc.perform(
-                get("/assets/category?categoryType=fixed"));
+        ResultActions result = mockMvc.perform(get("/assets/category?categoryType=fixed"));
 
         //then
         result.andExpect(status().isOk())
