@@ -237,4 +237,37 @@ class PostControllerTest {
         verify(postService, times(1)).deletePost(anyLong());
     }
 
+    @Test
+    @DisplayName("게시글 좋아요 - 성공")
+    void likePost() throws Exception {
+        //given
+        given(postService.likePost(anyLong())).willReturn(true);
+
+        //when
+        ResultActions result = mockMvc.perform(post("/posts/1/likes"));
+
+        //then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.likeStatus").isBoolean())
+                .andDo(print());
+
+        verify(postService, times(1)).likePost(anyLong());
+    }
+
+    @Test
+    @DisplayName("게시글 좋아요 - Post PK를 찾지 못한 경우 실패")
+    void likePostFail() throws Exception {
+        //given
+        doThrow(new CustomException(ErrorCode.NOT_FOUND_POST))
+                .when(postService).likePost(anyLong());
+
+        //when
+        ResultActions result = mockMvc.perform(post("/posts/1/likes"));
+
+        //then
+        result.andExpect(status().isNotFound());
+
+        verify(postService, times(1)).likePost(anyLong());
+    }
+
 }
