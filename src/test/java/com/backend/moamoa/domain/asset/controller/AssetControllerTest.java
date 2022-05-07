@@ -533,4 +533,20 @@ class AssetControllerTest {
         verify(assetService, times(1)).getMoneyLog(anyString());
     }
 
+    @Test
+    @DisplayName("머니 로그 조회 - 머니 로그 PK를 찾지 못한 경우 실패")
+    void getMoneyLogFail() throws Exception {
+        //given
+        doThrow(new CustomException(ErrorCode.NOT_FOUND_MONEY_LOG))
+                .when(assetService).getMoneyLog(anyString());
+
+        //when
+        ResultActions result = mockMvc.perform(get("/assets/money-log?date=2022-05-05"));
+
+        //then
+        result.andExpect(status().isNotFound());
+
+        verify(assetService, times(1)).getMoneyLog(anyString());
+    }
+
 }
