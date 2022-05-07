@@ -1,6 +1,8 @@
 package com.backend.moamoa.domain.post.controller;
 
 import com.backend.moamoa.domain.asset.controller.AssetController;
+import com.backend.moamoa.domain.post.dto.request.PostRequest;
+import com.backend.moamoa.domain.post.dto.response.PostCreateResponse;
 import com.backend.moamoa.domain.post.dto.response.PostOneResponse;
 import com.backend.moamoa.domain.post.dto.response.RecentPostResponse;
 import com.backend.moamoa.domain.post.service.PostService;
@@ -21,12 +23,15 @@ import org.springframework.context.annotation.FilterType;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.result.StatusResultMatchers;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -109,6 +114,40 @@ class PostControllerTest {
         result.andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(response)))
                 .andDo(print());
+    }
+
+    @Test
+    @DisplayName("게시글 생성  - 성공")
+    void createPost() throws Exception {
+        //given
+        List<MultipartFile> imageFiles = List.of(new MockMultipartFile("test1", "모아모아1.jpg", MediaType.IMAGE_PNG_VALUE, "test1".getBytes()),
+                new MockMultipartFile("test2", "모아모아2.jpg", MediaType.IMAGE_PNG_VALUE, "test2".getBytes()));
+
+        List<String> imageUrl = List.of("https://s3uploader.Moamoa1/eyjcnlzkam1aznaklmcmz.xccakljlkjljll1zeqwjeqwjkdnsajkcjksahdkjakjcsashc",
+                "https://s3uploader.moamoa2/ezzzyjcnlzkam1aznaklmcmz.xccakljlkjljll1zeqwjeqwjkdndsalkdjsalkmcxz,as");
+
+        PostCreateResponse response = new PostCreateResponse(1L, imageUrl);
+        given(postService.createPost(any(PostRequest.class))).willReturn(response);
+
+        //when
+        ResultActions result = mockMvc.perform(multipart("/posts")
+                .file("imageFiles", imageFiles.get(0).getBytes())
+                .file("imageFiles", imageFiles.get(1).getBytes())
+                .param("title", "test1")
+                .param("content", "test1")
+                .param("categoryName", "자유게시판")
+                .with(requestPostProcessor -> {
+                    requestPostProcessor.setMethod("POST");
+                    return requestPostProcessor;
+                })
+                .contentType(MediaType.MULTIPART_FORM_DATA));
+
+        //then
+        result.andExpect(status().isCreated())
+                .andExpect(content().json(objectMapper.writeValueAsString(response)))
+                .andDo(print());
+
+        verify(postService, times(1)).createPost(any(PostRequest.class));
     }
 
 }
