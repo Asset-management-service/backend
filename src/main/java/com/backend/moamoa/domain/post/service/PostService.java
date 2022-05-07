@@ -88,6 +88,9 @@ public class PostService {
                 .build());
     }
 
+    /**
+     * 게시글 수정
+     */
     @Transactional
     public PostUpdateResponse updatePost(PostUpdateRequest request) {
         User user = userUtil.findCurrentUser();
