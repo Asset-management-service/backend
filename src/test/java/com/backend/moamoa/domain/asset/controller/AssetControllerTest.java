@@ -486,4 +486,29 @@ class AssetControllerTest {
         verify(assetService, times(1)).updateMoneyLog(any(UpdateMoneyLogRequest.class));
     }
 
+    @Test
+    @DisplayName("머니 로그 수익 지출 내역 조회 - 성공")
+    void getMoneyLogRevenueExpenditure() throws Exception {
+        //given
+        List<RevenueExpenditureResponse> revenueExpenditureResponses = List.of(new RevenueExpenditureResponse(1L, RevenueExpenditureType.REVENUE, AssetCategoryType.FIXED, LocalDate.parse("2022-05-05"),
+                        "월급", "월급날!!", null, 5000000),
+                new RevenueExpenditureResponse(2L, RevenueExpenditureType.EXPENDITURE, AssetCategoryType.FIXED, LocalDate.parse("2022-05-05"),
+                        "통신비", "통신비 자동 치에", "계좌 이체", 5000000));
+
+        MoneyLogRevenueExpenditureResponse response = new MoneyLogRevenueExpenditureResponse(100000, 10000, 10000000,
+                revenueExpenditureResponses);
+
+        given(assetService.getRevenueExpenditure(anyString())).willReturn(response);
+
+        //when
+        ResultActions result = mockMvc.perform(get("/assets/money-log/revenue-expenditure?date=2022-05-05"));
+
+        //then
+        result.andExpect(status().isOk())
+                .andExpect(content().json(objectMapper.writeValueAsString(response)))
+                .andDo(print());
+
+        verify(assetService, times(1)).getRevenueExpenditure(anyString());
+    }
+
 }
