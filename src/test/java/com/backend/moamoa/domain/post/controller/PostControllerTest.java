@@ -2,8 +2,10 @@ package com.backend.moamoa.domain.post.controller;
 
 import com.backend.moamoa.domain.asset.controller.AssetController;
 import com.backend.moamoa.domain.post.dto.request.PostRequest;
+import com.backend.moamoa.domain.post.dto.request.PostUpdateRequest;
 import com.backend.moamoa.domain.post.dto.response.PostCreateResponse;
 import com.backend.moamoa.domain.post.dto.response.PostOneResponse;
+import com.backend.moamoa.domain.post.dto.response.PostUpdateResponse;
 import com.backend.moamoa.domain.post.dto.response.RecentPostResponse;
 import com.backend.moamoa.domain.post.service.PostService;
 import com.backend.moamoa.domain.user.oauth.filter.JwtFilter;
@@ -148,6 +150,65 @@ class PostControllerTest {
                 .andDo(print());
 
         verify(postService, times(1)).createPost(any(PostRequest.class));
+    }
+
+    @Test
+    @DisplayName("게시글 수정 - 성공")
+    void updatePost() throws Exception {
+        //given
+        List<MultipartFile> imageFiles = List.of(new MockMultipartFile("test1", "모아모아1.jpg", MediaType.IMAGE_PNG_VALUE, "test1".getBytes()),
+                new MockMultipartFile("test2", "모아모아2.jpg", MediaType.IMAGE_PNG_VALUE, "test2".getBytes()));
+
+        List<String> imageUrl = List.of("https://s3uploader.Moamoa1/eyjcnlzkam1aznaklmcmz.xccakljlkjljll1zeqwjeqwjkdnsajkcjksahdkjakjcsashc",
+                "https://s3uploader.moamoa2/ezzzyjcnlzkam1aznaklmcmz.xccakljlkjljll1zeqwjeqwjkdndsalkdjsalkmcxz,as");
+
+        PostUpdateResponse response = new PostUpdateResponse(1L, imageUrl);
+        given(postService.updatePost(any(PostUpdateRequest.class))).willReturn(response);
+
+        //when
+        ResultActions result = mockMvc.perform(multipart("/posts")
+                .file("imageFiles", imageFiles.get(0).getBytes())
+                .file("imageFiles", imageFiles.get(1).getBytes())
+                .param("postId", "1")
+                .param("title", "test1")
+                .param("content", "test1")
+                .param("saveImageUrl", imageUrl.get(0), imageUrl.get(1))
+                .with(requestPostProcessor -> {
+                    requestPostProcessor.setMethod("PATCH");
+                    return requestPostProcessor;
+                })
+                .contentType(MediaType.MULTIPART_FORM_DATA));
+
+        //then
+        result.andExpect(status().isOk())
+                .andExpect(content().json(objectMapper.writeValueAsString(response)))
+                .andDo(print());
+
+        verify(postService, times(1)).updatePost(any(PostUpdateRequest.class));
+    }
+
+    @Test
+    @DisplayName("게시글 수정 - Post PK를 찾지 못한 경우 실패")
+    void updatePostFail() throws Exception {
+        //given
+        doThrow(new CustomException(ErrorCode.NOT_FOUND_POST))
+                .when(postService).updatePost(any(PostUpdateRequest.class));
+
+        //when
+        ResultActions result = mockMvc.perform(multipart("/posts")
+                .param("postId", "1")
+                .param("title", "test1")
+                .param("content", "test1")
+                .with(requestPostProcessor -> {
+                    requestPostProcessor.setMethod("PATCH");
+                    return requestPostProcessor;
+                })
+                .contentType(MediaType.MULTIPART_FORM_DATA));
+
+        //then
+        result.andExpect(status().isNotFound());
+
+        verify(postService, times(1)).updatePost(any(PostUpdateRequest.class));
     }
 
 }
