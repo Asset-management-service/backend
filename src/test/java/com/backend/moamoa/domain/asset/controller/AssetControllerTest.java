@@ -549,4 +549,39 @@ class AssetControllerTest {
         verify(assetService, times(1)).getMoneyLog(anyString());
     }
 
+    @Test
+    @DisplayName("자산 관리 목표 조회 - 성공")
+    void getAssetGoal() throws Exception {
+        //given
+
+        AssetGoalResponse response = new AssetGoalResponse(1L, "100만원 적금하기!");
+        given(assetService.getAssetGoal(anyString())).willReturn(response);
+
+        //when
+        ResultActions result = mockMvc.perform(get("/assets/asset-goal?date=2022-05-01"));
+
+        //then
+        result.andExpect(status().isOk())
+                .andExpect(content().json(objectMapper.writeValueAsString(response)))
+                .andDo(print());
+
+        verify(assetService, times(1)).getAssetGoal(anyString());
+    }
+
+    @Test
+    @DisplayName("자산 목표 조회 - AssetGoal PK를 찾지 못한 경우 실패")
+    void getAssetGoalFail() throws Exception {
+        //given
+        doThrow(new CustomException(ErrorCode.NOT_FOUND_ASSET_GOAL))
+                .when(assetService).getAssetGoal(anyString());
+
+        //when
+        ResultActions result = mockMvc.perform(get("/assets/asset-goal?date=2022-05-01"));
+
+        //then
+        result.andExpect(status().isNotFound());
+
+        verify(assetService, times(1)).getAssetGoal(anyString());
+    }
+
 }
