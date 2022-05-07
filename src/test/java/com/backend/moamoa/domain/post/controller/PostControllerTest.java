@@ -1,6 +1,5 @@
 package com.backend.moamoa.domain.post.controller;
 
-import com.backend.moamoa.domain.asset.controller.AssetController;
 import com.backend.moamoa.domain.post.dto.request.PostRequest;
 import com.backend.moamoa.domain.post.dto.request.PostUpdateRequest;
 import com.backend.moamoa.domain.post.dto.response.PostCreateResponse;
@@ -15,7 +14,6 @@ import com.backend.moamoa.global.exception.ErrorCode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -29,10 +27,6 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.test.web.servlet.result.StatusResultMatchers;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
@@ -40,7 +34,7 @@ import java.util.List;
 
 import static org.mockito.BDDMockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @AutoConfigureMockMvc(addFilters = false)
@@ -268,6 +262,39 @@ class PostControllerTest {
         result.andExpect(status().isNotFound());
 
         verify(postService, times(1)).likePost(anyLong());
+    }
+
+    @Test
+    @DisplayName("게시글 스크랩 - 성공")
+    void scrapPost() throws Exception {
+        //given
+        given(postService.scrapPost(anyLong())).willReturn(true);
+
+        //when
+        ResultActions result = mockMvc.perform(post("/posts/1/scrap"));
+
+        //then
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.scrapStatus").isBoolean())
+                .andDo(print());
+
+        verify(postService, times(1)).scrapPost(anyLong());
+    }
+
+    @Test
+    @DisplayName("게시글 스크랩 - Post PK를 찾지 못한 경우 실패")
+    void scrapPostFail() throws Exception {
+        //given
+        doThrow(new CustomException(ErrorCode.NOT_FOUND_POST))
+                .when(postService).scrapPost(anyLong());
+
+        //when
+        ResultActions result = mockMvc.perform(post("/posts/1/scrap"));
+
+        //then
+        result.andExpect(status().isNotFound());
+
+        verify(postService, times(1)).scrapPost(anyLong());
     }
 
 }
