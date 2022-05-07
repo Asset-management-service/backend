@@ -569,7 +569,7 @@ class AssetControllerTest {
     }
 
     @Test
-    @DisplayName("자산 목표 조회 - AssetGoal PK를 찾지 못한 경우 실패")
+    @DisplayName("자산 관리 목표 조회 - AssetGoal PK를 찾지 못한 경우 실패")
     void getAssetGoalFail() throws Exception {
         //given
         doThrow(new CustomException(ErrorCode.NOT_FOUND_ASSET_GOAL))
@@ -582,6 +582,40 @@ class AssetControllerTest {
         result.andExpect(status().isNotFound());
 
         verify(assetService, times(1)).getAssetGoal(anyString());
+    }
+
+    @Test
+    @DisplayName("한달 예산 금액 조회 - 성공")
+    void getBudget() throws Exception {
+        //given
+        BudgetResponse response = new BudgetResponse(1L, 1000000);
+        given(assetService.getBudget()).willReturn(response);
+
+        //when
+        ResultActions result = mockMvc.perform(get("/assets/budget"));
+
+        //then
+        result.andExpect(status().isOk())
+                .andExpect(content().json(objectMapper.writeValueAsString(response)))
+                .andDo(print());
+
+        verify(assetService, times(1)).getBudget();
+    }
+
+    @Test
+    @DisplayName("한달 예산 금액 조회 - 실패")
+    void getBudgetFail() throws Exception {
+        //given
+        doThrow(new CustomException(ErrorCode.NOT_FOUND_BUDGET))
+                .when(assetService).getBudget();
+
+        //when
+        ResultActions result = mockMvc.perform(get("/assets/budget"));
+
+        //then
+        result.andExpect(status().isNotFound());
+
+        verify(assetService, times(1)).getBudget();
     }
 
 }
