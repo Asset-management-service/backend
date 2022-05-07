@@ -618,4 +618,38 @@ class AssetControllerTest {
         verify(assetService, times(1)).getBudget();
     }
 
+    @Test
+    @DisplayName("지출 비율 조회 - 성공")
+    void getExpenditure() throws Exception {
+        //given
+        ExpenditureResponse response = new ExpenditureResponse(1L, 40, 60);
+        given(assetService.getExpenditure()).willReturn(response);
+
+        //when
+        ResultActions result = mockMvc.perform(get("/assets/expenditure"));
+
+        //then
+        result.andExpect(status().isOk())
+                .andExpect(content().json(objectMapper.writeValueAsString(response)))
+                .andDo(print());
+
+        verify(assetService, times(1)).getExpenditure();
+    }
+
+    @Test
+    @DisplayName("지출 비율 조회 - ExpenditureRatio PK를 찾지 못한 경우 실패")
+    void getExpenditureFail() throws Exception {
+        //given
+        doThrow(new CustomException(ErrorCode.NOT_FOUND_RATIO))
+                .when(assetService).getExpenditure();
+
+        //when
+        ResultActions result = mockMvc.perform(get("/assets/expenditure"));
+
+        //then
+        result.andExpect(status().isNotFound());
+
+        verify(assetService, times(1)).getExpenditure();
+    }
+
 }
