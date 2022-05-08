@@ -88,6 +88,9 @@ public class PostService {
                 .build());
     }
 
+    /**
+     * 게시글 수정
+     */
     @Transactional
     public PostUpdateResponse updatePost(PostUpdateRequest request) {
         User user = userUtil.findCurrentUser();
@@ -166,6 +169,9 @@ public class PostService {
         return post;
     }
 
+    /**
+     * 게시글 좋아요
+     */
     @Transactional
     public boolean likePost(Long postId) {
         User user = userUtil.findCurrentUser();
@@ -180,6 +186,9 @@ public class PostService {
         return false;
     }
 
+    /**
+     * 게시글 스크랩
+     */
     @Transactional
     public boolean scrapPost(Long postId) {
         User user = userUtil.findCurrentUser();
