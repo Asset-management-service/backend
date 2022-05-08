@@ -69,7 +69,7 @@ class AssetControllerTest {
     private ObjectMapper objectMapper;
 
     @Test
-    @DisplayName("가계부 설정 카테고리 조회 테스트 - 성공")
+    @DisplayName("가계부 설정 카테고리 조회 - 성공")
     void getCategorySuccess() throws Exception {
         //given
         User user = UserBuilder.dummyUser();
@@ -146,6 +146,19 @@ class AssetControllerTest {
                 .andDo(print());
 
         verify(assetService).addCategory(any(AssetCategoryRequest.class));
+    }
+
+    @Test
+    @DisplayName("가계부 설정 카테고리 수정 - 성공")
+    void updateCategory() throws Exception {
+        //when
+        ResultActions result = mockMvc.perform(patch("/assets/category")
+                .content(objectMapper.writeValueAsString(new UpdateAssetCategoryRequest(1L, AssetCategoryType.FIXED, "월급")))
+                .characterEncoding(StandardCharsets.UTF_8)
+                .contentType(MediaType.APPLICATION_JSON));
+
+        //then
+        result.andExpect(status().isNoContent());
     }
 
     @Test
@@ -471,6 +484,172 @@ class AssetControllerTest {
                 .andDo(print());
 
         verify(assetService, times(1)).updateMoneyLog(any(UpdateMoneyLogRequest.class));
+    }
+
+    @Test
+    @DisplayName("머니 로그 수익 지출 내역 조회 - 성공")
+    void getMoneyLogRevenueExpenditure() throws Exception {
+        //given
+        List<RevenueExpenditureResponse> revenueExpenditureResponses = List.of(new RevenueExpenditureResponse(1L, RevenueExpenditureType.REVENUE, AssetCategoryType.FIXED, LocalDate.parse("2022-05-05"),
+                        "월급", "월급날!!", null, 5000000),
+                new RevenueExpenditureResponse(2L, RevenueExpenditureType.EXPENDITURE, AssetCategoryType.FIXED, LocalDate.parse("2022-05-05"),
+                        "통신비", "통신비 자동 치에", "계좌 이체", 5000000));
+
+        MoneyLogRevenueExpenditureResponse response = new MoneyLogRevenueExpenditureResponse(100000, 10000, 10000000,
+                revenueExpenditureResponses);
+
+        given(assetService.getRevenueExpenditure(anyString())).willReturn(response);
+
+        //when
+        ResultActions result = mockMvc.perform(get("/assets/money-log/revenue-expenditure?date=2022-05-05"));
+
+        //then
+        result.andExpect(status().isOk())
+                .andExpect(content().json(objectMapper.writeValueAsString(response)))
+                .andDo(print());
+
+        verify(assetService, times(1)).getRevenueExpenditure(anyString());
+    }
+
+    @Test
+    @DisplayName("머니 로그 조회 - 성공")
+    void getMoneyLog() throws Exception {
+        //given
+        List<String> imageUrl = List.of("https://s3uploader.Moamoa1/eyjcnlzkam1aznaklmcmz.xccakljlkjljll1zeqwjeqwjkdnsajkcjksahdkjakjcsashc",
+                "https://s3uploader.moamoa2/ezzzyjcnlzkam1aznaklmcmz.xccakljlkjljll1zeqwjeqwjkdndsalkdjsalkmcxz,as");
+
+        MoneyLogResponse response = new MoneyLogResponse(1L, "오늘은 초밥을 먹었다.", imageUrl);
+
+        given(assetService.getMoneyLog(anyString())).willReturn(response);
+
+        //when
+        ResultActions result = mockMvc.perform(get("/assets/money-log?date=2022-05-05"));
+
+        //then
+        result.andExpect(status().isOk())
+                .andExpect(content().json(objectMapper.writeValueAsString(response)))
+                .andDo(print());
+
+        verify(assetService, times(1)).getMoneyLog(anyString());
+    }
+
+    @Test
+    @DisplayName("머니 로그 조회 - 머니 로그 PK를 찾지 못한 경우 실패")
+    void getMoneyLogFail() throws Exception {
+        //given
+        doThrow(new CustomException(ErrorCode.NOT_FOUND_MONEY_LOG))
+                .when(assetService).getMoneyLog(anyString());
+
+        //when
+        ResultActions result = mockMvc.perform(get("/assets/money-log?date=2022-05-05"));
+
+        //then
+        result.andExpect(status().isNotFound());
+
+        verify(assetService, times(1)).getMoneyLog(anyString());
+    }
+
+    @Test
+    @DisplayName("자산 관리 목표 조회 - 성공")
+    void getAssetGoal() throws Exception {
+        //given
+
+        AssetGoalResponse response = new AssetGoalResponse(1L, "100만원 적금하기!");
+        given(assetService.getAssetGoal(anyString())).willReturn(response);
+
+        //when
+        ResultActions result = mockMvc.perform(get("/assets/asset-goal?date=2022-05-01"));
+
+        //then
+        result.andExpect(status().isOk())
+                .andExpect(content().json(objectMapper.writeValueAsString(response)))
+                .andDo(print());
+
+        verify(assetService, times(1)).getAssetGoal(anyString());
+    }
+
+    @Test
+    @DisplayName("자산 관리 목표 조회 - AssetGoal PK를 찾지 못한 경우 실패")
+    void getAssetGoalFail() throws Exception {
+        //given
+        doThrow(new CustomException(ErrorCode.NOT_FOUND_ASSET_GOAL))
+                .when(assetService).getAssetGoal(anyString());
+
+        //when
+        ResultActions result = mockMvc.perform(get("/assets/asset-goal?date=2022-05-01"));
+
+        //then
+        result.andExpect(status().isNotFound());
+
+        verify(assetService, times(1)).getAssetGoal(anyString());
+    }
+
+    @Test
+    @DisplayName("한달 예산 금액 조회 - 성공")
+    void getBudget() throws Exception {
+        //given
+        BudgetResponse response = new BudgetResponse(1L, 1000000);
+        given(assetService.getBudget()).willReturn(response);
+
+        //when
+        ResultActions result = mockMvc.perform(get("/assets/budget"));
+
+        //then
+        result.andExpect(status().isOk())
+                .andExpect(content().json(objectMapper.writeValueAsString(response)))
+                .andDo(print());
+
+        verify(assetService, times(1)).getBudget();
+    }
+
+    @Test
+    @DisplayName("한달 예산 금액 조회 - 실패")
+    void getBudgetFail() throws Exception {
+        //given
+        doThrow(new CustomException(ErrorCode.NOT_FOUND_BUDGET))
+                .when(assetService).getBudget();
+
+        //when
+        ResultActions result = mockMvc.perform(get("/assets/budget"));
+
+        //then
+        result.andExpect(status().isNotFound());
+
+        verify(assetService, times(1)).getBudget();
+    }
+
+    @Test
+    @DisplayName("지출 비율 조회 - 성공")
+    void getExpenditure() throws Exception {
+        //given
+        ExpenditureResponse response = new ExpenditureResponse(1L, 40, 60);
+        given(assetService.getExpenditure()).willReturn(response);
+
+        //when
+        ResultActions result = mockMvc.perform(get("/assets/expenditure"));
+
+        //then
+        result.andExpect(status().isOk())
+                .andExpect(content().json(objectMapper.writeValueAsString(response)))
+                .andDo(print());
+
+        verify(assetService, times(1)).getExpenditure();
+    }
+
+    @Test
+    @DisplayName("지출 비율 조회 - ExpenditureRatio PK를 찾지 못한 경우 실패")
+    void getExpenditureFail() throws Exception {
+        //given
+        doThrow(new CustomException(ErrorCode.NOT_FOUND_RATIO))
+                .when(assetService).getExpenditure();
+
+        //when
+        ResultActions result = mockMvc.perform(get("/assets/expenditure"));
+
+        //then
+        result.andExpect(status().isNotFound());
+
+        verify(assetService, times(1)).getExpenditure();
     }
 
 }
