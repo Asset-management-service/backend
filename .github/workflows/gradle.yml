@@ -24,17 +24,6 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 11
-          
-        # create application.yml
-      - name: make application.yml
-        run: |
-          ## create application.yml
-          cd ./src/main
-          mkdir ./resources
-          cd ./resources
-          # GitHub-Actions 에서 설정한 값을 application.yaml 파일에 쓰기
-          echo "${{ secrets.PROD }}" >> ./application.yml
-        shell: bash
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
