@@ -4,6 +4,3 @@ spring:
     include:
       - oauth
       - aws
-
-
-
