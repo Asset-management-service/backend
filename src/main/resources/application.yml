@@ -1,0 +1,9 @@
+spring:
+  profiles:
+    active: prod
+    include:
+      - oauth
+      - aws
+
+
+
