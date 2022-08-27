@@ -31,9 +31,11 @@ jobs:
           ## create application.yml
           cd ./src/main/resources
           # application.yml 파일 생성
-          touch ./application.yml
+          touch ./application-aws.yml application-oauth.yml application-prod.yml
           # GitHub-Actions 에서 설정한 값을 application.yaml 파일에 쓰기
-          echo "${{ secrets.DATABASE }}" >> ./application.yml
+          echo "${{ secrets.AWS }}" >> ./application-aws.yml
+          echo "${{ secrets.OAUTH }}" >> ./application-oauth.yml
+          echo "${{ secrets.PROD }}" >> ./application-prod.yml
         shell: bash
 
       - name: Grant execute permission for gradlew
