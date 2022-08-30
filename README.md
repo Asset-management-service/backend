@@ -37,8 +37,7 @@
 
 ## CI/CD 🐳
 
-<img width="601" src="https://user-images.githubusercontent.com/87658765/165499975-d3931fb9-e2d2-4b0d-827d-fc2a0e95e273.png">
-
+<img width="801" src="https://user-images.githubusercontent.com/60867950/187365613-abb6d4b1-5f2c-4086-afc2-53a806b556cc.png">
 
 
 ## 프로젝트 아키텍쳐 🏘
